@@ -7,15 +7,17 @@ export async function initDb(): Promise<Surreal | undefined> {
   if (db) return db;
   db = new Surreal();
   try {
-    await db.connect(env.PUBLIC_DB_HOST);
+    await db.connect(env.PUBLIC_DB_HOST, {
+      auth: {
+        username: env.PUBLIC_DB_ROOT_NAME,
+        password: env.PUBLIC_DB_ROOT_PW,
+      }
+    });
     await db.use({
       namespace: env.PUBLIC_DB_NS,
       database: env.PUBLIC_DB_DB,
     });
-    await db.signin({
-      username: "root",
-      password: "root",
-    })
+
     return db;
   } catch (err) {
     console.error("Failed to connect to SurrealDB:", err);
@@ -30,9 +32,5 @@ export async function closeDb(): Promise<void> {
 }
 
 export function getDb(): Surreal | undefined {
-  if (!db) {
-    initDb()
-  }
-
   return db;
 }

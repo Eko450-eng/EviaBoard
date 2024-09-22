@@ -4,6 +4,7 @@
     import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
     import Label from "@/components/ui/label/label.svelte";
+    import type Surreal from "surrealdb";
 
     let NS = env.PUBLIC_DB_NS;
     let DB = env.PUBLIC_DB_DB;
@@ -12,11 +13,12 @@
         email: "",
         pass: "",
     };
+
     let confirmPass = "";
 
     async function signUp() {
-        //initDb();
-        let db = getDb();
+        initDb();
+        let db: Surreal | undefined = getDb();
         if (data.pass !== confirmPass) {
             alert("Passwords don't match");
             return;
@@ -32,13 +34,14 @@
             namespace: NS,
             database: DB,
 
-            username: "Eko",
-            scope: 'user',
+            user: data.email,
+            scope: 'allusers',
 
             email: data.email,
             pass: data.pass,
             password: data.pass,
         });
+
 
         console.log(token);
     }
