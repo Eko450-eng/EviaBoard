@@ -1,80 +1,95 @@
 <script lang="ts">
-    import { env } from "$env/dynamic/public";
-    import { getDb, initDb } from "@/db";
     import { Input } from "$lib/components/ui/input";
+    import { Toggle } from "$lib/components/ui/toggle";
     import { Button } from "$lib/components/ui/button";
     import Label from "@/components/ui/label/label.svelte";
-    import type Surreal from "surrealdb";
-
-    let NS = env.PUBLIC_DB_NS;
-    let DB = env.PUBLIC_DB_DB;
+    import { signIn, signUp } from "$lib/db";
 
     let data = {
+        username: "",
         email: "",
         pass: "",
+        confirmPass: "",
     };
 
-    let confirmPass = "";
+    let registering: boolean = true;
 
-    async function signUp() {
-        initDb();
-        let db: Surreal | undefined = getDb();
-        if (data.pass !== confirmPass) {
-            alert("Passwords don't match");
-            return;
-        }
-        if (data.pass.length < 8) {
-            alert("Password to short");
-            return;
-        }
+    async function signInHandler() {
+        signIn(data);
+    }
 
-        if (!db || !NS || !DB) return;
-
-        const token = await db.signup({
-            namespace: NS,
-            database: DB,
-
-            user: data.email,
-            scope: 'allusers',
-
-            email: data.email,
-            pass: data.pass,
-            password: data.pass,
-        });
-
-
-        console.log(token);
+    async function signUpHandler() {
+        signUp(data);
     }
 </script>
 
-<h1>Login</h1>
-<form on:submit={signUp} class="p-4">
-    <div class="py-2">
-        <Label for="email">E-Mail</Label>
-        <Input
-            type="text"
-            id="email"
-            bind:value={data.email}
-            placeholder="E-Mail"
-            required
-        />
-    </div>
-    <div class="py-2">
-        <Label for="password">Password</Label>
-        <Input
-            type="password"
-            id="password"
-            bind:value={data.pass}
-            placeholder="Password"
-            required
-        />
-        <Input
-            type="password"
-            id="cpassword"
-            bind:value={confirmPass}
-            placeholder="Confirm Password"
-            required
-        />
-    </div>
-    <Button type="submit">Register</Button>
-</form>
+<div class="px-4">
+    <Toggle on:click={() => (registering = !registering)} variant="outline"
+        >{registering ? "Login?" : "Register?"}</Toggle
+    >
+</div>
+
+{#if registering}
+    <form on:submit={signUpHandler} class="p-4">
+        <div class="py-2">
+            <Label for="Username">Username</Label>
+            <Input
+                type="text"
+                id="Username"
+                bind:value={data.username}
+                placeholder="Username"
+                required
+            />
+            <Label for="email">E-Mail</Label>
+            <Input
+                type="text"
+                id="email"
+                bind:value={data.email}
+                placeholder="E-Mail"
+                required
+            />
+        </div>
+        <div class="py-2">
+            <Label for="password">Password</Label>
+            <Input
+                type="password"
+                id="password"
+                bind:value={data.pass}
+                placeholder="Password"
+                required
+            />
+            <Input
+                type="password"
+                id="cpassword"
+                bind:value={data.confirmPass}
+                placeholder="Confirm Password"
+                required
+            />
+        </div>
+        <Button type="submit">Register</Button>
+    </form>
+{:else}
+    <form on:submit={signInHandler} class="p-4">
+        <div class="py-2">
+            <Label for="email">E-Mail</Label>
+            <Input
+                type="text"
+                id="email"
+                bind:value={data.email}
+                placeholder="E-Mail"
+                required
+            />
+        </div>
+        <div class="py-2">
+            <Label for="password">Password</Label>
+            <Input
+                type="password"
+                id="password"
+                bind:value={data.pass}
+                placeholder="Password"
+                required
+            />
+        </div>
+        <Button type="submit">Login</Button>
+    </form>
+{/if}
