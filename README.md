@@ -10,3 +10,4 @@ So we can keep our sh*t togheter.
 - group file Generator
 - Coma Structure Generator
 - Invoice Process generator
+- ELO Installer config generator (MSI,AIO <20, AIO 20+)
