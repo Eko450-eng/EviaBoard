@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
     import { Button } from "../lib/components/ui/button/index";
-    import { initDb, user_token } from "../lib/db";
+    import { initDb, signOut } from "../lib/db";
     import { onMount } from "svelte";
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
@@ -9,8 +9,8 @@
     let links = [
         { type: "default", name: "/todos" },
         { type: "default", name: "/" },
-        { type: "no-login", name: "/login" },
-        { type: "no-login", name: "/knowledgeboard" },
+        { type: "notauthenicated", name: "/login" },
+        { type: "authenticated", name: "/knowledgeboard" },
     ];
 
     onMount(() => {
@@ -25,19 +25,21 @@
     <h1 class="text-3xl p-2">Evia-Board</h1>
     <div>
         {#each links as link}
-            {#if link.type === "no-login" && !user_token}
-                <Button variant="link" href={link.name}
-                    ><span
-                        class={$page.url.pathname === link.name
-                            ? "text-muted-foreground"
-                            : "text-secondary-foreground"}
-                        >{link.name === "/"
-                            ? "HOME"
-                            : link.name.replace("/", "").toUpperCase()}</span
-                    ></Button
-                >
-            {/if}
+            <Button variant="link" href={link.name}
+                ><span
+                    class={$page.url.pathname === link.name
+                        ? "text-muted-foreground"
+                        : "text-secondary-foreground"}
+                    >{link.name === "/"
+                        ? "HOME"
+                        : link.name.replace("/", "").toUpperCase()}</span
+                ></Button
+            >
         {/each}
+        <Button variant="link"
+            on:click={()=>signOut()}
+            ><span class="text-secondary-foreground">LOGOUT</span></Button
+        >
     </div>
 </nav>
 <slot></slot>

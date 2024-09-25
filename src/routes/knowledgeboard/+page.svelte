@@ -1,23 +1,19 @@
 <script lang="ts">
+    import Plus from "svelte-radix/Plus.svelte";
     import { onMount, tick } from "svelte";
     import * as Command from "../../lib/components/ui/command/index.js";
     import * as Popover from "../../lib/components/ui/popover/index.js";
     import * as Card from "../../lib/components/ui/card/index.js";
-    import { Button } from "../../lib/components/ui/button/index.js";
-    import { getDb, getPost, getTopics, initDb } from "../../lib/db";
+    import {
+        Button,
+        buttonVariants,
+    } from "../../lib/components/ui/button/index.js";
+    import { Label } from "../../lib/components/ui/label/index.js";
+    import { Input } from "../../lib/components/ui/input/index.js";
+    import * as Dialog from "../../lib/components/ui/dialog/index.js";
+    import { getDb } from "../../lib/db";
+    import { redirect } from "@sveltejs/kit";
     import type Surreal from "surrealdb";
-    import { env } from "$env/dynamic/public";
-    import { Label } from "@/components/ui/label/index.js";
-    import Input from "@/components/ui/input/input.svelte";
-
-    let NS = env.PUBLIC_DB_NS;
-    let DB = env.PUBLIC_DB_DB;
-    let ROOT_USER = env.PUBLIC_DB_ROOT_NAME;
-    let ROOT_PW = env.PUBLIC_DB_ROOT_PW;
-
-    type topic = {
-        name: string;
-    };
 
     const topics = [
         {
@@ -58,52 +54,99 @@
     type post = {
         title: string;
         body: string;
-        topic: topic;
+        topic: string;
+        solution: string;
     };
 
     let posts: post[] = [];
-    let topicsList: any;
-
-    export async function getTo() {
-        initDb();
-        let db: Surreal | undefined = getDb();
-        if (!db) return;
-        await db.connect(env.PUBLIC_DB_HOST, {
-            namespace: NS,
-            database: DB,
-            auth: {
-                username: ROOT_USER,
-                password: ROOT_PW,
-            },
-        });
-        let posts = await db?.select("post_topic");
-        return posts;
-    }
-
-    export async function getT(id: string) {
-        initDb();
-        let db: Surreal | undefined = getDb();
-        if (!db) return;
-        await db.connect(env.PUBLIC_DB_HOST, {
-            namespace: NS,
-            database: DB,
-            auth: {
-                username: ROOT_USER,
-                password: ROOT_PW,
-            },
-        });
-        let posts = await db?.select(id);
-        return posts;
-    }
+    let DB: Surreal | undefined;
 
     onMount(async () => {
-        posts = (await getPost()) as unknown as post[];
-        topicsList = await getTopics();
-        let po = await getTo();
+        let token = localStorage.getItem("user_token");
+        if (!token) {
+            redirect(300, "/");
+        } else {
+            DB = await getDb();
+            let query = "select body, title, topic.name as topic from posts";
+            let postsList: Array<Array<post>> = (await DB?.query(
+                query,
+            )) as unknown as Array<Array<post>>;
+            posts = postsList[0];
+        }
     });
+
+    let postData: post = {
+        title: "Title",
+        body: "Markdown support soooon!",
+        topic: "",
+        solution: "test",
+    };
+
+    async function addPost() {
+        let topic = null;
+        if (selectedValue !== "Select a Topic") {
+            topic = selectedValue;
+        }
+
+        // TODO Change this code to use topics instead of null
+
+        await DB?.query(` CREATE posts CONTENT{
+            title:  "${postData.title}",
+            body:  "${postData.body}",
+            solution:  "${postData.solution}",
+            topic: topic
+        }`);
+        open = false;
+    }
 </script>
 
-<h1>Knowledgebase</h1>
+<div class="flex p-4 items-center justify-between">
+    <h1>Knowledgebase</h1>
+
+    <Dialog.Root>
+        <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
+            <Plus />
+        </Dialog.Trigger>
+        <Dialog.Content class="sm:max-w-[425px]">
+            <Dialog.Header>
+                <Dialog.Title>Add post</Dialog.Title>
+                <Dialog.Description>
+                    Trage zur Knowledgebase bei!
+                </Dialog.Description>
+            </Dialog.Header>
+            <div class="grid gap-4 py-4">
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <Label for="title" class="text-right">Titel</Label>
+                    <Input
+                        id="title"
+                        bind:value={postData.title}
+                        class="col-span-3"
+                    />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <Label for="body" class="text-right">Beschreibung</Label>
+                    <Input
+                        id="body"
+                        bind:value={postData.body}
+                        class="col-span-3"
+                    />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <Label for="solution" class="text-right">Lösung</Label>
+                    <Input
+                        id="solution"
+                        bind:value={postData.solution}
+                        class="col-span-3"
+                    />
+                </div>
+            </div>
+            <Dialog.Footer>
+                <Button type="submit" on:click={addPost}>Posten</Button>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
+</div>
+
 <div class="p-4">
     <Popover.Root bind:open let:ids>
         <Popover.Trigger asChild let:builder>
@@ -120,7 +163,7 @@
         <Popover.Content class="w-[200px] p-0">
             <Command.Root>
                 <Command.Input placeholder="Search topics" class="h-9" />
-                <Command.Empty>No framework found.</Command.Empty>
+                <Command.Empty>No topic found.</Command.Empty>
                 <Command.Group>
                     {#each topics as topic}
                         <Command.Item
@@ -138,25 +181,29 @@
         </Popover.Content>
     </Popover.Root>
 
-    {#each posts as post}
-        <Card.Root class="my-2 w-[350px]">
-            <Card.Header>
-                <Card.Title>{post.title}</Card.Title>
-                <Card.Description>{post.topic}</Card.Description>
-            </Card.Header>
-            <Card.Content>
-                <form>
-                    <div class="grid w-full items-center gap-4">
-                        <div class="flex flex-col space-y-1.5">
-                            <p>{post.body}</p>
-                        </div>
-                    </div>
-                </form>
-            </Card.Content>
-            <!-- <Card.Footer class="flex justify-between"> -->
-            <!--     <Button variant="outline">Cancel</Button> -->
-            <!--     <Button>Deploy</Button> -->
-            <!-- </Card.Footer> -->
-        </Card.Root>
-    {/each}
+    <div class="grid grid-cols-[repeat(auto-fit,_minmax(350px,_1fr))] gap-2">
+        {#each posts as post}
+            {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
+                <Card.Root class="my-2 w-[350px]">
+                    <Card.Header>
+                        <Card.Title>{post.title}</Card.Title>
+                        <Card.Description>{post.topic}</Card.Description>
+                    </Card.Header>
+                    <Card.Content>
+                        <form>
+                            <div class="grid w-full items-center gap-4">
+                                <div class="flex flex-col space-y-1.5">
+                                    <p>{post.body}</p>
+                                </div>
+                            </div>
+                        </form>
+                    </Card.Content>
+                    <!-- <Card.Footer class="flex justify-between"> -->
+                    <!--     <Button variant="outline">Cancel</Button> -->
+                    <!--     <Button>Deploy</Button> -->
+                    <!-- </Card.Footer> -->
+                </Card.Root>
+            {/if}
+        {/each}
+    </div>
 </div>

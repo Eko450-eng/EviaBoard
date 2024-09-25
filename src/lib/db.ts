@@ -1,6 +1,8 @@
+import { goto } from "$app/navigation";
 import { env } from "$env/dynamic/public";
 import { Surreal } from "surrealdb";
 
+let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB = env.PUBLIC_DB_DB;
 let ROOT_USER = env.PUBLIC_DB_ROOT_NAME;
@@ -14,15 +16,17 @@ export async function initDb(): Promise<Surreal | undefined> {
   if (db) return db;
   db = new Surreal();
   try {
-    await db.connect(env.PUBLIC_DB_HOST, {
+    await db.connect(HOST, {
+      namespace: NS,
+      database: DB,
       auth: {
         username: ROOT_USER,
         password: ROOT_PW
       }
     });
     await db.use({
-      namespace: env.PUBLIC_DB_NS,
-      database: env.PUBLIC_DB_DB,
+      namespace: NS,
+      database: DB,
     });
     return db;
   } catch (err) {
@@ -37,7 +41,18 @@ export async function closeDb(): Promise<void> {
   db = undefined;
 }
 
-export function getDb(): Surreal | undefined {
+export async function getDb(): Promise<Surreal | undefined> {
+  initDb()
+  let token = localStorage.getItem("user_token")
+  if (!token) return;
+  try {
+    await db?.connect(env.PUBLIC_DB_HOST, {
+      auth: token
+    })
+  } catch (e) {
+    goto("/login")
+    return
+  }
   return db;
 }
 
@@ -49,9 +64,7 @@ export function checkSession() {
 
 export async function signIn(data: { username: string, email: string, pass: string, confirmPass: string }) {
   initDb();
-  let db: Surreal | undefined = getDb();
   if (!db || !NS || !DB) return;
-
   const token = await db.signin({
     namespace: NS,
     database: DB,
@@ -61,12 +74,14 @@ export async function signIn(data: { username: string, email: string, pass: stri
       password: data.pass,
     },
   });
-  localStorage.setItem("user_token", token);
+  if (token) {
+    localStorage.setItem("user_token", token);
+    goto("/")
+  }
 }
 
 export async function signUp(data: { username: string, email: string, pass: string, confirmPass: string }) {
   initDb();
-  let db: Surreal | undefined = getDb();
   if (data.pass !== data.confirmPass) {
     alert("Passwords don't match");
     return;
@@ -88,37 +103,15 @@ export async function signUp(data: { username: string, email: string, pass: stri
       password: data.pass,
     },
   });
-  localStorage.setItem("user_token", token);
+  if (token) {
+    localStorage.setItem("user_token", token);
+    goto("/")
+  }
 }
 
-export async function getPost() {
-  initDb()
-  let db: Surreal | undefined = getDb();
-  if (!db) return;
-  await db.connect(env.PUBLIC_DB_HOST, {
-    namespace: NS,
-    database: DB,
-    auth: {
-      username: ROOT_USER,
-      password: ROOT_PW
-    }
-  });
-  let posts = await db?.select("posts");
-  return posts;
-}
-
-export async function getTopics() {
-  initDb()
-  let db: Surreal | undefined = getDb();
-  if (!db) return;
-  await db.connect(env.PUBLIC_DB_HOST, {
-    namespace: NS,
-    database: DB,
-    auth: {
-      username: ROOT_USER,
-      password: ROOT_PW
-    }
-  });
-  let posts = await db?.select("topics");
-  return posts;
+export async function signOut(){
+  initDb();
+  localStorage.clear();
+  db?.invalidate()
+  goto("/")
 }
