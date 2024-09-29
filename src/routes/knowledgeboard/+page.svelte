@@ -19,6 +19,7 @@
         user_token as token,
         user_id,
         getToken,
+        user_id_raw,
     } from "../../lib/db";
     import type { post, topic, user } from "../../lib/db";
     import { redirect } from "@sveltejs/kit";

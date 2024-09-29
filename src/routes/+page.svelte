@@ -1,7 +1,7 @@
 <div>
     <h2 class="text-2xl p-2">Todos</h2>
     <ul class="main-feature-list-item">
-        <li>Add Knowledgeboard</li>
+        <li>Add Knowledgeboard - WIP</li>
         <li>Add Knowledgeboard addon - Scripts</li>
         <ul class="feature-description-list-item">
             <li>
@@ -23,6 +23,10 @@
         <li>Add group file Generator</li>
         <li>Add Coma Structure Generator</li>
         <li>Add Invoice Process generator</li>
+        <li>Prompt before Deleting</li>
+        <li>Close Dialog when submited</li>
+        <li>Add images to posts</li>
+        <li>Design Changes</li>
         <li>Janky übersetzungen grade ziehen.... (An manchen Tagen bevorzuge ich es auf Deutsch zu schreiben on other days I rather write in English, this is also auffällig in meinen Notizen, muss ich mir echt mal abgewöhnen)</li>
     </ul>
 </div>

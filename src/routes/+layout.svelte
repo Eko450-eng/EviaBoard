@@ -14,20 +14,20 @@
 
     let links: Array<link> = [
         { type: "default", name: "home", value: "/" },
-        { type: "notauthenicated", name: "login", value: "/login" },
+        { type: "nologin", name: "login", value: "/login" },
         {
-            type: "authenticated",
+            type: "loggedin",
             name: "knowledgeboard",
             value: "/knowledgeboard",
         },
         {
-            type: "authenticated",
+            type: "loggedin",
             name: "download links",
             value: "/downloadlinks",
         },
     ];
 
-    onMount(() => {
+    onMount(async () => {
         initDb();
     });
 </script>

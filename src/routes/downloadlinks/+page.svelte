@@ -3,7 +3,14 @@
         Button,
         buttonVariants,
     } from "../../lib/components/ui/button/index.js";
-    import { db, getDb, user, user_id, user_id_raw, type Downloadlinks } from "../../lib/db";
+    import {
+        db,
+        getDb,
+        user,
+        user_id,
+        user_id_raw,
+        type Downloadlinks,
+    } from "../../lib/db";
     import { onMount } from "svelte";
     import * as Dialog from "../../lib/components/ui/dialog/index.js";
     import Plus from "svelte-radix/Plus.svelte";
@@ -129,14 +136,16 @@
 
 <div>
     {#each downloadlinks as link}
-        <Button
-            variant="link"
-            class="w-[50%] flex justify-between"
-            href={link.link}
-            target="_blank"
-        >
-            <h1>{link.name}</h1>
-            <p>{link.description}</p>
+        <div class="flex">
+            <Button
+                variant="link"
+                class="w-[50%] flex justify-between"
+                href={link.link}
+                target="_blank"
+            >
+                <h1>{link.name}</h1>
+                <p>{link.description}</p>
+            </Button>
             {#if link.owner.id == user_id_raw}
                 <Button
                     variant="destructive"
@@ -145,6 +154,6 @@
                     }}>Delete</Button
                 >
             {/if}
-        </Button>
+        </div>
     {/each}
 </div>

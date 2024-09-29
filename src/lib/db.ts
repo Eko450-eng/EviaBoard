@@ -5,8 +5,6 @@ import { RecordId, Surreal } from "surrealdb";
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB = env.PUBLIC_DB_DB;
-let ROOT_USER = env.PUBLIC_DB_ROOT_NAME;
-let ROOT_PW = env.PUBLIC_DB_ROOT_PW;
 
 export type post = {
   id?: RecordId;
@@ -56,10 +54,6 @@ export async function initDb(): Promise<Surreal | undefined> {
     await db.connect(HOST, {
       namespace: NS,
       database: DB,
-      auth: {
-        username: ROOT_USER,
-        password: ROOT_PW
-      }
     });
     await db.use({
       namespace: NS,
