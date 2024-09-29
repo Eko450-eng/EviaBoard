@@ -6,11 +6,25 @@
     import "../app.css";
     import { page } from "$app/stores";
 
-    let links = [
-        { type: "default", name: "/todos" },
-        { type: "default", name: "/" },
-        { type: "notauthenicated", name: "/login" },
-        { type: "authenticated", name: "/knowledgeboard" },
+    type link = {
+        type: string;
+        name: string;
+        value: string;
+    };
+
+    let links: Array<link> = [
+        { type: "default", name: "home", value: "/" },
+        { type: "notauthenicated", name: "login", value: "/login" },
+        {
+            type: "authenticated",
+            name: "knowledgeboard",
+            value: "/knowledgeboard",
+        },
+        {
+            type: "authenticated",
+            name: "download links",
+            value: "/downloadlinks",
+        },
     ];
 
     onMount(() => {
@@ -25,19 +39,16 @@
     <h1 class="text-3xl p-2">Evia-Board</h1>
     <div>
         {#each links as link}
-            <Button variant="link" href={link.name}
+            <Button variant="link" href={link.value}
                 ><span
-                    class={$page.url.pathname === link.name
+                    class={$page.url.pathname === link.value
                         ? "text-muted-foreground"
                         : "text-secondary-foreground"}
-                    >{link.name === "/"
-                        ? "HOME"
-                        : link.name.replace("/", "").toUpperCase()}</span
+                    >{link.name.toUpperCase()}</span
                 ></Button
             >
         {/each}
-        <Button variant="link"
-            on:click={()=>signOut()}
+        <Button variant="link" on:click={() => signOut()}
             ><span class="text-secondary-foreground">LOGOUT</span></Button
         >
     </div>

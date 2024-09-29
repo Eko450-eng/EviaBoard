@@ -1,6 +1,6 @@
 import { goto } from "$app/navigation";
 import { env } from "$env/dynamic/public";
-import { Surreal } from "surrealdb";
+import { RecordId, Surreal } from "surrealdb";
 
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
@@ -8,13 +8,50 @@ let DB = env.PUBLIC_DB_DB;
 let ROOT_USER = env.PUBLIC_DB_ROOT_NAME;
 let ROOT_PW = env.PUBLIC_DB_ROOT_PW;
 
-export let db: Surreal | undefined;
+export type post = {
+  id?: RecordId;
+  title: string;
+  body: string;
+  solution: string;
+  owner: any;
+  topic: string;
+};
 
-export let user_token: string | undefined;
+export type user = {
+  email: string;
+  id: RecordId;
+  name: string;
+  password: string;
+  role: string;
+};
+
+export type topic = {
+  id: RecordId;
+  name: string;
+};
+
+export type Downloadlinks = {
+  id: string;
+  name: string;
+  description: string;
+  link: string;
+  owner: { name: string; id: string };
+};
+
+export let db: Surreal | undefined;
+export let user_token: string | undefined | null;
+export let user: user[] | undefined;
+export let user_id_raw: string | undefined | null;
+export let user_id: string | undefined | null;
+
+export function getToken() {
+  user_token = localStorage.getItem("user_token");
+}
 
 export async function initDb(): Promise<Surreal | undefined> {
   if (db) return db;
   db = new Surreal();
+
   try {
     await db.connect(HOST, {
       namespace: NS,
@@ -42,13 +79,21 @@ export async function closeDb(): Promise<void> {
 }
 
 export async function getDb(): Promise<Surreal | undefined> {
-  initDb()
-  let token = localStorage.getItem("user_token")
-  if (!token) return;
+  if (!db || !db.ready) {
+    await initDb()
+  }
+  getToken()
+  if (!user_token) return;
   try {
-    await db?.connect(env.PUBLIC_DB_HOST, {
-      auth: token
+    if (!db) return;
+    await db.connect(env.PUBLIC_DB_HOST, {
+      namespace: NS,
+      database: DB,
+      auth: user_token
     })
+    user = await db.query<user[]>("$auth");
+    user_id_raw = `${user![0].id}`;
+    user_id = `user:${user![0].id}`;
   } catch (e) {
     goto("/login")
     return
@@ -109,7 +154,7 @@ export async function signUp(data: { username: string, email: string, pass: stri
   }
 }
 
-export async function signOut(){
+export async function signOut() {
   initDb();
   localStorage.clear();
   db?.invalidate()

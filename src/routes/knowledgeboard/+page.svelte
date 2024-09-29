@@ -1,50 +1,37 @@
 <script lang="ts">
-    import Plus from "svelte-radix/Plus.svelte";
-    import Cross from "svelte-radix/Cross1.svelte";
-    import { onMount, tick } from "svelte";
     import * as Command from "../../lib/components/ui/command/index.js";
     import * as Popover from "../../lib/components/ui/popover/index.js";
     import * as Card from "../../lib/components/ui/card/index.js";
+    import * as Select from "../../lib/components/ui/select/index.js";
+    import * as Dialog from "../../lib/components/ui/dialog/index.js";
+    import Plus from "svelte-radix/Plus.svelte";
+    import Cross from "svelte-radix/Cross1.svelte";
+    import { onMount, tick } from "svelte";
     import {
         Button,
         buttonVariants,
     } from "../../lib/components/ui/button/index.js";
     import { Label } from "../../lib/components/ui/label/index.js";
     import { Input } from "../../lib/components/ui/input/index.js";
-    import * as Dialog from "../../lib/components/ui/dialog/index.js";
-    import { getDb } from "../../lib/db";
+    import {
+        getDb,
+        db,
+        user_token as token,
+        user_id,
+        getToken,
+    } from "../../lib/db";
+    import type { post, topic, user } from "../../lib/db";
     import { redirect } from "@sveltejs/kit";
-    import type Surreal from "surrealdb";
     import { RecordId } from "surrealdb";
 
-    const topics = [
-        {
-            value: "datev",
-            label: "Datev",
-        },
-        {
-            value: "eom",
-            label: "EOM",
-        },
-        {
-            value: "invoice",
-            label: "Invoice",
-        },
-        {
-            value: "contract",
-            label: "Contract",
-        },
-        {
-            value: "workflows",
-            label: "Workflows",
-        },
-    ];
+    let topics: Array<topic> | Array<{ id: string; name: string }> | undefined =
+        [{ name: "Select a Topic", id: "placeholder" }];
 
     let open = false;
     let value = "";
 
     $: selectedValue =
-        topics.find((f) => f.value === value)?.label ?? "Select a Topic";
+        topics?.find((f) => f.name === value)?.name ?? "Select a Topic";
 
     function closeAndFocusTrigger(triggerId: string) {
         open = false;
@@ -53,50 +40,45 @@
         });
     }
 
-    type post = {
-        id?: any;
-        title: string;
-        body: string;
-        solution: string;
-        owner: { name: string; id: string };
-    };
-
-    type user = {
-        email: string;
-        id: any;
-        name: string;
-        password: string;
-    };
-
     let posts: post[] = [];
-    let DB: Surreal | undefined;
-    let token: string | null;
-    let user: user[] | undefined;
-    let user_id: string | undefined | null;
+
+    async function queryPosts() {
+        let query =
+            "select id, body, title, topic.name as topic, owner.id, owner.name from posts";
+        let posts_raw = await db?.query<Array<Array<post>>>(query);
+        if (!posts_raw) return;
+        posts = posts_raw[0];
+    }
+
+    async function queryTopics() {
+        let raw_data = await db?.select<topic>("topics");
+        topics = raw_data;
+    }
+
 
     onMount(async () => {
-        token = localStorage.getItem("user_token");
+        getToken();
+        await getDb();
         if (!token) {
-            redirect(300, "/");
+            redirect(300, "/login");
         } else {
-            DB = await getDb();
-            let query =
-                "select id, body, title, owner.id, owner.name from posts";
-            let postsList: Array<Array<post>> = (await DB?.query(
-                query,
-            )) as unknown as Array<Array<post>>;
-            posts = postsList[0];
-            user = await DB?.query<user[]>("$auth");
-            const queryUuid = await DB?.live("posts", (action, result) => {
-                if (action === "CLOSE") return;
-            });
-            await DB?.subscribeLive(queryUuid!, async (action, result) => {
-                let postsList: Array<Array<post>> = (await DB?.query(
-                    query,
-                )) as unknown as Array<Array<post>>;
-                posts = postsList[0];
-            });
-            user_id = `user:${user![0].id}`;
+            if (db && db.ready) {
+                queryPosts();
+                queryTopics();
+
+                const queryUuid = await db?.live("posts", (action, _result) => {
+                    if (action === "CLOSE") return;
+                });
+                await db?.subscribeLive(queryUuid!, async (action, _result) => {
+                    if (
+                        action === "CREATE" ||
+                        action === "UPDATE" ||
+                        action === "DELETE"
+                    ) {
+                        queryPosts();
+                    }
+                });
+            }
         }
     });
 
@@ -105,27 +87,36 @@
         body: "Markdown support soooon!",
         solution: "test",
         owner: { id: "", name: "" },
+        topic: "",
     };
 
-    async function deletePost(id: string) {
-        await DB?.delete(new RecordId("posts", id));
+    let selectedTopic: any = "";
+
+    async function deletePost(id: RecordId) {
+        await db?.delete(new RecordId("posts", id.id));
     }
 
+    let addPostOpen = false;
     async function addPost() {
-        await DB?.query(` CREATE posts CONTENT{
+        let topic = `topics:${selectedTopic}`;
+        await db
+            ?.query(
+                ` CREATE posts CONTENT{
             title:  "${postData.title}",
             body:  "${postData.body}",
             solution:  "${postData.solution}",
             owner: ${user_id},
-        }`);
-        open = false;
+            topic: ${topic}
+        }`,
+            )
+            .then(() => (addPostOpen = false));
     }
 </script>
 
 <div class="flex p-4 items-center justify-between">
     <h1>Knowledgebase</h1>
 
-    <Dialog.Root>
+    <Dialog.Root open={addPostOpen}>
         <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
             <Plus />
         </Dialog.Trigger>
@@ -161,6 +152,35 @@
                         class="col-span-3"
                     />
                 </div>
+                <Select.Root
+                    selected={selectedTopic}
+                    onSelectedChange={(v) => {
+                        v && (selectedTopic = v.value);
+                    }}
+                >
+                    <Select.Trigger class="w-[180px]">
+                        <Select.Value
+                            placeholder={selectedTopic == ""
+                                ? "Kategorie"
+                                : selectedTopic}
+                        />
+                    </Select.Trigger>
+                    <Select.Content>
+                        <Select.Group>
+                            <Select.Label>Themen</Select.Label>
+                            {#if topics}
+                                {#each topics as topic}
+                                    <Select.Item
+                                        value={topic.name}
+                                        label={topic.name}
+                                        >{topic.name}</Select.Item
+                                    >
+                                {/each}
+                            {/if}
+                        </Select.Group>
+                    </Select.Content>
+                    <Select.Input name="selectedTopic" />
+                </Select.Root>
             </div>
             <Dialog.Footer>
                 <Button type="submit" on:click={addPost}>Posten</Button>
@@ -196,17 +216,19 @@
                 <Command.Input placeholder="Search topics" class="h-9" />
                 <Command.Empty>No topic found.</Command.Empty>
                 <Command.Group>
-                    {#each topics as topic}
-                        <Command.Item
-                            value={topic.value}
-                            onSelect={(currentValue) => {
-                                value = currentValue;
-                                closeAndFocusTrigger(ids.trigger);
-                            }}
-                        >
-                            {topic.label}
-                        </Command.Item>
-                    {/each}
+                    {#if topics}
+                        {#each topics as topic}
+                            <Command.Item
+                                value={topic.name}
+                                onSelect={(currentValue) => {
+                                    value = currentValue;
+                                    closeAndFocusTrigger(ids.trigger);
+                                }}
+                            >
+                                {topic.name}
+                            </Command.Item>
+                        {/each}
+                    {/if}
                 </Command.Group>
             </Command.Root>
         </Popover.Content>
@@ -214,11 +236,11 @@
 
     <div class="grid grid-cols-[repeat(auto-fit,_minmax(350px,_1fr))] gap-2">
         {#each posts as post}
-            {#if selectedValue === "Select a Topic" || post.topic.name === selectedValue.toLowerCase()}
+            {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
                 <Card.Root class="my-2 w-[350px]">
                     <Card.Header>
                         <Card.Title>{post.title}</Card.Title>
-                        <!-- <Card.Description>{post.topic.name}</Card.Description> -->
+                        <Card.Description>{post.topic}</Card.Description>
                     </Card.Header>
                     <Card.Content>
                         <form>
@@ -234,7 +256,9 @@
                         {#if post.owner.id == user_id}
                             <Button
                                 variant="destructive"
-                                on:click={deletePost(post.id.id)}>Delete</Button
+                                on:click={() => {
+                                    if (post && post.id) deletePost(post.id);
+                                }}>Delete</Button
                             >
                         {/if}
                     </Card.Footer>
