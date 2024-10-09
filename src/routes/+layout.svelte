@@ -34,9 +34,9 @@
 
 <ModeWatcher />
 <nav
-    class="flex w-full p-2 justify-start border-t-solid border-sky-500 items-center justify-between"
+    class="flex w-full p-2 my-2 justify-start border-t-solid border-sky-500 items-center justify-between"
 >
-    <h1 class="text-3xl p-2">Evia-Board</h1>
+    <div class="logo"></div>
     <div>
         {#each links as link}
             <Button variant="link" href={link.value}
@@ -54,3 +54,25 @@
     </div>
 </nav>
 <slot></slot>
+
+<style>
+    .logo {
+        width: 14em;
+        height: 2em;
+        background-image: url(../lib/assets/Evia-Board.svg);
+        background-size: contain;
+        background-repeat: no-repeat;
+        margin: 1em 2em;
+        position: relative;
+    }
+    .logo:after {
+        content: "";
+        width: 14em;
+        height: 2em;
+        top: 0;
+        position: absolute;
+        background: inherit;
+        filter: blur(20px);
+        z-index: -1;
+    }
+</style>
