@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Button } from "../lib/components/ui/button/index";
-    import { initDb, signOut } from "../lib/db";
+    import { getDb, initDb, signOut } from "../lib/db";
     import { onMount } from "svelte";
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
@@ -12,23 +12,27 @@
         value: string;
     };
 
-    let links: Array<link> = [
-        { type: "default", name: "home", value: "/" },
-        { type: "nologin", name: "login", value: "/login" },
+    let authenticatedLinks = [
         {
-            type: "loggedin",
             name: "knowledgeboard",
             value: "/knowledgeboard",
         },
         {
-            type: "loggedin",
             name: "download links",
             value: "/downloadlinks",
         },
     ];
+    let unauthenticatedLinks = [
+        { type: "nologin", name: "login", value: "/login" },
+    ];
+    let links = [{ name: "home", value: "/" }];
+
+    let isLoggedIn = false;
 
     onMount(async () => {
         initDb();
+        let db = await getDb();
+        if (db) isLoggedIn = true;
     });
 </script>
 
@@ -48,9 +52,34 @@
                 ></Button
             >
         {/each}
-        <Button variant="link" on:click={() => signOut()}
-            ><span class="text-secondary-foreground">LOGOUT</span></Button
-        >
+        {#if isLoggedIn}
+            {#each authenticatedLinks as link}
+                <Button variant="link" href={link.value}
+                    ><span
+                        class={$page.url.pathname === link.value
+                            ? "text-muted-foreground"
+                            : "text-secondary-foreground"}
+                        >{link.name.toUpperCase()}</span
+                    ></Button
+                >
+            {/each}
+        {:else}
+            {#each unauthenticatedLinks as link}
+                <Button variant="link" href={link.value}
+                    ><span
+                        class={$page.url.pathname === link.value
+                            ? "text-muted-foreground"
+                            : "text-secondary-foreground"}
+                        >{link.name.toUpperCase()}</span
+                    ></Button
+                >
+            {/each}
+        {/if}
+        {#if isLoggedIn}
+            <Button variant="link" on:click={() => signOut()}
+                ><span class="text-secondary-foreground">LOGOUT</span></Button
+            >
+        {/if}
     </div>
 </nav>
 <slot></slot>

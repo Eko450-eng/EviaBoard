@@ -7,7 +7,6 @@
     import { Input } from "$lib/components/ui/input/index";
     import { Button } from "$lib/components/ui/button/index";
     import type Surreal from "surrealdb";
-    import { StringRecordId } from "surrealdb";
 
     let wip = true;
 
