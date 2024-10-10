@@ -19,9 +19,8 @@
         user_token as token,
         user_id,
         getToken,
-        user_id_raw,
     } from "../../lib/db";
-    import type { post, topic, user } from "../../lib/db";
+    import type { post, topic } from "../../lib/db";
     import { redirect } from "@sveltejs/kit";
     import { RecordId } from "surrealdb";
 
@@ -55,7 +54,6 @@
         let raw_data = await db?.select<topic>("topics");
         topics = raw_data;
     }
-
 
     onMount(async () => {
         getToken();
@@ -100,17 +98,21 @@
     let addPostOpen = false;
     async function addPost() {
         let topic = `topics:${selectedTopic}`;
-        await db
-            ?.query(
-                ` CREATE posts CONTENT{
+        try {
+            await db
+                ?.query(
+                    ` CREATE posts CONTENT{
             title:  "${postData.title}",
             body:  "${postData.body}",
             solution:  "${postData.solution}",
             owner: ${user_id},
             topic: ${topic}
         }`,
-            )
-            .then(() => (addPostOpen = false));
+                )
+                .then(() => (addPostOpen = false));
+        } catch (e) {
+            console.log(e);
+        }
     }
 </script>
 
@@ -235,7 +237,8 @@
         </Popover.Content>
     </Popover.Root>
 
-    <div class="grid grid-cols-[repeat(auto-fit,_minmax(350px,_1fr))] gap-2">
+    <!-- <div class="grid grid-cols-[repeat(auto-fit,_minmax(350px,_1fr))] gap-2"> -->
+    <div class="flex gap-2">
         {#each posts as post}
             {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
                 <Card.Root class="my-2 w-[350px]">

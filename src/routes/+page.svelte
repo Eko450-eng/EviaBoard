@@ -31,7 +31,7 @@
     </ul>
 </div>
 
-<style lang="scss">
+<style>
     ul {
         margin-inline: 1rem;
         padding-inline: 1rem;

@@ -4,6 +4,7 @@
     import { Button } from "$lib/components/ui/button";
     import Label from "@/components/ui/label/label.svelte";
     import { signIn, signUp } from "$lib/db";
+    import { checkIsLoggedIn } from "../store";
 
     let data = {
         username: "",
@@ -16,10 +17,12 @@
 
     async function signInHandler() {
         signIn(data);
+        checkIsLoggedIn(true)
     }
 
     async function signUpHandler() {
         signUp(data);
+        checkIsLoggedIn(true)
     }
 </script>
 

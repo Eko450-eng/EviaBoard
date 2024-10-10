@@ -87,7 +87,7 @@
     });
 </script>
 
-<div class="flex p-4 items-center justify-end">
+<div class="flex items-center justify-end">
     <Dialog.Root open={dialogOpen}>
         {#if role === "editor"}
             <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
@@ -136,14 +136,13 @@
 
 <div>
     {#each downloadlinks as link}
-        <div class="flex">
+        <div class="flex flex-wrap">
             <Button
                 variant="link"
-                class="w-[50%] flex justify-between"
                 href={link.link}
                 target="_blank"
             >
-                <h1>{link.name}</h1>
+                <h1 class="mx-2">{link.name}</h1>
                 <p>{link.description}</p>
             </Button>
             {#if link.owner.id == user_id_raw}

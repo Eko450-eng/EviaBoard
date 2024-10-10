@@ -5,12 +5,10 @@
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
     import { page } from "$app/stores";
-
-    type link = {
-        type: string;
-        name: string;
-        value: string;
-    };
+    import Sun from "svelte-radix/Sun.svelte";
+    import Moon from "svelte-radix/Moon.svelte";
+    import { toggleMode } from "mode-watcher";
+    import { checkIsLoggedIn, isLoggedIn } from "./store";
 
     let authenticatedLinks = [
         {
@@ -22,23 +20,27 @@
             value: "/downloadlinks",
         },
     ];
+
     let unauthenticatedLinks = [
         { type: "nologin", name: "login", value: "/login" },
     ];
+
     let links = [{ name: "home", value: "/" }];
 
-    let isLoggedIn = false;
-
-    onMount(async () => {
-        initDb();
+    async function checkStatus() {
         let db = await getDb();
-        if (db) isLoggedIn = true;
+        if (!db) await initDb();
+        if (db) checkIsLoggedIn(true);
+    }
+
+    onMount(() => {
+        checkStatus();
     });
 </script>
 
 <ModeWatcher />
 <nav
-    class="flex w-full p-2 my-2 justify-start border-t-solid border-sky-500 items-center justify-between"
+    class="flex flex-col w-full p-2 my-2 justify-start border-t-solid border-sky-500 items-center justify-between"
 >
     <div class="logo"></div>
     <div>
@@ -52,7 +54,7 @@
                 ></Button
             >
         {/each}
-        {#if isLoggedIn}
+        {#if $isLoggedIn}
             {#each authenticatedLinks as link}
                 <Button variant="link" href={link.value}
                     ><span
@@ -75,19 +77,32 @@
                 >
             {/each}
         {/if}
-        {#if isLoggedIn}
-            <Button variant="link" on:click={() => signOut()}
-                ><span class="text-secondary-foreground">LOGOUT</span></Button
+        {#if $isLoggedIn}
+            <Button
+                variant="link"
+                on:click={async () => {
+                    signOut();
+                    checkIsLoggedIn(false);
+                }}><span class="text-secondary-foreground">LOGOUT</span></Button
             >
         {/if}
+        <Button on:click={toggleMode} variant="outline" size="icon">
+            <Sun
+                class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+            />
+            <Moon
+                class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+            />
+            <span class="sr-only">Toggle theme</span>
+        </Button>
     </div>
 </nav>
 <slot></slot>
 
 <style>
     .logo {
-        width: 14em;
-        height: 2em;
+        width: 10em;
+        height: 1em;
         background-image: url(../lib/assets/Evia-Board.svg);
         background-size: contain;
         background-repeat: no-repeat;
@@ -96,8 +111,8 @@
     }
     .logo:after {
         content: "";
-        width: 14em;
-        height: 2em;
+        width: 100%;
+        height: 100%;
         top: 0;
         position: absolute;
         background: inherit;
