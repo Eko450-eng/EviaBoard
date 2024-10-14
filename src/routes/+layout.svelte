@@ -1,17 +1,24 @@
 <script lang="ts">
     import Links from "$lib/links.svelte";
     import Optionbuttons from "$lib/optionbuttons.svelte";
-    import { getDb, initDb } from "../lib/db";
+    import { db, initDb, user_token } from "../lib/db";
     import { onMount } from "svelte";
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
-    import { checkIsLoggedIn, alertData } from "./store";
-    import * as Alert from "$lib/components/ui/alert/index";
+    import { checkIsLoggedIn } from "./store";
+    import { Toaster } from "$lib/components/ui/sonner";
 
+    let token: string | null;
     async function checkStatus() {
-        let db = await getDb();
-        if (!db) await initDb();
-        if (db) checkIsLoggedIn(true);
+        await initDb();
+        token = localStorage.getItem("user_token");
+        if (db && user_token) {
+            db.authenticate(user_token).then(() => {
+                checkIsLoggedIn(true);
+            });
+        } else {
+            checkIsLoggedIn(false);
+        }
     }
 
     onMount(() => {
@@ -20,15 +27,7 @@
 </script>
 
 <ModeWatcher />
-
-{#if $alertData.active}
-    <div class="alert">
-        <Alert.Root variant={$alertData.type}>
-            <Alert.Title>{$alertData.title}</Alert.Title>
-            <Alert.Description>{$alertData.message}</Alert.Description>
-        </Alert.Root>
-    </div>
-{/if}
+<Toaster />
 
 <div class="logo"></div>
 <div class="mainview">
@@ -53,6 +52,7 @@
 
     nav {
         height: 100vh;
+        margin-right: 1em;
         display: flex;
         width: min-content;
         align-items: center;
@@ -91,12 +91,5 @@
         background: inherit;
         filter: blur(20px);
         z-index: -1;
-    }
-
-    .alert {
-        position: absolute;
-        right: 1em;
-        width: 25%;
-        z-index: 200000;
     }
 </style>

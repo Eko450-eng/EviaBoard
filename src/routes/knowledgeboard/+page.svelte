@@ -4,7 +4,6 @@
     import * as Card from "../../lib/components/ui/card/index.js";
     import * as Select from "../../lib/components/ui/select/index.js";
     import * as Dialog from "../../lib/components/ui/dialog/index.js";
-    import { type Alert, toast } from "../store";
     import Plus from "svelte-radix/Plus.svelte";
     import Cross from "svelte-radix/Cross1.svelte";
     import { onMount, tick } from "svelte";
@@ -14,16 +13,11 @@
     } from "../../lib/components/ui/button/index.js";
     import { Label } from "../../lib/components/ui/label/index.js";
     import { Input } from "../../lib/components/ui/input/index.js";
-    import {
-        getDb,
-        db,
-        user_token as token,
-        user_id,
-        getToken,
-    } from "../../lib/db";
+    import { getDb, db, user_token as token, user_id } from "../../lib/db";
     import type { post, topic } from "../../lib/db";
     import { redirect } from "@sveltejs/kit";
     import { RecordId } from "surrealdb";
+    import { toast } from "svelte-sonner";
 
     let topics: Array<topic> | Array<{ id: string; name: string }> | undefined =
         [{ name: "Select a Topic", id: "placeholder" }];
@@ -57,7 +51,6 @@
     }
 
     onMount(async () => {
-        getToken();
         await getDb();
         if (!token) {
             redirect(300, "/login");
@@ -100,13 +93,9 @@
     async function addPost() {
         let topic = `topics:${selectedTopic}`;
         if (postData.topic === "") {
-            let alert: Alert = {
-                active: true,
-                type: "destructive",
-                title: "Fehler",
-                message: "Kategorie nicht vergessen!",
-            };
-            toast(alert);
+            toast.error("Fehler", {
+                description: "Kategorie nicht vergessen!",
+            });
             return;
         }
         try {
@@ -122,13 +111,9 @@
                 )
                 .then(() => (addPostOpen = false));
         } catch (e) {
-            let alert: Alert = {
-                active: true,
-                type: "destructive",
-                title: "Fehler",
-                message: `This failed due to: ${e}, probably not my fault`,
-            };
-            toast(alert);
+            toast.error("Fehler", {
+                description: `This failed due to: ${e}, probably not my fault`,
+            });
         }
     }
 </script>
@@ -136,7 +121,10 @@
 <div class="flex p-4 items-center justify-between">
     <h1>Knowledgebase</h1>
 
-    <Dialog.Root open={addPostOpen}>
+    <Dialog.Root
+        open={addPostOpen}
+        onOpenChange={() => (addPostOpen = !addPostOpen)}
+    >
         <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
             <Plus />
         </Dialog.Trigger>

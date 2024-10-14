@@ -6,6 +6,16 @@ let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB = env.PUBLIC_DB_DB;
 
+export type Report = {
+  id?: RecordId;
+  title: string;
+  body: string;
+  status: string;
+  category: string;
+  upvotes: number;
+  owner: any
+};
+
 export type post = {
   id?: RecordId;
   title: string;
@@ -50,15 +60,18 @@ export async function initDb(): Promise<Surreal | undefined> {
   if (db) return db;
   db = new Surreal();
 
+  let token = localStorage.getItem("user_token");
+  if (token) {
+    user_token = token;
+  }
+
   try {
-    await db.connect(HOST, {
-      namespace: NS,
-      database: DB,
-    });
+    await db.connect(HOST);
     await db.use({
       namespace: NS,
       database: DB,
     });
+    if (token) db.authenticate(token);
     return db;
   } catch (err) {
     console.error("Failed to connect to SurrealDB:", err);
@@ -72,14 +85,20 @@ export async function closeDb(): Promise<void> {
   db = undefined;
 }
 
+export async function authenticate(token: string) {
+  db?.connect(HOST, {
+    namespace: NS,
+    database: DB,
+  }).then(() => {
+    db?.authenticate(token)
+  })
+}
+
 export async function getDb(): Promise<Surreal | undefined> {
-  if (!db || !db.ready) {
-    await initDb()
-  }
-  getToken()
+  if (!db || !user_token) await initDb();
   if (!user_token) return;
+  if (!db) return;
   try {
-    if (!db) return;
     await db.connect(env.PUBLIC_DB_HOST, {
       namespace: NS,
       database: DB,
@@ -102,7 +121,6 @@ export function checkSession() {
 }
 
 export async function signIn(data: { username: string, email: string, pass: string, confirmPass: string }) {
-  initDb();
   if (!db || !NS || !DB) return;
   const token = await db.signin({
     namespace: NS,
@@ -120,7 +138,6 @@ export async function signIn(data: { username: string, email: string, pass: stri
 }
 
 export async function signUp(data: { username: string, email: string, pass: string, confirmPass: string }) {
-  initDb();
   if (data.pass !== data.confirmPass) {
     alert("Passwords don't match");
     return;
@@ -149,7 +166,6 @@ export async function signUp(data: { username: string, email: string, pass: stri
 }
 
 export async function signOut() {
-  initDb();
   localStorage.clear();
   db?.invalidate()
   goto("/")
