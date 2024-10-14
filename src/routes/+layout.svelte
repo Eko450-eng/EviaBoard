@@ -1,31 +1,12 @@
 <script lang="ts">
-    import { Button } from "../lib/components/ui/button/index";
-    import { getDb, initDb, signOut } from "../lib/db";
+    import Links from "$lib/links.svelte";
+    import Optionbuttons from "$lib/optionbuttons.svelte";
+    import { getDb, initDb } from "../lib/db";
     import { onMount } from "svelte";
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
-    import { page } from "$app/stores";
-    import Sun from "svelte-radix/Sun.svelte";
-    import Moon from "svelte-radix/Moon.svelte";
-    import { toggleMode } from "mode-watcher";
-    import { checkIsLoggedIn, isLoggedIn } from "./store";
-
-    let authenticatedLinks = [
-        {
-            name: "knowledgeboard",
-            value: "/knowledgeboard",
-        },
-        {
-            name: "download links",
-            value: "/downloadlinks",
-        },
-    ];
-
-    let unauthenticatedLinks = [
-        { type: "nologin", name: "login", value: "/login" },
-    ];
-
-    let links = [{ name: "home", value: "/" }];
+    import { checkIsLoggedIn, alertData } from "./store";
+    import * as Alert from "$lib/components/ui/alert/index";
 
     async function checkStatus() {
         let db = await getDb();
@@ -39,67 +20,59 @@
 </script>
 
 <ModeWatcher />
-<nav
-    class="flex flex-col w-full p-2 my-2 justify-start border-t-solid border-sky-500 items-center justify-between"
->
-    <div class="logo"></div>
-    <div>
-        {#each links as link}
-            <Button variant="link" href={link.value}
-                ><span
-                    class={$page.url.pathname === link.value
-                        ? "text-muted-foreground"
-                        : "text-secondary-foreground"}
-                    >{link.name.toUpperCase()}</span
-                ></Button
-            >
-        {/each}
-        {#if $isLoggedIn}
-            {#each authenticatedLinks as link}
-                <Button variant="link" href={link.value}
-                    ><span
-                        class={$page.url.pathname === link.value
-                            ? "text-muted-foreground"
-                            : "text-secondary-foreground"}
-                        >{link.name.toUpperCase()}</span
-                    ></Button
-                >
-            {/each}
-        {:else}
-            {#each unauthenticatedLinks as link}
-                <Button variant="link" href={link.value}
-                    ><span
-                        class={$page.url.pathname === link.value
-                            ? "text-muted-foreground"
-                            : "text-secondary-foreground"}
-                        >{link.name.toUpperCase()}</span
-                    ></Button
-                >
-            {/each}
-        {/if}
-        {#if $isLoggedIn}
-            <Button
-                variant="link"
-                on:click={async () => {
-                    signOut();
-                    checkIsLoggedIn(false);
-                }}><span class="text-secondary-foreground">LOGOUT</span></Button
-            >
-        {/if}
-        <Button on:click={toggleMode} variant="outline" size="icon">
-            <Sun
-                class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-            />
-            <Moon
-                class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-            />
-            <span class="sr-only">Toggle theme</span>
-        </Button>
+
+{#if $alertData.active}
+    <div class="alert">
+        <Alert.Root variant={$alertData.type}>
+            <Alert.Title>{$alertData.title}</Alert.Title>
+            <Alert.Description>{$alertData.message}</Alert.Description>
+        </Alert.Root>
     </div>
-</nav>
-<slot></slot>
+{/if}
+
+<div class="logo"></div>
+<div class="mainview">
+    <nav>
+        <div class="spacebetween">
+            <div>
+                <Links />
+            </div>
+            <Optionbuttons />
+        </div>
+    </nav>
+    <main>
+        <slot></slot>
+    </main>
+</div>
 
 <style>
+    :global(body) {
+        margin: 0;
+        padding: 0;
+    }
+
+    nav {
+        height: 100vh;
+        display: flex;
+        width: min-content;
+        align-items: center;
+        flex-direction: column;
+        border-right: 1px solid teal;
+        border-top: 1px solid teal;
+        border-top-right-radius: 10px;
+    }
+
+    .mainview {
+        display: flex;
+        grid-template-columns: 1fr 10fr;
+    }
+
+    .spacebetween {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 90%;
+    }
     .logo {
         width: 10em;
         height: 1em;
@@ -118,5 +91,12 @@
         background: inherit;
         filter: blur(20px);
         z-index: -1;
+    }
+
+    .alert {
+        position: absolute;
+        right: 1em;
+        width: 25%;
+        z-index: 200000;
     }
 </style>

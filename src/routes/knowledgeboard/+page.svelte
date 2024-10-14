@@ -4,6 +4,7 @@
     import * as Card from "../../lib/components/ui/card/index.js";
     import * as Select from "../../lib/components/ui/select/index.js";
     import * as Dialog from "../../lib/components/ui/dialog/index.js";
+    import { type Alert, toast } from "../store";
     import Plus from "svelte-radix/Plus.svelte";
     import Cross from "svelte-radix/Cross1.svelte";
     import { onMount, tick } from "svelte";
@@ -98,6 +99,16 @@
     let addPostOpen = false;
     async function addPost() {
         let topic = `topics:${selectedTopic}`;
+        if (postData.topic === "") {
+            let alert: Alert = {
+                active: true,
+                type: "destructive",
+                title: "Fehler",
+                message: "Kategorie nicht vergessen!",
+            };
+            toast(alert);
+            return;
+        }
         try {
             await db
                 ?.query(
@@ -111,7 +122,13 @@
                 )
                 .then(() => (addPostOpen = false));
         } catch (e) {
-            console.log(e);
+            let alert: Alert = {
+                active: true,
+                type: "destructive",
+                title: "Fehler",
+                message: `This failed due to: ${e}, probably not my fault`,
+            };
+            toast(alert);
         }
     }
 </script>
@@ -237,8 +254,7 @@
         </Popover.Content>
     </Popover.Root>
 
-    <!-- <div class="grid grid-cols-[repeat(auto-fit,_minmax(350px,_1fr))] gap-2"> -->
-    <div class="flex gap-2">
+    <div class="flex flex-wrap gap-2">
         {#each posts as post}
             {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
                 <Card.Root class="my-2 w-[350px]">
