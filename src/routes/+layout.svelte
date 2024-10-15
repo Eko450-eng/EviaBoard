@@ -60,6 +60,11 @@
         border-right: 1px solid teal;
         border-top: 1px solid teal;
         border-top-right-radius: 10px;
+        position: fixed;
+    }
+
+    main {
+        margin-left: 5em;
     }
 
     .mainview {

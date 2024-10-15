@@ -129,6 +129,13 @@
                     disable: false,
                 },
             },
+            cell: ({ value }) => {
+                if (value.length > 30) {
+                    return `${value.substring(0, 30)}...`;
+                } else {
+                    return value;
+                }
+            },
         }),
         table.column({
             accessor: "status",
