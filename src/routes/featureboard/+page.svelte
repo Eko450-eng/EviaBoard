@@ -21,8 +21,8 @@
     let postData: Report = {
         title: "",
         body: "",
-        status: "open",
-        category: "",
+        status: 0,
+        category: 0,
         upvotes: 0,
         owner: { name: "", id: "" },
     };

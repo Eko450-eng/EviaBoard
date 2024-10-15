@@ -7,11 +7,12 @@ let NS = env.PUBLIC_DB_NS;
 let DB = env.PUBLIC_DB_DB;
 
 export type Report = {
-  id?: RecordId;
+  source?: string;
+  id?: RecordId | string;
   title: string;
   body: string;
-  status: string;
-  category: string;
+  status: number;
+  category: number;
   upvotes: number;
   owner: any
 };
