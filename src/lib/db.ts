@@ -6,6 +6,7 @@ import { userData } from "../routes/store";
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB = env.PUBLIC_DB_DB;
+let guestpw = env.PUBLIC_DB_GUEST_PW;
 
 export type Report = {
   source?: string;
@@ -49,27 +50,20 @@ export type Downloadlinks = {
 };
 
 export let db: Surreal | undefined;
-export let user: user[] | undefined;
-export let user_id_raw: string | undefined | null;
-export let user_id: string | undefined | null;
 
 export async function initDb(): Promise<Surreal | undefined> {
-  console.log("Checking connection")
   if (db) return db;
-  console.log("Initializing connection")
   db = new Surreal();
 
-  console.log("Still initializing connection")
-
   try {
-    console.log("Trying to connect")
-    await db.connect(HOST);
-    console.log("connected")
-    await db.use({
-      namespace: NS,
-      database: DB,
+    await db.connect(HOST, {
+      auth: {
+        namespace: NS,
+        database: DB,
+        username: "eviaguest",
+        password: guestpw
+      }
     });
-    console.log("Configured")
     return db;
   } catch (err) {
     console.error("Failed to connect to SurrealDB:", err);

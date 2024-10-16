@@ -32,6 +32,9 @@
     </main>
 </div>
 
+
+<div class={$userData.email ? "online" : "offline"}></div>
+
 <style>
     :global(body) {
         margin: 0;
@@ -84,5 +87,24 @@
         background: inherit;
         filter: blur(20px);
         z-index: -1;
+    }
+
+    .offline{
+        width: .5em;
+        height: .5em;
+        border-radius: 100%;
+        background: red;
+        position: fixed;
+        top:1em;
+        right:1em;
+    }
+    .online{
+        width: .5em;
+        height: .5em;
+        border-radius: 100%;
+        background: green;
+        position: fixed;
+        top:1em;
+        right:1em;
     }
 </style>

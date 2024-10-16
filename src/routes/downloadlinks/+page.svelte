@@ -83,7 +83,6 @@
                 ?.select<user>(new RecordId("user", user[0].id.toString()))
                 .then((v) => (role = v.role));
         }
-        console.log(downloadlinks);
     });
 </script>
 

@@ -2,8 +2,6 @@
     import DotsHorizontal from "svelte-radix/DotsHorizontal.svelte";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
     import { Button } from "$lib/components/ui/button";
-
-    export let id: string;
 </script>
 
 <DropdownMenu.Root>

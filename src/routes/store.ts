@@ -1,5 +1,5 @@
 import { writable, type Writable } from 'svelte/store'
-import { authenticate, db, getDb, user } from "@/db";
+import { authenticate, db, getDb, type user } from "@/db";
 import Surreal, { RecordId } from 'surrealdb';
 
 // Userdata

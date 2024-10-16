@@ -1,6 +1,6 @@
 <script lang="ts">
     import DataTable from "./bug-table.svelte";
-    import { db, user_id_raw, type Report } from "$lib/db";
+    import { db, type Report } from "$lib/db";
     import { toast } from "svelte-sonner";
     import * as Dialog from "../../lib/components/ui/dialog/index.js";
     import Plus from "svelte-radix/Plus.svelte";
@@ -12,10 +12,12 @@
         buttonVariants,
     } from "../../lib/components/ui/button/index.js";
     import { RecordId } from "surrealdb";
+    import { userData } from "../store";
+    import { get } from "svelte/store";
 
     let addPostOpen = false;
 
-    let topics: Array<string> | undefined = ["Question", "Bug", "Feature"];
+    let topics: Array<string> | undefined = ["Bug", "Feature", "Question"];
     let selectedTopic: any = "";
 
     let postData: Report = {
@@ -27,15 +29,25 @@
         owner: { name: "", id: "" },
     };
 
-    export let data;
-
     async function addPost() {
+        let user = get(userData);
+        if (!user) return;
+        let category = 0;
+        switch (selectedTopic) {
+            case "Bug":
+                category = 0;
+            case "Feature":
+                category = 1;
+            case "Question":
+                category = 2;
+            default:
+                category = 0;
+        }
         try {
-            if (!user_id_raw) return;
             let data: Report = {
                 ...postData,
-                category: selectedTopic,
-                owner: new RecordId("user", user_id_raw),
+                category: category,
+                owner: user.id,
             };
             await db?.create("bugreports", data).then(() => {
                 addPostOpen = false;
