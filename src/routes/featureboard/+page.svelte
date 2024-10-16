@@ -27,6 +27,8 @@
         owner: { name: "", id: "" },
     };
 
+    export let data;
+
     async function addPost() {
         try {
             if (!user_id_raw) return;

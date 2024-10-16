@@ -13,17 +13,25 @@
     } from "../../lib/components/ui/button/index.js";
     import { Label } from "../../lib/components/ui/label/index.js";
     import { Input } from "../../lib/components/ui/input/index.js";
-    import { getDb, db, user_token as token, user_id } from "../../lib/db";
-    import type { post, topic } from "../../lib/db";
-    import { redirect } from "@sveltejs/kit";
+    import { db, type post, type topic, type user } from "../../lib/db";
     import { RecordId } from "surrealdb";
     import { toast } from "svelte-sonner";
+    import { userData } from "../store.js";
+    import { goto } from "$app/navigation";
 
     let topics: Array<topic> | Array<{ id: string; name: string }> | undefined =
         [{ name: "Select a Topic", id: "placeholder" }];
+    let user: user | null;
 
     let open = false;
     let value = "";
+
+    export let data: {
+        posts: post[] | undefined;
+        failed: boolean;
+    };
+
+    let posts: post[] | undefined = data.posts;
 
     $: selectedValue =
         topics?.find((f) => f.name === value)?.name ?? "Select a Topic";
@@ -35,44 +43,8 @@
         });
     }
 
-    let posts: post[] = [];
-
-    async function queryPosts() {
-        let query =
-            "select id, body, title, topic.name as topic, owner.id, owner.name from posts";
-        let posts_raw = await db?.query<Array<Array<post>>>(query);
-        if (!posts_raw) return;
-        posts = posts_raw[0];
-    }
-
-    async function queryTopics() {
-        let raw_data = await db?.select<topic>("topics");
-        topics = raw_data;
-    }
-
-    onMount(async () => {
-        await getDb();
-        if (!token) {
-            redirect(300, "/login");
-        } else {
-            if (db && db.ready) {
-                queryPosts();
-                queryTopics();
-
-                const queryUuid = await db?.live("posts", (action, _result) => {
-                    if (action === "CLOSE") return;
-                });
-                await db?.subscribeLive(queryUuid!, async (action, _result) => {
-                    if (
-                        action === "CREATE" ||
-                        action === "UPDATE" ||
-                        action === "DELETE"
-                    ) {
-                        queryPosts();
-                    }
-                });
-            }
-        }
+    onMount(() => {
+        if (data.failed || data.failed === undefined) goto("/");
     });
 
     let postData: post = {
@@ -105,7 +77,7 @@
             title:  "${postData.title}",
             body:  "${postData.body}",
             solution:  "${postData.solution}",
-            owner: ${user_id},
+            owner: ${user?.id},
             topic: ${topic}
         }`,
                 )
@@ -242,36 +214,41 @@
         </Popover.Content>
     </Popover.Root>
 
-    <div class="flex flex-wrap gap-2">
-        {#each posts as post}
-            {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
-                <Card.Root class="my-2 w-[350px]">
-                    <Card.Header>
-                        <Card.Title>{post.title}</Card.Title>
-                        <Card.Description>{post.topic}</Card.Description>
-                    </Card.Header>
-                    <Card.Content>
-                        <form>
-                            <div class="grid w-full items-center gap-4">
-                                <div class="flex flex-col space-y-1.5">
-                                    <p>{post.body}</p>
+    {#if posts}
+        <div class="flex flex-wrap gap-2">
+            {#each posts as post}
+                {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
+                    <Card.Root class="my-2 w-[350px]">
+                        <Card.Header>
+                            <Card.Title>{post.title}</Card.Title>
+                            <Card.Description>{post.topic}</Card.Description>
+                        </Card.Header>
+                        <Card.Content>
+                            <form>
+                                <div class="grid w-full items-center gap-4">
+                                    <div class="flex flex-col space-y-1.5">
+                                        <p>{post.body}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
-                    </Card.Content>
-                    <Card.Footer class="flex justify-between">
-                        <Card.Description>{post.owner.name}</Card.Description>
-                        {#if post.owner.id == user_id}
-                            <Button
-                                variant="destructive"
-                                on:click={() => {
-                                    if (post && post.id) deletePost(post.id);
-                                }}>Delete</Button
+                            </form>
+                        </Card.Content>
+                        <Card.Footer class="flex justify-between">
+                            <Card.Description
+                                >{post.owner.name}</Card.Description
                             >
-                        {/if}
-                    </Card.Footer>
-                </Card.Root>
-            {/if}
-        {/each}
-    </div>
+                            {#if post.owner.id.toString() === $userData.id.toString()}
+                                <Button
+                                    variant="destructive"
+                                    on:click={() => {
+                                        if (post && post.id)
+                                            deletePost(post.id);
+                                    }}>Delete</Button
+                                >
+                            {/if}
+                        </Card.Footer>
+                    </Card.Root>
+                {/if}
+            {/each}
+        </div>
+    {/if}
 </div>

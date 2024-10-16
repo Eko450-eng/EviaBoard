@@ -17,7 +17,7 @@
     import { onMount } from "svelte";
     import { env } from "$env/dynamic/public";
 
-    let data: Report[] = [];
+    export let data: Report[] = [];
 
     let dataNew = writable(data);
     let token = env.PUBLIC_EJ_TOKEN;

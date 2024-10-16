@@ -1,11 +1,17 @@
-import { writable } from 'svelte/store'
-import { user } from "@/db";
-
+import { writable, type Writable } from 'svelte/store'
+import { authenticate, db, getDb, user } from "@/db";
+import Surreal, { RecordId } from 'surrealdb';
 
 // Userdata
-const initData: user | null = null;
+const initData: user = {
+  email: "",
+  id: new RecordId("user", "tada"),
+  name: "",
+  password: "",
+  role: "",
+};
 
-export const userData = writable(initData)
+export const userData: Writable<user> = writable(initData)
 export const isLoggedIn = writable(false)
 
 export function checkInitialLoggedIn() {
@@ -15,6 +21,19 @@ export function checkInitialLoggedIn() {
   } else {
     return false
   }
+}
+
+export async function checkLoggedIn(): Promise<Surreal | undefined> {
+  let token = localStorage.getItem("user_token");
+  await getDb();
+  if (db && token) {
+    authenticate(token).then(() => {
+      checkIsLoggedIn(true);
+    });
+  } else {
+    checkIsLoggedIn(false);
+  }
+  return db;
 }
 
 export function checkIsLoggedIn(state: boolean) {

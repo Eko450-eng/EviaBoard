@@ -1,33 +1,23 @@
 <script lang="ts">
     import Links from "$lib/links.svelte";
     import Optionbuttons from "$lib/optionbuttons.svelte";
-    import { db, initDb, user_token } from "../lib/db";
-    import { onMount } from "svelte";
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
-    import { checkIsLoggedIn } from "./store";
     import { Toaster } from "$lib/components/ui/sonner";
+    import { onMount } from "svelte";
+    import { checkLoggedIn, userData } from "./store";
+    import { goto } from "$app/navigation";
 
-    let token: string | null;
-    async function checkStatus() {
-        await initDb();
-        token = localStorage.getItem("user_token");
-        if (db && user_token) {
-            db.authenticate(user_token).then(() => {
-                checkIsLoggedIn(true);
-            });
-        } else {
-            checkIsLoggedIn(false);
-        }
-    }
-
-    onMount(() => {
-        checkStatus();
+    onMount(async () => {
+        checkLoggedIn();
     });
+
 </script>
 
 <ModeWatcher />
 <Toaster />
+
+<p>{$userData.email}</p>
 
 <div class="logo"></div>
 <div class="mainview">

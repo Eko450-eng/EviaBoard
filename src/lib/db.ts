@@ -1,6 +1,7 @@
 import { goto } from "$app/navigation";
 import { env } from "$env/dynamic/public";
 import { RecordId, Surreal } from "surrealdb";
+import { userData } from "../routes/store";
 
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
@@ -48,31 +49,27 @@ export type Downloadlinks = {
 };
 
 export let db: Surreal | undefined;
-export let user_token: string | undefined | null;
 export let user: user[] | undefined;
 export let user_id_raw: string | undefined | null;
 export let user_id: string | undefined | null;
 
-export function getToken() {
-  user_token = localStorage.getItem("user_token");
-}
-
 export async function initDb(): Promise<Surreal | undefined> {
+  console.log("Checking connection")
   if (db) return db;
+  console.log("Initializing connection")
   db = new Surreal();
 
-  let token = localStorage.getItem("user_token");
-  if (token) {
-    user_token = token;
-  }
+  console.log("Still initializing connection")
 
   try {
+    console.log("Trying to connect")
     await db.connect(HOST);
+    console.log("connected")
     await db.use({
       namespace: NS,
       database: DB,
     });
-    if (token) db.authenticate(token);
+    console.log("Configured")
     return db;
   } catch (err) {
     console.error("Failed to connect to SurrealDB:", err);
@@ -90,35 +87,17 @@ export async function authenticate(token: string) {
   db?.connect(HOST, {
     namespace: NS,
     database: DB,
-  }).then(() => {
+  }).then(async () => {
     db?.authenticate(token)
+    let user = await db?.query<Array<Array<user>>>("SELECT * FROM user WHERE id = $auth.id");
+    if (!user) return
+    let u = user[0][0]
+    userData.set(u)
   })
 }
 
 export async function getDb(): Promise<Surreal | undefined> {
-  if (!db || !user_token) await initDb();
-  if (!user_token) return;
-  if (!db) return;
-  try {
-    await db.connect(env.PUBLIC_DB_HOST, {
-      namespace: NS,
-      database: DB,
-      auth: user_token
-    })
-    user = await db.query<user[]>("$auth");
-    user_id_raw = `${user![0].id}`;
-    user_id = `user:${user![0].id}`;
-  } catch (e) {
-    goto("/login")
-    return
-  }
   return db;
-}
-
-export function checkSession() {
-  if (localStorage.getItem("user_token") !== "" && localStorage.getItem("user_token") !== null) {
-    user_token = localStorage.getItem("user_token")!;
-  }
 }
 
 export async function signIn(data: { username: string, email: string, pass: string, confirmPass: string }) {
@@ -169,5 +148,12 @@ export async function signUp(data: { username: string, email: string, pass: stri
 export async function signOut() {
   localStorage.clear();
   db?.invalidate()
+  userData.set({
+    email: "",
+    id: new RecordId("user", "tada"),
+    name: "",
+    password: "",
+    role: "",
+  })
   goto("/")
 }
