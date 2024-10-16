@@ -17,8 +17,6 @@
 <ModeWatcher />
 <Toaster />
 
-<p>{$userData.email}</p>
-
 <div class="logo"></div>
 <div class="mainview">
     <nav>
