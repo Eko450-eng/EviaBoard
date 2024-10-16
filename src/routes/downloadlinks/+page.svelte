@@ -3,20 +3,14 @@
         Button,
         buttonVariants,
     } from "../../lib/components/ui/button/index.js";
-    import {
-        db,
-        getDb,
-        user,
-        user_id,
-        user_id_raw,
-        type Downloadlinks,
-    } from "../../lib/db";
+    import { db, getDb, type Downloadlinks, type user } from "../../lib/db";
     import { onMount } from "svelte";
     import * as Dialog from "../../lib/components/ui/dialog/index.js";
     import Plus from "svelte-radix/Plus.svelte";
     import Label from "@/components/ui/label/label.svelte";
     import Input from "@/components/ui/input/input.svelte";
     import { RecordId } from "surrealdb";
+    import { userData } from "../store.js";
 
     let downloadlinks: Array<Downloadlinks> = [];
 
@@ -40,6 +34,9 @@
     async function deleteLink(id: string) {
         await db?.delete(new RecordId("downloadlinks", id));
     }
+
+    let user = $userData;
+    let user_id = $userData.id;
 
     async function postLinks() {
         await db
@@ -78,9 +75,9 @@
                 }
             });
         }
-        if (user && user[0]) {
+        if (user) {
             await db
-                ?.select<user>(new RecordId("user", user[0].id.toString()))
+                ?.select<user>(user.id.toString())
                 .then((v) => (role = v.role));
         }
     });
@@ -136,22 +133,18 @@
 <div>
     {#each downloadlinks as link}
         <div class="flex flex-wrap">
-            <Button
-                variant="link"
-                href={link.link}
-                target="_blank"
-            >
+            <Button variant="link" href={link.link} target="_blank">
                 <h1 class="mx-2">{link.name}</h1>
                 <p>{link.description}</p>
             </Button>
-            {#if link.owner.id == user_id_raw}
-                <Button
-                    variant="destructive"
-                    on:click={() => {
-                        if (link && link.id) deleteLink(link.id);
-                    }}>Delete</Button
-                >
-            {/if}
+            <!-- {#if link.owner.id == user_id_raw} -->
+            <!--     <Button -->
+            <!--         variant="destructive" -->
+            <!--         on:click={() => { -->
+            <!--             if (link && link.id) deleteLink(link.id); -->
+            <!--         }}>Delete</Button -->
+            <!--     > -->
+            <!-- {/if} -->
         </div>
     {/each}
 </div>
