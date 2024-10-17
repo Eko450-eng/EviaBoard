@@ -52,21 +52,24 @@ export type Downloadlinks = {
 export let db: Surreal | undefined;
 
 export async function initDb(): Promise<Surreal | undefined> {
-  if (db) return db;
+  if (db) {
+    return db
+  };
   db = new Surreal();
 
   try {
-    await db.connect(HOST, {
-      auth: {
-        namespace: NS,
-        database: DB,
-        username: "eviaguest",
-        password: guestpw
+    await db.connect(HOST
+      , {
+        auth: {
+          namespace: NS,
+          database: DB,
+          username: "eviaguest",
+          password: guestpw
+        }
       }
-    });
+    );
     return db;
   } catch (err) {
-    console.error("Failed to connect to SurrealDB:", err);
     throw err;
   }
 }
@@ -77,25 +80,12 @@ export async function closeDb(): Promise<void> {
   db = undefined;
 }
 
-export async function authenticate(token: string) {
-  db?.connect(HOST, {
-    namespace: NS,
-    database: DB,
-  }).then(async () => {
-    db?.authenticate(token)
-    let user = await db?.query<Array<Array<user>>>("SELECT * FROM user WHERE id = $auth.id");
-    if (!user) return
-    let u = user[0][0]
-    userData.set(u)
-  })
-}
-
 export async function getDb(): Promise<Surreal | undefined> {
   return db;
 }
 
-export async function signIn(data: { username: string, email: string, pass: string, confirmPass: string }): boolean {
-  if (!db || !NS || !DB) return;
+export async function signIn(data: { username: string, email: string, pass: string, confirmPass: string }): Promise<boolean> {
+  if (!db || !NS || !DB) return false;
   const token = await db.signin({
     namespace: NS,
     database: DB,

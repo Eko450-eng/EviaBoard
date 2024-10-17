@@ -18,7 +18,6 @@
 
     async function signInHandler() {
         let login = await signIn(data);
-        console.log(login)
         if (login){
           goto("/")
         }

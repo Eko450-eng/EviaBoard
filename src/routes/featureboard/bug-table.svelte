@@ -31,8 +31,8 @@
         }).toString();
         const ejAPI = "https://ejberichtsheft.de/";
 
-        const response = await fetch(`${ejAPI}?${ejParams}`, {})
-            .then(async (response) => {
+        const response = await fetch(`${ejAPI}?${ejParams}`, {}).then(
+            async (response) => {
                 let respon: Array<any> = await response.json();
                 let results: Report[] = [];
                 respon.forEach((res) => {
@@ -51,9 +51,8 @@
                 let oldSet = $dataNew;
                 oldSet = [...oldSet, ...results];
                 dataNew.set(oldSet);
-            })
-            .then((data) => console.log(data))
-            .catch((error) => console.error(error));
+            },
+        );
         return response;
     }
 

@@ -1,5 +1,5 @@
 import { writable, type Writable } from 'svelte/store'
-import { authenticate, db, getDb, type user } from "@/db";
+import { db, type user } from "@/db";
 import Surreal, { RecordId } from 'surrealdb';
 
 // Userdata
@@ -25,11 +25,16 @@ export function checkInitialLoggedIn() {
 
 export async function checkLoggedIn(): Promise<Surreal | undefined> {
   let token = localStorage.getItem("user_token");
-  await getDb();
-  if (db && token) {
-    authenticate(token).then(() => {
-      checkIsLoggedIn(true);
-    });
+  if (token) {
+    db?.authenticate(token)
+      .then(async () => {
+        db?.authenticate(token)
+        let user = await db?.query<Array<Array<user>>>("SELECT * FROM user WHERE id = $auth.id");
+        if (!user) return
+        let u = user[0][0]
+        userData.set(u)
+        checkIsLoggedIn(true);
+      });
   } else {
     checkIsLoggedIn(false);
   }

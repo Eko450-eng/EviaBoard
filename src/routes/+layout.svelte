@@ -6,12 +6,10 @@
     import { Toaster } from "$lib/components/ui/sonner";
     import { onMount } from "svelte";
     import { checkLoggedIn, userData } from "./store";
-    import { goto } from "$app/navigation";
 
     onMount(async () => {
         checkLoggedIn();
     });
-
 </script>
 
 <ModeWatcher />
@@ -32,8 +30,8 @@
     </main>
 </div>
 
-
 <div class={$userData.email ? "online" : "offline"}></div>
+<div style="position: absolute; top: 1em; left: 50%">{$userData.id}</div>
 
 <style>
     :global(body) {
@@ -89,22 +87,22 @@
         z-index: -1;
     }
 
-    .offline{
-        width: .5em;
-        height: .5em;
+    .offline {
+        width: 0.5em;
+        height: 0.5em;
         border-radius: 100%;
         background: red;
         position: fixed;
-        top:1em;
-        right:1em;
+        top: 1em;
+        right: 1em;
     }
-    .online{
-        width: .5em;
-        height: .5em;
+    .online {
+        width: 0.5em;
+        height: 0.5em;
         border-radius: 100%;
         background: green;
         position: fixed;
-        top:1em;
-        right:1em;
+        top: 1em;
+        right: 1em;
     }
 </style>

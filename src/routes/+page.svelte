@@ -1,4 +1,8 @@
 <div>
+    <h2 class="text-4xl p-2">News!</h2>
+    <ul class="feature-description-list-item">
+        <li>Jetzt neu - ASB Online Checker!!!!! (Achtung kann oder kann auch nicht stimmen)</li>
+    </ul>
     <h2 class="text-2xl p-2">Todos</h2>
     <ul class="main-feature-list-item">
         <li>Add Knowledgeboard - WIP</li>
@@ -27,7 +31,12 @@
         <li>Close Dialog when submited</li>
         <li>Add images to posts</li>
         <li>Design Changes</li>
-        <li>Janky übersetzungen grade ziehen.... (An manchen Tagen bevorzuge ich es auf Deutsch zu schreiben on other days I rather write in English, this is also auffällig in meinen Notizen, muss ich mir echt mal abgewöhnen)</li>
+        <li>
+            Janky übersetzungen grade ziehen.... (An manchen Tagen bevorzuge ich
+            es auf Deutsch zu schreiben on other days I rather write in English,
+            this is also auffällig in meinen Notizen, muss ich mir echt mal
+            abgewöhnen)
+        </li>
     </ul>
 </div>
 

@@ -44,6 +44,7 @@
     }
 
     onMount(() => {
+        console.log(data);
         if (data.failed) goto("/");
     });
 

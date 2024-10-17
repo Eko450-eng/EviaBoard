@@ -12,40 +12,38 @@ async function queryPosts() {
 }
 
 async function loadPageData() {
-  if (db && db.ready) {
-    let user = get(userData);
-    let response;
-    if (!user.email) {
-      response = {
-        res: [],
-        failed: true
-      }
-    } else {
-      let res = await queryPosts();
-      response = {
-        res: res,
-        failed: false
-      }
+  let user = get(userData);
+  let response;
+  if (!user.email) {
+    response = {
+      res: [],
+      failed: true
     }
-    return response
-
-    // const queryUuid = await db?.live("posts", (action, _result) => {
-    //   if (action === "CLOSE") return;
-    // });
-    // await db?.subscribeLive(queryUuid!, async (action, _result) => {
-    //   if (
-    //     action === "CREATE" ||
-    //     action === "UPDATE" ||
-    //     action === "DELETE"
-    //   ) {
-    //     queryPosts();
-    //   }
-    // });
+  } else {
+    let res = await queryPosts();
+    response = {
+      res: res,
+      failed: false
+    }
   }
+  return response
+
+  // const queryUuid = await db?.live("posts", (action, _result) => {
+  //   if (action === "CLOSE") return;
+  // });
+  // await db?.subscribeLive(queryUuid!, async (action, _result) => {
+  //   if (
+  //     action === "CREATE" ||
+  //     action === "UPDATE" ||
+  //     action === "DELETE"
+  //   ) {
+  //     queryPosts();
+  //   }
+  // });
 }
 
 
-export async function load({ params }: any) {
+export async function load() {
   let data = await loadPageData();
   return {
     posts: data?.res,

@@ -7,6 +7,8 @@
     import Home from "svelte-radix/Home.svelte";
     import Download from "svelte-radix/Download.svelte";
     import Enter from "svelte-radix/Enter.svelte";
+    import { Icon } from "svelte-icons-pack";
+    import { AiFillSmile } from "svelte-icons-pack/ai";
 
     let authenticatedLinks = [
         {
@@ -51,6 +53,17 @@
             >
         </div>
     {/each}
+    <div>
+        <Button variant="link" href="/asb"
+            ><span
+                class={$page.url.pathname === "asb"
+                    ? "text-muted-foreground"
+                    : "text-secondary-foreground"}
+            >
+            <Icon src={AiFillSmile} size={24} />
+            </span></Button
+        >
+    </div>
 {:else}
     {#each unauthenticatedLinks as link}
         <div>
