@@ -19,6 +19,7 @@
         if (dl) {
             downloadlinks = dl;
         }
+        console.log("Hier- ", dl![0]);
     }
 
     let dialogOpen = false;
@@ -137,14 +138,14 @@
                 <h1 class="mx-2">{link.name}</h1>
                 <p>{link.description}</p>
             </Button>
-            <!-- {#if link.owner.id == user_id_raw} -->
-            <!--     <Button -->
-            <!--         variant="destructive" -->
-            <!--         on:click={() => { -->
-            <!--             if (link && link.id) deleteLink(link.id); -->
-            <!--         }}>Delete</Button -->
-            <!--     > -->
-            <!-- {/if} -->
+            {#if link.owner.tb + ":" + link.owner.id == $userData.id.toString()}
+                <Button
+                    variant="destructive"
+                    on:click={() => {
+                        if (link && link.id) deleteLink(link.id);
+                    }}>Delete</Button
+                >
+            {/if}
         </div>
     {/each}
 </div>

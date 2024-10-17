@@ -26,6 +26,7 @@ export type post = {
   solution: string;
   owner: any;
   topic: string;
+  deleted: boolean;
 };
 
 export type user = {
@@ -46,7 +47,7 @@ export type Downloadlinks = {
   name: string;
   description: string;
   link: string;
-  owner: { name: string; id: string };
+  owner: { name: string; id: string; tb: string };
 };
 
 export let db: Surreal | undefined;

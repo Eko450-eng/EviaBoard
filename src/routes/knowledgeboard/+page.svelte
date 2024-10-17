@@ -14,10 +14,10 @@
     import { Label } from "../../lib/components/ui/label/index.js";
     import { Input } from "../../lib/components/ui/input/index.js";
     import { db, type post, type topic, type user } from "../../lib/db";
-    import { RecordId } from "surrealdb";
     import { toast } from "svelte-sonner";
     import { userData } from "../store.js";
     import { goto } from "$app/navigation";
+    import { RecordId } from "surrealdb";
 
     let topics: Array<topic> | Array<{ id: string; name: string }> | undefined =
         [{ name: "Select a Topic", id: "placeholder" }];
@@ -49,6 +49,7 @@
     });
 
     let postData: post = {
+        deleted: false,
         title: "Title",
         body: "Markdown support soooon!",
         solution: "test",
@@ -58,8 +59,17 @@
 
     let selectedTopic: any = "";
 
-    async function deletePost(id: RecordId) {
-        await db?.delete(new RecordId("posts", id.id));
+    async function deletePost(data: post) {
+        console.log(data);
+        let newData = data;
+        newData.deleted = true;
+        await db?.patch(data.id!, [
+            {
+                op: "replace",
+                path: "/deleted",
+                value: true,
+            },
+        ]);
     }
 
     let addPostOpen = false;
@@ -241,8 +251,7 @@
                                 <Button
                                     variant="destructive"
                                     on:click={() => {
-                                        if (post && post.id)
-                                            deletePost(post.id);
+                                        deletePost(post);
                                     }}>Delete</Button
                                 >
                             {/if}

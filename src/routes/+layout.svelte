@@ -31,7 +31,6 @@
 </div>
 
 <div class={$userData.email ? "online" : "offline"}></div>
-<div style="position: absolute; top: 1em; left: 50%">{$userData.id}</div>
 
 <style>
     :global(body) {
