@@ -94,7 +94,7 @@ export async function getDb(): Promise<Surreal | undefined> {
   return db;
 }
 
-export async function signIn(data: { username: string, email: string, pass: string, confirmPass: string }) {
+export async function signIn(data: { username: string, email: string, pass: string, confirmPass: string }): boolean {
   if (!db || !NS || !DB) return;
   const token = await db.signin({
     namespace: NS,
@@ -107,8 +107,9 @@ export async function signIn(data: { username: string, email: string, pass: stri
   });
   if (token) {
     localStorage.setItem("user_token", token);
-    goto("/")
+    return true
   }
+  return false
 }
 
 export async function signUp(data: { username: string, email: string, pass: string, confirmPass: string }) {

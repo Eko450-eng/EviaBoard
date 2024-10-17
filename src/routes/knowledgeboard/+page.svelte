@@ -44,7 +44,7 @@
     }
 
     onMount(() => {
-        if (data.failed || data.failed === undefined) goto("/");
+        if (data.failed) goto("/");
     });
 
     let postData: post = {

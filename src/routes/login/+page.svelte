@@ -5,6 +5,7 @@
     import Label from "@/components/ui/label/label.svelte";
     import { signIn, signUp } from "$lib/db";
     import { checkIsLoggedIn } from "../store";
+    import { goto } from "$app/navigation";
 
     let data = {
         username: "",
@@ -16,7 +17,11 @@
     let registering: boolean = true;
 
     async function signInHandler() {
-        signIn(data);
+        let login = await signIn(data);
+        console.log(login)
+        if (login){
+          goto("/")
+        }
         checkIsLoggedIn(true)
     }
 

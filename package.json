@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"host": "vite preview --host --port 8090",
+		"host": "vite preview --host --port 8900",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
