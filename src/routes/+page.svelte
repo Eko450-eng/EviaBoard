@@ -1,7 +1,8 @@
 <div>
-    <h2 class="text-4xl p-2">News!</h2>
+    <h2 class="text-4xl p-2">News vom 17.10.2024!</h2>
     <ul class="feature-description-list-item">
         <li>Jetzt neu - ASB Online Checker!!!!! (Achtung kann oder kann auch nicht stimmen)</li>
+        <li>Jetzt neu - Im Featureboard ist nun das Upvoten möglich und zudem lassen sich die Boards nun (in hässlich) in einer Karte öffenen für eine leichter lesbare ansicht</li>
     </ul>
     <h2 class="text-2xl p-2">Todos</h2>
     <ul class="main-feature-list-item">
