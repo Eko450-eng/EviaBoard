@@ -1,4 +1,8 @@
 <div>
+    <h2 class="text-4xl p-2">News vom 18.10.2024!</h2>
+    <ul class="feature-description-list-item">
+        <li>Feature - Im Featureboard unterstützt die Suche nun Suchparameter wie z.B. status:0 oder category:2</li>
+    </ul>
     <h2 class="text-4xl p-2">News vom 17.10.2024!</h2>
     <ul class="feature-description-list-item">
         <li>Jetzt neu - ASB Online Checker!!!!! (Achtung kann oder kann auch nicht stimmen)</li>

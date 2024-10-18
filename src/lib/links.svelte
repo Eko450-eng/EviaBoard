@@ -1,80 +1,60 @@
 <script lang="ts">
-    import { Button } from "../lib/components/ui/button/index";
     import "../app.css";
     import { page } from "$app/stores";
     import { isLoggedIn } from "../routes/store";
-    import Archive from "svelte-radix/Archive.svelte";
-    import Home from "svelte-radix/Home.svelte";
-    import Download from "svelte-radix/Download.svelte";
-    import Enter from "svelte-radix/Enter.svelte";
-    import { Icon } from "svelte-icons-pack";
-    import { AiFillSmile } from "svelte-icons-pack/ai";
+    import LinkButton from "./link-button.svelte";
+    import {
+    FaSolidArrowRightToBracket,
+        FaSolidBook,
+        FaSolidDownload,
+        FaSolidGlobe,
+        FaSolidHouse,
+    } from "svelte-icons-pack/fa";
 
     let authenticatedLinks = [
         {
-            name: Archive,
+            icon: FaSolidBook,
+            name: "knowledgeboard",
             value: "/knowledgeboard",
         },
         {
-            name: Download,
+            icon: FaSolidDownload,
+            name: "Links",
             value: "/downloadlinks",
+        },
+        {
+            icon: FaSolidGlobe,
+            name: "ASB",
+            value: "/asb",
         },
     ];
 
     let unauthenticatedLinks = [
-        { type: "nologin", name: Enter, value: "/login" },
+        {
+            icon: FaSolidArrowRightToBracket,
+            name: "Login or Signup",
+            value: "/login",
+        },
     ];
 
-    let links = [{ name: Home, value: "/" }];
+    let links = [
+        {
+            icon: FaSolidHouse,
+            name: "Home & News",
+            value: "/",
+        },
+    ];
 </script>
 
 {#each links as link}
-    <div>
-        <Button variant="link" href={link.value}
-            ><span
-                class={$page.url.pathname === link.value
-                    ? "text-muted-foreground"
-                    : "text-secondary-foreground"}
-                ><svelte:component this={link.name} /></span
-            ></Button
-        >
-    </div>
+    <LinkButton {link} pathname={$page.url.pathname} />
 {/each}
 {#if $isLoggedIn}
     {#each authenticatedLinks as link}
-        <div>
-            <Button variant="link" href={link.value}
-                ><span
-                    class={$page.url.pathname === link.value
-                        ? "text-muted-foreground"
-                        : "text-secondary-foreground"}
-                    ><svelte:component this={link.name} /></span
-                ></Button
-            >
-        </div>
+        <LinkButton {link} pathname={$page.url.pathname} />
     {/each}
-    <div>
-        <Button variant="link" href="/asb"
-            ><span
-                class={$page.url.pathname === "asb"
-                    ? "text-muted-foreground"
-                    : "text-secondary-foreground"}
-            >
-            <Icon src={AiFillSmile} size={24} />
-            </span></Button
-        >
-    </div>
 {:else}
     {#each unauthenticatedLinks as link}
-        <div>
-            <Button variant="link" href={link.value}
-                ><span
-                    class={$page.url.pathname === link.value
-                        ? "text-muted-foreground"
-                        : "text-secondary-foreground"}
-                    ><svelte:component this={link.name} /></span
-                ></Button
-            >
-        </div>
+        <LinkButton {link} pathname={$page.url.pathname} />
     {/each}
 {/if}
