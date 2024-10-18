@@ -15,7 +15,7 @@
     import { Input } from "../../lib/components/ui/input/index.js";
     import { db, type post, type topic, type user } from "../../lib/db";
     import { toast } from "svelte-sonner";
-    import { userData } from "../store.js";
+    import { checkLoggedIn, userData } from "../store.js";
     import { goto } from "$app/navigation";
     import { RecordId } from "surrealdb";
 
@@ -44,6 +44,7 @@
     }
 
     onMount(() => {
+        checkLoggedIn();
         console.log(data);
         if (data.failed) goto("/");
     });

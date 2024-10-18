@@ -5,6 +5,8 @@
         Subscribe,
         createRender,
     } from "svelte-headless-table";
+
+    import * as Dialog from "../../lib/components/ui/dialog/index.js";
     import { writable } from "svelte/store";
     import * as Table from "../../lib/components/ui/table";
     import { Input } from "$lib/components/ui/input";
@@ -18,6 +20,8 @@
     import { env } from "$env/dynamic/public";
 
     export let data: Report[] = [];
+    let cardOpen = false;
+    let cardContent: Report;
 
     let dataNew = writable(data);
     let token = env.PUBLIC_EJ_TOKEN;
@@ -75,7 +79,7 @@
                             body: res.body,
                             status: res.status,
                             category: res.category,
-                            upvotes: 0,
+                            upvotes: res.upvotes,
                             owner: res.owner,
                         };
                         results.push(result);
@@ -91,6 +95,19 @@
     onMount(async () => {
         await getDb();
         updateTable();
+
+        const queryUuid = await db?.live("bugreports", (action, _result) => {
+            if (action === "CLOSE") return;
+        });
+        await db?.subscribeLive(queryUuid!, async (action, _result) => {
+            if (
+                action === "CREATE" ||
+                action === "UPDATE" ||
+                action === "DELETE"
+            ) {
+                updateTable();
+            }
+        });
     });
 
     let table = createTable(dataNew, {
@@ -208,7 +225,7 @@
                     disable: true,
                 },
             },
-            cell: (value) => {
+            cell: ({ value }: any) => {
                 return createRender(DataTableActions, { id: value.id });
             },
         }),
@@ -268,7 +285,13 @@
                     <Table.Row {...rowAttrs}>
                         {#each row.cells as cell (cell.id)}
                             <Subscribe attrs={cell.attrs()} let:attrs>
-                                <Table.Cell {...attrs}>
+                                <Table.Cell
+                                    on:click={() => {
+                                        cardOpen = true;
+                                        cardContent = row.original;
+                                    }}
+                                    {...attrs}
+                                >
                                     <Render of={cell.render()} />
                                 </Table.Cell>
                             </Subscribe>
@@ -279,3 +302,39 @@
         </Table.Body>
     </Table.Root>
 </div>
+
+<!-- DIALOG CARDBOX -->
+
+<Dialog.Root open={cardOpen} onOpenChange={() => (cardOpen = !cardOpen)}>
+    <Dialog.Content class="sm:max-w-[425px]">
+        <Dialog.Header>
+            <Dialog.Title>{cardContent.title}</Dialog.Title>
+        </Dialog.Header>
+
+        <Dialog.Description>
+            {cardContent.body}
+        </Dialog.Description>
+        <Dialog.Footer>
+            <p>Upvotes: {cardContent.upvotes}</p>
+            <p>Ersteller: {cardContent.owner}</p>
+            <p>
+                Status: {cardContent.status == 0
+                    ? "Open"
+                    : cardContent.status == 1
+                      ? "WIP"
+                      : cardContent.status == 2
+                        ? "Accepted"
+                        : cardContent.status == 3
+                          ? "Denied"
+                          : "Closed"}
+            </p>
+            <p>
+                Kategorie: {cardContent.category == 0
+                    ? "Bug"
+                    : cardContent.category == 1
+                      ? "Feature"
+                      : "Question"}
+            </p>
+        </Dialog.Footer>
+    </Dialog.Content>
+</Dialog.Root>

@@ -1,5 +1,5 @@
 import { db, type post } from "@/db";
-import { userData } from "../store";
+import { checkLoggedIn, userData } from "../store";
 import { get } from "svelte/store";
 
 
@@ -11,7 +11,10 @@ async function queryPosts() {
   return posts_raw[0];
 }
 
+export let ssr = false
+
 async function loadPageData() {
+  checkLoggedIn()
   let user = get(userData);
   let response;
   if (!user.email) {

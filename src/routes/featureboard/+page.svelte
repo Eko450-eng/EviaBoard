@@ -6,12 +6,12 @@
     import Plus from "svelte-radix/Plus.svelte";
     import { Label } from "../../lib/components/ui/label/index.js";
     import { Input } from "../../lib/components/ui/input/index.js";
+    import { Textarea } from "../../lib/components/ui/textarea/index.js";
     import * as Select from "../../lib/components/ui/select/index.js";
     import {
         Button,
         buttonVariants,
     } from "../../lib/components/ui/button/index.js";
-    import { RecordId } from "surrealdb";
     import { userData } from "../store";
     import { get } from "svelte/store";
 
@@ -90,7 +90,7 @@
             </div>
             <div class="grid grid-cols-4 items-center gap-4">
                 <Label for="body" class="text-right">Beschreibung</Label>
-                <Input
+                <Textarea
                     id="body"
                     bind:value={postData.body}
                     class="col-span-3"

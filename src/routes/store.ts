@@ -14,15 +14,6 @@ const initData: user = {
 export const userData: Writable<user> = writable(initData)
 export const isLoggedIn = writable(false)
 
-export function checkInitialLoggedIn() {
-  let token = localStorage.getItem("user_token");
-  if (token != "" || token != undefined || token != null) {
-    return true
-  } else {
-    return false
-  }
-}
-
 export async function checkLoggedIn(): Promise<Surreal | undefined> {
   let token = localStorage.getItem("user_token");
   if (token) {
