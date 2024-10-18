@@ -17,6 +17,9 @@
 
     export let recoverDialog: boolean;
     export let postToRecover: post | undefined;
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" || event.key === "Esc") recoverDialog = false;
+    });
 </script>
 
 <Dialog.Root

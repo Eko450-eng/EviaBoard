@@ -11,15 +11,16 @@
     import Plus from "svelte-radix/Plus.svelte";
     import { Label } from "../../lib/components/ui/label/index.js";
     import { Input } from "../../lib/components/ui/input/index.js";
+    import { Textarea } from "../../lib/components/ui/textarea";
 
     export let addPostOpen: boolean;
     export let selectedTopic: any;
     export let topics: any;
     export let postData: post = {
         deleted: false,
-        title: "Title",
-        body: "Markdown support soooon!",
-        solution: "test",
+        title: "",
+        body: "",
+        solution: "",
         owner: { id: "", name: "" },
         topic: "",
     };
@@ -54,6 +55,10 @@
             });
         }
     }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" || event.key === "Esc") addPostOpen = false;
+    });
 </script>
 
 <Dialog.Root
@@ -65,13 +70,13 @@
     </Dialog.Trigger>
     <Dialog.Content class="sm:max-w-[425px]">
         <Dialog.Header>
-            <Dialog.Title>Add post</Dialog.Title>
+            <Dialog.Title>Post beitragen</Dialog.Title>
             <Dialog.Description>
                 Trage zur Knowledgebase bei!
             </Dialog.Description>
         </Dialog.Header>
         <div class="grid gap-4 py-4">
-            <div class="grid grid-cols-4 items-center gap-4">
+            <div>
                 <Label for="title" class="text-right">Titel</Label>
                 <Input
                     id="title"
@@ -79,17 +84,17 @@
                     class="col-span-3"
                 />
             </div>
-            <div class="grid grid-cols-4 items-center gap-4">
+            <div>
                 <Label for="body" class="text-right">Beschreibung</Label>
-                <Input
+                <Textarea
                     id="body"
                     bind:value={postData.body}
                     class="col-span-3"
                 />
             </div>
-            <div class="grid grid-cols-4 items-center gap-4">
+            <div>
                 <Label for="solution" class="text-right">Lösung</Label>
-                <Input
+                <Textarea
                     id="solution"
                     bind:value={postData.solution}
                     class="col-span-3"

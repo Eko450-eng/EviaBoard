@@ -17,6 +17,10 @@
 
     export let deleteDialog: boolean;
     export let postToDelete: post | undefined;
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" || event.key === "Esc") deleteDialog = false;
+    });
 </script>
 
 <Dialog.Root

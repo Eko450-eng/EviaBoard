@@ -132,7 +132,7 @@
             {#each $page.data.posts as post}
                 {#if (showDeleted && post.deleted) || !post.deleted}
                     {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
-                        <Card.Root class="my-2 w-[350px]">
+                        <Card.Root on:click={()=>goto(`/knowledgeboard/${post.id}`)} class="my-2 w-[350px]">
                             <Card.Header>
                                 <Card.Title>{post.title}</Card.Title>
                                 <Card.Description>{post.topic}</Card.Description
