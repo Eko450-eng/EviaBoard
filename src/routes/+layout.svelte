@@ -19,7 +19,7 @@
     <aside
         class="bg-background fixed inset-y-0 left-0 z-10 w-14 flex-col border-r sm:flex"
     >
-        <nav class="flex flex-col items-center gap-4 px-2 py-4 h-full">
+        <nav class="flex flex-col items-center gap-4 px-2 py-4 h-full border-r border-teal-500">
             <div class="flex flex-col justify-between content-between h-full">
                 <div>
                     <Links />
