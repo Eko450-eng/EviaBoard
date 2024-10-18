@@ -113,8 +113,9 @@
     let table = createTable(dataNew, {
         sort: addSortBy(),
         filter: addTableFilter({
-            fn: ({ filterValue, value }) =>
-                value.toLowerCase().includes(filterValue.toLowerCase()),
+            fn: ({ filterValue, value }) => {
+                return value.toLowerCase().includes(filterValue.toLowerCase());
+            },
         }),
     });
 
@@ -123,6 +124,11 @@
             accessor: "source",
             header: "App",
             plugins: {
+                filter: {
+                    getFilterValue(value) {
+                        return "app:" + value;
+                    },
+                },
                 sort: {
                     disable: false,
                 },
@@ -157,6 +163,11 @@
             accessor: "status",
             header: "status",
             plugins: {
+                filter: {
+                    getFilterValue(value) {
+                        return "status:" + value;
+                    },
+                },
                 sort: {
                     disable: false,
                 },
@@ -182,6 +193,11 @@
             accessor: "category",
             header: "category",
             plugins: {
+                filter: {
+                    getFilterValue(value) {
+                        return "category:" + value;
+                    },
+                },
                 sort: {
                     disable: false,
                 },
@@ -287,8 +303,10 @@
                             <Subscribe attrs={cell.attrs()} let:attrs>
                                 <Table.Cell
                                     on:click={() => {
-                                        cardOpen = true;
-                                        cardContent = row.original;
+                                        if (cell.id !== "id") {
+                                            cardOpen = true;
+                                            cardContent = row.original;
+                                        }
                                     }}
                                     {...attrs}
                                 >
@@ -302,8 +320,6 @@
         </Table.Body>
     </Table.Root>
 </div>
-
-<!-- DIALOG CARDBOX -->
 
 <Dialog.Root open={cardOpen} onOpenChange={() => (cardOpen = !cardOpen)}>
     <Dialog.Content class="sm:max-w-[425px]">
