@@ -15,17 +15,21 @@
 <ModeWatcher />
 <Toaster />
 
-<div class="logo"></div>
-<div class="mainview">
-    <nav>
-        <div class="spacebetween">
-            <div>
-                <Links />
+<div class="bg-muted/40 flex min-h-screen w-full flex-col">
+    <aside
+        class="bg-background fixed inset-y-0 left-0 z-10 w-14 flex-col border-r sm:flex"
+    >
+        <nav class="flex flex-col items-center gap-4 px-2 py-4 h-full">
+            <div class="flex flex-col justify-between content-between h-full">
+                <div>
+                    <Links />
+                </div>
+                <Optionbuttons />
             </div>
-            <Optionbuttons />
-        </div>
-    </nav>
+        </nav>
+    </aside>
     <main>
+        <div class="logo"></div>
         <slot></slot>
     </main>
 </div>
@@ -38,41 +42,17 @@
         padding: 0;
     }
 
-    nav {
-        height: 100vh;
-        margin-right: 1em;
-        display: flex;
-        width: min-content;
-        align-items: center;
-        flex-direction: column;
-        border-right: 1px solid teal;
-        border-top: 1px solid teal;
-        border-top-right-radius: 10px;
-        position: fixed;
-    }
-
     main {
-        margin-left: 5em;
+        margin-left: 4em;
     }
 
-    .mainview {
-        display: flex;
-        grid-template-columns: 1fr 10fr;
-    }
-
-    .spacebetween {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 90%;
-    }
     .logo {
         width: 10em;
         height: 1em;
         background-image: url(../lib/assets/Evia-Board.svg);
         background-size: contain;
         background-repeat: no-repeat;
-        margin: 1em 2em;
+        margin: 1em 0;
         position: relative;
     }
     .logo:after {
