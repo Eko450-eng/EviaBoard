@@ -3,7 +3,7 @@
         Button,
         buttonVariants,
     } from "../../lib/components/ui/button/index.js";
-    import { db, getDb, type Downloadlinks, type user } from "../../lib/db";
+    import { db, getDb, type Downloadlinks } from "../../lib/db";
     import { onMount } from "svelte";
     import * as Dialog from "../../lib/components/ui/dialog/index.js";
     import Plus from "svelte-radix/Plus.svelte";
@@ -29,14 +29,13 @@
         name: "Name",
         description: "Kurze Beschreibung!",
         link: "https://....",
-        owner: { id: "", name: "" },
+        owner: { id: "", name: "" , tb: ""},
     };
 
     async function deleteLink(id: string) {
         await db?.delete(new RecordId("downloadlinks", id));
     }
 
-    let user = $userData;
     let user_id = $userData.id;
 
     async function postLinks() {
@@ -53,8 +52,6 @@
                 dialogOpen = false;
             });
     }
-
-    let role: string = "";
 
     onMount(async () => {
         await getDb();
@@ -76,17 +73,12 @@
                 }
             });
         }
-        if (user) {
-            await db
-                ?.select<user>(user.id.toString())
-                .then((v) => (role = v.role));
-        }
     });
 </script>
 
 <div class="flex items-center justify-end">
     <Dialog.Root open={dialogOpen}>
-        {#if role === "editor"}
+        {#if $userData.role === "editor" || $userData.role === "admin"}
             <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
                 <Plus />
             </Dialog.Trigger>

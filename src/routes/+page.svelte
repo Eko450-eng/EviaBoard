@@ -1,13 +1,106 @@
+<script lang="ts">
+    import { onMount } from "svelte";
+    import { db } from "@/db";
+    import Addnews from "./addnews.svelte";
+    import type { News, News_newspost } from "@/types";
+    import { formatDate } from "@/helpers/formating";
+    import { userData } from "./store";
+    import Addnewspost from "./addnewspost.svelte";
+    import type { Uuid } from "surrealdb";
+    import { Button } from "$lib/components/ui/button/index";
+
+    export let news: News_newspost[];
+
+    async function loadData() {
+        let query =
+            "SELECT *, owner.name, -> news_post.out.* as newspost from news ORDER BY date desc";
+
+        let data = await db?.query<Array<Array<News_newspost>>>(query);
+
+        if (!data) return;
+        let d = data[0];
+        news = d;
+    }
+
+    async function subscribeNews(queryUuid: Uuid | undefined) {
+        if (!queryUuid) return;
+        await db?.subscribeLive(queryUuid!, async (action, _result) => {
+            if (
+                action === "CREATE" ||
+                action === "UPDATE" ||
+                action === "DELETE"
+            ) {
+                await loadData();
+            }
+        });
+    }
+
+    onMount(async () => {
+        await loadData();
+        const queryUuidNews = await db?.live("news", (action, _result) => {
+            if (action === "CLOSE") return;
+        });
+        const queryUuidNewsPost = await db?.live(
+            "newspost",
+            (action, _result) => {
+                if (action === "CLOSE") return;
+            },
+        );
+        const queryUuidNewsPostRelation = await db?.live(
+            "news_post",
+            (action, _result) => {
+                if (action === "CLOSE") return;
+            },
+        );
+
+        subscribeNews(queryUuidNews);
+        subscribeNews(queryUuidNewsPost);
+        subscribeNews(queryUuidNewsPostRelation);
+    });
+
+    let addPostOpen = false;
+    let addNewsPostOpen = false;
+    let selectedPost: News | undefined;
+</script>
+
+{#if $userData.role == "admin"}
+    <Addnews {addPostOpen} />
+{/if}
+<Addnewspost addPostOpen={addNewsPostOpen} post={selectedPost} />
+
+{#if news}
+    {#each news as post}
+        <div class="border rounded my-2 py-2">
+            <div class="flex justify-between">
+                <h2 class="text-4xl p-2">{post.title}</h2>
+                {#if $userData.role == "admin"}
+                    <Button
+                        on:click={() => {
+                            if ($userData.role !== "admin") return;
+                            selectedPost = post;
+                            addNewsPostOpen = true;
+                        }}>Add post</Button
+                    >
+                {/if}
+            </div>
+            <div class="flex">
+                <h2 class="text-1xl p-2 text-gray-500">{post.owner.name}</h2>
+                <h2 class="text-1xl p-2 text-gray-500">
+                    {formatDate(post.date)}
+                </h2>
+            </div>
+            <ul class="feature-description-list-item">
+                {#each post.newspost as entry}
+                    <li>
+                        {entry.name}
+                    </li>
+                {/each}
+            </ul>
+        </div>
+    {/each}
+{/if}
+
 <div>
-    <h2 class="text-4xl p-2">News vom 18.10.2024!</h2>
-    <ul class="feature-description-list-item">
-        <li>Feature - Im Featureboard unterstützt die Suche nun Suchparameter wie z.B. status:0 oder category:2</li>
-    </ul>
-    <h2 class="text-4xl p-2">News vom 17.10.2024!</h2>
-    <ul class="feature-description-list-item">
-        <li>Jetzt neu - ASB Online Checker!!!!! (Achtung kann oder kann auch nicht stimmen)</li>
-        <li>Jetzt neu - Im Featureboard ist nun das Upvoten möglich und zudem lassen sich die Boards nun (in hässlich) in einer Karte öffenen für eine leichter lesbare ansicht</li>
-    </ul>
     <h2 class="text-2xl p-2">Todos</h2>
     <ul class="main-feature-list-item">
         <li>Add Knowledgeboard - WIP</li>

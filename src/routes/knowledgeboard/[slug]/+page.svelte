@@ -1,23 +1,34 @@
 <script lang="ts">
-    import type { post } from "@/db.js";
+    import type { post, topic } from "@/db.js";
     import { Button } from "../../../lib/components/ui/button/index.js";
     import { Icon } from "svelte-icons-pack";
-    import { FaSolidArrowLeft } from "svelte-icons-pack/fa";
+    import { FaSolidArrowLeft, FaSolidPencil } from "svelte-icons-pack/fa";
     import { goto } from "$app/navigation";
     import * as Alert from "$lib/components/ui/alert/index.js";
     import { FiAlertTriangle } from "svelte-icons-pack/fi";
+    import EditPostDialog from "./edit-post.svelte";
 
-    export let data: { posts: post[] };
+    export let data: { posts: post[], topics: topic[] };
 
     let post = data.posts[0];
+    let editPostOpen = false;
 </script>
 
+<EditPostDialog {editPostOpen} postData={post} />
 <div class="flex flex-col w-full">
     <h1
         class="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
     >
         <Button variant="outline" on:click={() => goto("/knowledgeboard")}>
             <Icon src={FaSolidArrowLeft} />
+        </Button>
+        <Button
+            variant="outline"
+            on:click={() => {
+                editPostOpen = true;
+            }}
+        >
+            <Icon src={FaSolidPencil} />
         </Button>
         {post.title}
         {#if post.deleted}

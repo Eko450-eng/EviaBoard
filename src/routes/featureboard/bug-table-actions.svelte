@@ -104,7 +104,7 @@
         </DropdownMenu.Group>
         <DropdownMenu.Separator />
 
-        {#if get(userData).role == "editor"}
+        {#if $userData.role == "editor" || $userData.role == "admin"}
             <DropdownMenu.Item on:click={() => setStatus(id, 0)}
                 >Open</DropdownMenu.Item
             >
