@@ -8,12 +8,15 @@
     import Addnewspost from "./addnewspost.svelte";
     import type { Uuid } from "surrealdb";
     import { Button } from "$lib/components/ui/button/index";
+    import { Icon } from "svelte-icons-pack";
+    import { FaCalendarDays } from "svelte-icons-pack/fa";
+    import AvatarBar from "../lib/avatar.svelte";
 
     export let news: News_newspost[];
 
     async function loadData() {
         let query =
-            "SELECT *, owner.name, -> news_post.out.* as newspost from news ORDER BY date desc";
+            "SELECT *, owner.name, owner.image, -> news_post.out.* as newspost from news ORDER BY date desc";
 
         let data = await db?.query<Array<Array<News_newspost>>>(query);
 
@@ -72,7 +75,7 @@
     {#each news as post}
         <div class="border rounded my-2 py-2">
             <div class="flex justify-between">
-                <h2 class="text-4xl p-2">{post.title}</h2>
+                <h2 class="text-2xl p-2">{post.title}</h2>
                 {#if $userData.role == "admin"}
                     <Button
                         on:click={() => {
@@ -83,19 +86,22 @@
                     >
                 {/if}
             </div>
-            <div class="flex">
-                <h2 class="text-1xl p-2 text-gray-500">{post.owner.name}</h2>
+            <div class="flex flex-col">
                 <h2 class="text-1xl p-2 text-gray-500">
-                    {formatDate(post.date)}
+                    <span class="flex items-center gap-2">
+                        <Icon src={FaCalendarDays} size={15} />
+                        {formatDate(post.date)}
+                    </span>
                 </h2>
+                <ul class="feature-description-list-item list-disc">
+                    {#each post.newspost as entry}
+                        <li>
+                            {entry.name}
+                        </li>
+                    {/each}
+                </ul>
             </div>
-            <ul class="feature-description-list-item">
-                {#each post.newspost as entry}
-                    <li>
-                        {entry.name}
-                    </li>
-                {/each}
-            </ul>
+            <AvatarBar user={post.owner} />
         </div>
     {/each}
 {/if}

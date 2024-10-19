@@ -13,6 +13,7 @@
     import DeleteDialog from "./delete-dialog.svelte";
     import RecoverDialog from "./recover-dialog.svelte";
     import AddPostDialog from "./add-post.svelte";
+    import AvatarBar from "$lib/avatar.svelte";
 
     let topics: Array<topic> | Array<{ id: string; name: string }> | undefined =
         [{ name: "Select a Topic", id: "placeholder" }];
@@ -132,46 +133,53 @@
             {#each $page.data.posts as post}
                 {#if (showDeleted && post.deleted) || !post.deleted}
                     {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
-                        <Card.Root on:click={()=>goto(`/knowledgeboard/${post.id}`)} class="my-2 w-[350px]">
-                            <Card.Header>
-                                <Card.Title>{post.title}</Card.Title>
-                                <Card.Description>{post.topic}</Card.Description
-                                >
-                            </Card.Header>
-                            <Card.Content>
-                                <div
-                                    class={post.deleted
-                                        ? "grid w-full items-center gap-4 deleted"
-                                        : "grid w-full items-center gap-4"}
-                                >
-                                    <div class="flex flex-col space-y-1.5">
-                                        <p>{post.body}</p>
+                        <div class="hoverpointer">
+                            <Card.Root
+                                on:click={() =>
+                                    goto(`/knowledgeboard/${post.id}`)}
+                                class="my-2 w-[350px]"
+                            >
+                                <Card.Header>
+                                    <Card.Title>{post.title}</Card.Title>
+                                    <Card.Description
+                                        >{post.topic}</Card.Description
+                                    >
+                                </Card.Header>
+                                <Card.Content>
+                                    <div
+                                        class={post.deleted
+                                            ? "grid w-full items-center gap-4 deleted"
+                                            : "grid w-full items-center gap-4"}
+                                    >
+                                        <div class="flex flex-col space-y-1.5">
+                                            <p>{post.body}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </Card.Content>
-                            <Card.Footer class="flex justify-between">
-                                <Card.Description
-                                    >{post.owner.name}</Card.Description
-                                >
-                                {#if post.owner.id.toString() === $userData.id.toString() && !post.deleted}
-                                    <Button
-                                        variant="destructive"
-                                        on:click={() => {
-                                            deleteDialog = true;
-                                            postToDelete = post;
-                                        }}>Delete</Button
-                                    >
-                                {:else if post.owner.id.toString() === $userData.id.toString() && post.deleted}
-                                    <Button
-                                        variant="default"
-                                        on:click={() => {
-                                            recoverDialog = true;
-                                            postToRecover = post;
-                                        }}>Recover</Button
-                                    >
-                                {/if}
-                            </Card.Footer>
-                        </Card.Root>
+                                </Card.Content>
+                                <Card.Footer class="flex justify-between">
+                                    <Card.Description>
+                                        <AvatarBar user={post.owner} />
+                                    </Card.Description>
+                                    {#if post.owner.id.toString() === $userData.id.toString() && !post.deleted}
+                                        <Button
+                                            variant="destructive"
+                                            on:click={() => {
+                                                deleteDialog = true;
+                                                postToDelete = post;
+                                            }}>Delete</Button
+                                        >
+                                    {:else if post.owner.id.toString() === $userData.id.toString() && post.deleted}
+                                        <Button
+                                            variant="default"
+                                            on:click={() => {
+                                                recoverDialog = true;
+                                                postToRecover = post;
+                                            }}>Recover</Button
+                                        >
+                                    {/if}
+                                </Card.Footer>
+                            </Card.Root>
+                        </div>
                     {/if}
                 {/if}
             {/each}
@@ -182,5 +190,8 @@
 <style>
     .deleted {
         color: red;
+    }
+    .hoverpointer {
+        cursor: pointer;
     }
 </style>

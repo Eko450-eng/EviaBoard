@@ -6,9 +6,12 @@
     import { goto } from "$app/navigation";
     import * as Alert from "$lib/components/ui/alert/index.js";
     import { FiAlertTriangle } from "svelte-icons-pack/fi";
+    import { userData } from "../../store.js";
     import EditPostDialog from "./edit-post.svelte";
+    import Comments from "./comment-view.svelte";
+    import AvatarBar from "$lib/avatar.svelte";
 
-    export let data: { posts: post[], topics: topic[] };
+    export let data: { posts: post[]; topics: topic[] };
 
     let post = data.posts[0];
     let editPostOpen = false;
@@ -22,14 +25,16 @@
         <Button variant="outline" on:click={() => goto("/knowledgeboard")}>
             <Icon src={FaSolidArrowLeft} />
         </Button>
-        <Button
-            variant="outline"
-            on:click={() => {
-                editPostOpen = true;
-            }}
-        >
-            <Icon src={FaSolidPencil} />
-        </Button>
+        {#if $userData.id == post.owner.id.toString()}
+            <Button
+                variant="outline"
+                on:click={() => {
+                    editPostOpen = true;
+                }}
+            >
+                <Icon src={FaSolidPencil} />
+            </Button>
+        {/if}
         {post.title}
         {#if post.deleted}
             <Alert.Root>
@@ -57,6 +62,9 @@
         class="flex flex-col justify-between my-5 border-t text-sm text-gray-500"
     >
         <p>Kategorie: {post.topic}</p>
+        <AvatarBar user={post.owner} />
         <p>Autor: {post.owner.name}</p>
     </div>
 </div>
+
+<Comments />

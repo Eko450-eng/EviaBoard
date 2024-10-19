@@ -13,8 +13,7 @@
     async function editPost() {
         try {
             if (!postData) return;
-            await db
-                .patch(postData.id, [
+            await db?.patch(postData.id, [
                     {
                         op: "replace",
                         path: "/deleted",

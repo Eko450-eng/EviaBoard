@@ -30,6 +30,7 @@ export type post = {
 };
 
 export type user = {
+  image?: string;
   email: string;
   id: RecordId;
   name: string;

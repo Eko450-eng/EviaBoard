@@ -31,7 +31,6 @@
                     let newPost: Array<Array<Newspost>> = data as Newspost[][];
                     let q = `RELATE ${post?.id} -> news_post -> ${newPost[0][0].id}`;
                     await db?.query(q);
-                    console.log(newPost);
                     addPostOpen = false;
                 });
         } catch (e) {

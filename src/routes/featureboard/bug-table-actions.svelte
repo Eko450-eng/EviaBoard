@@ -33,11 +33,9 @@
         let newUpvotes = report?.upvotes;
 
         if (votes[0]?.length >= 1) {
-            console.log("removed", votes[0]);
             await db?.delete(votes[0][0].id);
             newUpvotes -= 1;
         } else {
-            console.log("added");
             newUpvotes += 1;
             await db?.create("votes", {
                 bugreport: recordId,

@@ -4,9 +4,8 @@ import { get } from "svelte/store";
 
 
 async function queryPosts() {
-    //"select id, body, title, topic.name as topic, owner.id, owner.name, deleted from posts WHERE  !deleted";
   let query =
-  "select id, body, title, topic.name as topic, owner.id, owner.name, deleted from posts WHERE  !deleted OR deleted AND owner = $auth.id";
+  "select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE  !deleted OR deleted AND owner = $auth.id";
   let posts_raw = await db?.query<Array<Array<post>>>(query);
   if (!posts_raw) return;
   return posts_raw[0];

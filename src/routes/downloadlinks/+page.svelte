@@ -19,7 +19,6 @@
         if (dl) {
             downloadlinks = dl;
         }
-        console.log("Hier- ", dl![0]);
     }
 
     let dialogOpen = false;
