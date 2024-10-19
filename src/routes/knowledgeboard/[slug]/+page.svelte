@@ -10,6 +10,7 @@
     import EditPostDialog from "./edit-post.svelte";
     import Comments from "./comment-view.svelte";
     import AvatarBar from "$lib/avatar.svelte";
+    import Idview from "@/idview.svelte";
 
     export let data: { posts: post[]; topics: topic[] };
 
@@ -63,7 +64,9 @@
     >
         <p>Kategorie: {post.topic}</p>
         <AvatarBar user={post.owner} />
-        <p>Autor: {post.owner.name}</p>
+        {#if post.id}
+            <Idview id={post.id} />
+        {/if}
     </div>
 </div>
 
