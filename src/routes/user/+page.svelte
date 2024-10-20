@@ -31,7 +31,6 @@
     };
 
     async function updateUser() {
-        console.log("Started");
         await generateImage();
 
         await db
@@ -53,13 +52,10 @@
                 },
             ])
             .then(() => {
-                console.log("UserID: ", $userData.id);
-                console.log("User: ", user);
                 toast.success("Yey", {
                     description: "User updated",
                 });
             });
-        console.log("Done");
     }
 </script>
 

@@ -9,10 +9,6 @@
 
     onMount(async () => {
         checkLoggedIn();
-        console.log("First: ", $DB);
-        DB.subscribe((db) => {
-            console.log("After: ", db);
-        });
     });
 </script>
 
