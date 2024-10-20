@@ -41,7 +41,8 @@ async function loadPageData(id: string) {
 }
 
 
-export async function load({ params }: any) {
+export async function load({ params, parent }: any) {
+  await parent()
   let data = await loadPageData(params.slug);
 
   return {
