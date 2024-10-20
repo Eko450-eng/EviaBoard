@@ -4,7 +4,7 @@
     import { isLoggedIn } from "../routes/store";
     import LinkButton from "./link-button.svelte";
     import {
-    FaSolidArrowRightToBracket,
+        FaSolidArrowRightToBracket,
         FaSolidBook,
         FaSolidDownload,
         FaSolidGlobe,
