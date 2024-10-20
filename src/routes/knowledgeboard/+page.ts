@@ -31,7 +31,8 @@ async function loadPageData() {
 }
 
 
-export async function load() {
+export async function load({parent}) {
+  await parent()
   let data = await loadPageData();
   return {
     posts: data?.res,
