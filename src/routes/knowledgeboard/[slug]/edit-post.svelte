@@ -12,7 +12,7 @@
 
     async function editPost() {
         try {
-            if (!postData) return;
+            if (!postData.id) return;
             await db?.patch(postData.id, [
                     {
                         op: "replace",

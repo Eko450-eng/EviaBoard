@@ -11,6 +11,7 @@
     import Comments from "./comment-view.svelte";
     import AvatarBar from "$lib/avatar.svelte";
     import Idview from "@/idview.svelte";
+    import DescriptionWithImage from "../description-with-image.svelte";
 
     export let data: { posts: post[]; topics: topic[] };
 
@@ -18,7 +19,7 @@
     let editPostOpen = false;
 </script>
 
-<EditPostDialog {editPostOpen} postData={post} />
+<EditPostDialog bind:editPostOpen postData={post} />
 <div class="flex flex-col w-full">
     <h1
         class="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
@@ -49,7 +50,7 @@
     </h1>
     <div class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6">
         <p class="text-sm text-gray-500">Beschreibung</p>
-        <p class="leading-7">{post.body}</p>
+        <DescriptionWithImage {post} clickable={true}/>
     </div>
     <div class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6">
         <p class="text-sm text-gray-500">Lösung</p>

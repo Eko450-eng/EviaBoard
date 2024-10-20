@@ -1,11 +1,7 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import * as Avatar from "./components/ui/avatar/index";
     import type { user } from "./db";
-    import { getFromMinio, minioClient } from "./minio";
     import { userData } from "../routes/store";
-    import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-    import { GetObjectCommand } from "@aws-sdk/client-s3";
 
     export let user: user;
 </script>

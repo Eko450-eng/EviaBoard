@@ -4,15 +4,13 @@
     import { Button } from "$ui/button";
     import { Input } from "$ui/input";
     import { fileUploadHandler, uploadFile } from "@/helpers/minio";
-    import { getFromMinio, minioClient } from "@/minio";
-    import { GetObjectCommand } from "@aws-sdk/client-s3";
-    import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+    import { getFromMinio } from "@/minio";
     import { db, signOut, type user } from "@/db";
     import { toast } from "svelte-sonner";
     import { Icon } from "svelte-icons-pack";
     import { FaSolidArrowRightFromBracket } from "svelte-icons-pack/fa";
 
-    async function generateImage(): Promise<string> {
+    async function generateImage() {
         let image: any;
 
         let userid = $userData.id.toString();
@@ -21,14 +19,6 @@
         image = await getFromMinio("eviaboard", userImage);
 
         await uploadFile($userData.id + ".png");
-
-        const getCommand = new GetObjectCommand({
-            Bucket: "eviaboard",
-            Key: userImage,
-        });
-
-        let imageUrl = await getSignedUrl(minioClient, getCommand);
-        return imageUrl;
     }
 
     let user: user = {
@@ -42,8 +32,7 @@
 
     async function updateUser() {
         console.log("Started");
-        let userImage = await generateImage();
-        console.log("userImage", userImage);
+        await generateImage();
 
         await db
             ?.patch($userData.id, [
@@ -60,7 +49,7 @@
                 {
                     op: "replace",
                     path: "/image",
-                    value: userImage,
+                    value: `https://minio.eko450eng.org/eviaboard/${$userData.id}.png`,
                 },
             ])
             .then(() => {

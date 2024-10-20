@@ -14,6 +14,7 @@
     import RecoverDialog from "./recover-dialog.svelte";
     import AddPostDialog from "./add-post.svelte";
     import AvatarBar from "$lib/avatar.svelte";
+    import DescriptionWithImage from "./description-with-image.svelte";
 
     let topics: Array<topic> | Array<{ id: string; name: string }> | undefined =
         [{ name: "Select a Topic", id: "placeholder" }];
@@ -72,15 +73,15 @@
 
 <div class="flex p-4 items-center justify-between">
     <h1>Knowledgebase</h1>
-    <DeleteDialog {deleteDialog} {postToDelete} />
-    <RecoverDialog {recoverDialog} {postToRecover} />
+    <DeleteDialog bind:deleteDialog {postToDelete} />
+    <RecoverDialog bind:recoverDialog {postToRecover} />
 
     <Toggle variant="outline" on:click={() => (showDeleted = !showDeleted)}>
         {showDeleted ? "Hide" : "Show"}
         your Deleted posts
     </Toggle>
 
-    <AddPostDialog {addPostOpen} {selectedTopic} {topics} />
+    <AddPostDialog bind:addPostOpen {selectedTopic} {topics} />
 </div>
 
 <div class="p-4">
@@ -134,28 +135,36 @@
                 {#if (showDeleted && post.deleted) || !post.deleted}
                     {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
                         <div class="hoverpointer">
-                            <Card.Root
-                                on:click={() =>
-                                    goto(`/knowledgeboard/${post.id}`)}
-                                class="my-2 w-[350px]"
-                            >
-                                <Card.Header>
-                                    <Card.Title>{post.title}</Card.Title>
-                                    <Card.Description
-                                        >{post.topic}</Card.Description
-                                    >
-                                </Card.Header>
-                                <Card.Content>
-                                    <div
-                                        class={post.deleted
-                                            ? "grid w-full items-center gap-4 deleted"
-                                            : "grid w-full items-center gap-4"}
-                                    >
-                                        <div class="flex flex-col space-y-1.5">
-                                            <p>{post.body}</p>
+                            <Card.Root class="my-2 w-[350px]">
+                                <div
+                                    class="hoverpointer"
+                                    role="button"
+                                    tabindex="0"
+                                    aria-label="Go to Post"
+                                    on:keydown={() => console.log("Clicked")}
+                                    on:click={() =>
+                                        goto(`/knowledgeboard/${post.id}`)}
+                                >
+                                    <Card.Header>
+                                        <Card.Title>{post.title}</Card.Title>
+                                        <Card.Description
+                                            >{post.topic}</Card.Description
+                                        >
+                                    </Card.Header>
+                                    <Card.Content>
+                                        <div
+                                            class={post.deleted
+                                                ? "grid w-full items-center gap-4 deleted"
+                                                : "grid w-full items-center gap-4"}
+                                        >
+                                            <div
+                                                class="flex flex-col space-y-1.5"
+                                            >
+                                                <DescriptionWithImage {post} clickable={false} />
+                                            </div>
                                         </div>
-                                    </div>
-                                </Card.Content>
+                                    </Card.Content>
+                                </div>
                                 <Card.Footer class="flex justify-between">
                                     <Card.Description>
                                         <AvatarBar user={post.owner} />

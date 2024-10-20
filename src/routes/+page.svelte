@@ -67,9 +67,9 @@
 </script>
 
 {#if $userData.role == "admin"}
-    <Addnews {addPostOpen} />
+    <Addnews bind:addPostOpen={addPostOpen} />
 {/if}
-<Addnewspost addPostOpen={addNewsPostOpen} post={selectedPost} />
+<Addnewspost bind:addPostOpen={addNewsPostOpen} post={selectedPost} />
 
 {#if news}
     {#each news as post}

@@ -4,7 +4,7 @@ import { db, type post, type topic } from "@/db";
 
 async function queryPosts(id: string) {
   let query =
-    `select id, body, title, solution, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE  !deleted OR deleted AND owner = $auth.id AND id=${id}`;
+    `select id, body, title, solution, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE id=${id}`
   let posts_raw = await db?.query<Array<Array<post>>>(query);
   if (!posts_raw) return;
   return posts_raw[0];
