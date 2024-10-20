@@ -118,6 +118,9 @@
             <DropdownMenu.Item on:click={() => setStatus(id, 4)}
                 >Closed</DropdownMenu.Item
             >
+            <DropdownMenu.Item on:click={() => setStatus(id, 10)}
+                >Archived</DropdownMenu.Item
+            >
         {/if}
     </DropdownMenu.Content>
 </DropdownMenu.Root>

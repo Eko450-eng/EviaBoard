@@ -1,11 +1,9 @@
 import { db, type post, type topic } from "@/db";
-import { checkLoggedIn, userData } from "../store";
-import { get } from "svelte/store";
-
+import { checkLoggedIn, } from "../store";
 
 async function queryPosts() {
   let query =
-  "select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE  !deleted OR deleted AND owner = $auth.id";
+    "select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE  !deleted OR deleted AND owner = $auth.id";
   let posts_raw = await db?.query<Array<Array<post>>>(query);
   if (!posts_raw) return;
   return posts_raw[0];
@@ -16,26 +14,18 @@ async function queryTopics() {
   return raw_data;
 }
 
-export let ssr = false
+export let ssr = false;
+export let csr = true;
 
 async function loadPageData() {
   checkLoggedIn()
-  let user = get(userData);
   let response;
-  if (!user.email) {
-    response = {
-      res: [],
-      topics: [],
-      failed: true
-    }
-  } else {
-    let resPosts = await queryPosts();
-    let resTopics = await queryTopics();
-    response = {
-      res: resPosts,
-      topics: resTopics,
-      failed: false
-    }
+  let resPosts = await queryPosts();
+  let resTopics = await queryTopics();
+  response = {
+    res: resPosts,
+    topics: resTopics,
+    failed: false
   }
   return response
 }
@@ -43,7 +33,6 @@ async function loadPageData() {
 
 export async function load() {
   let data = await loadPageData();
-
   return {
     posts: data?.res,
     topics: data?.topics,

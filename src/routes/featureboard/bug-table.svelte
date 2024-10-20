@@ -66,7 +66,7 @@
             await db
                 ?.query<
                     Report[][]
-                >("select id, title, body, status, category, upvotes, owner.name as owner from bugreports")
+                >("select id, title, body, status, category, upvotes, owner.name as owner from bugreports WHERE status != 10")
                 .then((v) => {
                     let responses = v[0];
                     let results: Report[] = [];
@@ -184,6 +184,8 @@
                         return "Denied";
                     case 4:
                         return "Closed";
+                    case 10:
+                        return "Archived";
                     default:
                         return "Open";
                 }
@@ -302,6 +304,19 @@
                         {#each row.cells as cell (cell.id)}
                             <Subscribe attrs={cell.attrs()} let:attrs>
                                 <Table.Cell
+                                    class={cell.id === "status"
+                                        ? cell === 0
+                                            ? "bg-blue-900 rounded-xl"
+                                            : cell.value === 1
+                                              ? "bg-teal-900 rounded-xl"
+                                              : cell.value === 2
+                                                ? "bg-purple-900 rounded-xl"
+                                                : cell.value === 3
+                                                  ? "bg-red-900 rounded-xl"
+                                                  : cell.value === 4
+                                                    ? "bg-green-900 rounded-xl"
+                                                    : ""
+                                        : ""}
                                     on:click={() => {
                                         if (cell.id !== "id") {
                                             cardOpen = true;

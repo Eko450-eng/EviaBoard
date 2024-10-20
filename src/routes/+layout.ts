@@ -1,8 +1,11 @@
 import { initDb } from "@/db";
+import { DB } from './store'
 
 
 export async function load() {
-  await initDb()
+  let db = await initDb()
+  if (!db) return
+  DB.set(db)
   return null;
 }
 

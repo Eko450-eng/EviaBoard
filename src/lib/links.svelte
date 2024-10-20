@@ -31,6 +31,11 @@
 
     let unauthenticatedLinks = [
         {
+            icon: FaSolidBook,
+            name: "knowledgeboard",
+            value: "/knowledgeboard",
+        },
+        {
             icon: FaSolidArrowRightToBracket,
             name: "Login or Signup",
             value: "/login",

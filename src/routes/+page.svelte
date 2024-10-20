@@ -12,7 +12,7 @@
     import { FaCalendarDays } from "svelte-icons-pack/fa";
     import AvatarBar from "../lib/avatar.svelte";
 
-    export let news: News_newspost[];
+    let news: News_newspost[];
 
     async function loadData() {
         let query =

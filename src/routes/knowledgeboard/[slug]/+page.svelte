@@ -12,11 +12,17 @@
     import AvatarBar from "$lib/avatar.svelte";
     import Idview from "@/idview.svelte";
     import DescriptionWithImage from "../description-with-image.svelte";
+    import { onMount } from "svelte";
 
     export let data: { posts: post[]; topics: topic[] };
 
     let post = data.posts[0];
     let editPostOpen = false;
+    onMount(() => {
+        if (!data) {
+            goto("/");
+        }
+    });
 </script>
 
 <EditPostDialog bind:editPostOpen postData={post} />
@@ -50,7 +56,7 @@
     </h1>
     <div class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6">
         <p class="text-sm text-gray-500">Beschreibung</p>
-        <DescriptionWithImage {post} clickable={true}/>
+        <DescriptionWithImage {post} clickable={true} />
     </div>
     <div class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6">
         <p class="text-sm text-gray-500">Lösung</p>

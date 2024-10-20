@@ -36,10 +36,15 @@
                     id,
                     owner: owner.*
                 } AS comments
-            FROM posts WHERE id = ${$page.data.posts[0].id}`;
+            FROM posts WHERE id = ${$page.data.posts[0].id} `;
 
         await db?.query<Array<Array<CommentRelation>>>(query).then((value) => {
             comments = value[0][0].comments;
+            comments.sort((a: Comments, b: Comments) => {
+                const dateA = new Date(a.created_at).getTime();
+                const dateB = new Date(b.created_at).getTime();
+                return dateB - dateA;
+            });
         });
     }
 
@@ -51,7 +56,9 @@
                 action === "UPDATE" ||
                 action === "DELETE"
             ) {
-                await fetchComments();
+                setTimeout(async () => {
+                    await fetchComments();
+                }, 500);
             }
         });
     }

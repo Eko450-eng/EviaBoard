@@ -6,8 +6,8 @@
     import { onMount, tick } from "svelte";
     import { Button } from "../../lib/components/ui/button/index.js";
     import { Toggle } from "../../lib/components/ui/toggle/index.js";
-    import { db, type post, type topic } from "../../lib/db";
-    import { checkLoggedIn, userData } from "../store.js";
+    import { type post, type topic } from "../../lib/db";
+    import { checkLoggedIn, DB, userData } from "../store.js";
     import { goto, invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
     import DeleteDialog from "./delete-dialog.svelte";
@@ -44,10 +44,10 @@
         checkLoggedIn();
         if (data.failed) goto("/");
 
-        const queryUuid = await db?.live("posts", (action, _result) => {
+        const queryUuid = await $DB?.live("posts", (action, _result) => {
             if (action === "CLOSE") return;
         });
-        await db?.subscribeLive(queryUuid!, async (action, _result) => {
+        await $DB?.subscribeLive(queryUuid!, async (action, _result) => {
             if (
                 action === "CREATE" ||
                 action === "UPDATE" ||
@@ -76,10 +76,12 @@
     <DeleteDialog bind:deleteDialog {postToDelete} />
     <RecoverDialog bind:recoverDialog {postToRecover} />
 
-    <Toggle variant="outline" on:click={() => (showDeleted = !showDeleted)}>
-        {showDeleted ? "Hide" : "Show"}
-        your Deleted posts
-    </Toggle>
+    {#if $userData.email}
+        <Toggle variant="outline" on:click={() => (showDeleted = !showDeleted)}>
+            {showDeleted ? "Hide" : "Show"}
+            your Deleted posts
+        </Toggle>
+    {/if}
 
     <AddPostDialog bind:addPostOpen {selectedTopic} {topics} />
 </div>
@@ -160,7 +162,10 @@
                                             <div
                                                 class="flex flex-col space-y-1.5"
                                             >
-                                                <DescriptionWithImage {post} clickable={false} />
+                                                <DescriptionWithImage
+                                                    {post}
+                                                    clickable={false}
+                                                />
                                             </div>
                                         </div>
                                     </Card.Content>

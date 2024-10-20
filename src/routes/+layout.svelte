@@ -5,10 +5,14 @@
     import "../app.css";
     import { Toaster } from "$lib/components/ui/sonner";
     import { onMount } from "svelte";
-    import { checkLoggedIn, userData } from "./store";
+    import { checkLoggedIn, DB } from "./store";
 
     onMount(async () => {
         checkLoggedIn();
+        console.log("First: ", $DB);
+        DB.subscribe((db) => {
+            console.log("After: ", db);
+        });
     });
 </script>
 
@@ -19,7 +23,9 @@
     <aside
         class="bg-background fixed inset-y-0 left-0 z-10 w-14 flex-col border-r sm:flex"
     >
-        <nav class="flex flex-col items-center gap-4 px-2 py-4 h-full border-r border-teal-500">
+        <nav
+            class="flex flex-col items-center gap-4 px-2 py-4 h-full border-r border-teal-500"
+        >
             <div class="flex flex-col justify-between content-between h-full">
                 <div>
                     <Links />
@@ -34,7 +40,7 @@
     </main>
 </div>
 
-<div class={$userData.email ? "online" : "offline"}></div>
+<div class={$DB.status !== "connected" ? "offline" : "online"}></div>
 
 <style>
     :global(body) {
