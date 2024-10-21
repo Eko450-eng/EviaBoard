@@ -3,23 +3,21 @@
     import { Label } from "$ui/label";
     import { Button } from "$ui/button";
     import { Input } from "$ui/input";
-    import { fileUploadHandler, uploadFile } from "@/helpers/minio";
-    import { getFromMinio } from "@/minio";
+    import { fileUploadHandler } from "@/helpers/minio";
     import { db, signOut, type user } from "@/db";
     import { toast } from "svelte-sonner";
     import { Icon } from "svelte-icons-pack";
     import { FaSolidArrowRightFromBracket } from "svelte-icons-pack/fa";
-
-    async function generateImage() {
-        let image: any;
-
-        let userid = $userData.id.toString();
-        let userImage = userid + ".png";
-        if (!userid) return "";
-        image = await getFromMinio("eviaboard", userImage);
-
-        await uploadFile($userData.id + ".png");
-    }
+    import { onMount } from "svelte";
+    import {
+        checkSubscriptionStatus,
+        requestNotificationPermission,
+        subscribeUser,
+        unsubscribe,
+        updateUser,
+    } from "./functions";
+    import { sendPush } from "@/helpers/push";
+    import { RecordId } from "surrealdb";
 
     let user: user = {
         id: $userData.id,
@@ -30,36 +28,97 @@
         image: $userData.image,
     };
 
-    async function updateUser() {
-        await generateImage();
+    let nottifPermGranted: boolean | null = null;
+    let isSubscribed = false;
 
-        await db
-            ?.patch($userData.id, [
+    onMount(async () => {
+        nottifPermGranted = Notification.permission === "granted";
+
+        if (nottifPermGranted) {
+            isSubscribed = await checkSubscriptionStatus(
+                $userData,
+                isSubscribed,
+            );
+
+            if (!isSubscribed) {
+                if (!$userData.email) {
+                } else {
+                    userData.subscribe(async () => {
+                        if (isSubscribed) return;
+                        if (!$userData.email) {
+                            await subscribeUser(isSubscribed, $userData);
+                        }
+                    });
+                }
                 {
-                    op: "replace",
-                    path: "/email",
-                    value: user.email,
-                },
-                {
-                    op: "replace",
-                    path: "/name",
-                    value: user.name,
-                },
-                {
-                    op: "replace",
-                    path: "/image",
-                    value: `https://minio.eko450eng.org/eviaboard/${$userData.id}.png`,
-                },
-            ])
-            .then(() => {
-                toast.success("Yey", {
-                    description: "User updated",
-                });
+                    await subscribeUser(isSubscribed, $userData);
+                }
+            }
+        }
+    });
+
+    async function handleUpdateUser() {
+        await updateUser($userData, user).then(() => {
+            toast.success("Yey", {
+                description: "User updated",
             });
+        });
+    }
+    async function sendPushHandler() {
+        let res = await sendPush("testing", "test", $userData.id);
+        console.log(res);
+    }
+
+    async function subtoChannel(channelname: string) {
+        let pushKey = new RecordId("pushkey", $userData.id.toString());
+        console.log(pushKey.toString());
+        await db?.query(
+            `relate ${pushKey} -> pushkey_channel -> ${channelname}`,
+        );
     }
 </script>
 
-<form on:submit={updateUser}>
+<div class="flex flex-col my-5">
+    {#if $userData.role === "admin"}
+        <div>
+            <Button on:click={sendPushHandler} variant="secondary">test</Button>
+        </div>
+    {/if}
+    {#if nottifPermGranted === null}
+        <p>Checking permissions...</p>
+    {:else if nottifPermGranted === false}
+        <Button
+            variant="secondary"
+            class="button"
+            type="button"
+            on:click={() => requestNotificationPermission()}
+            >Enable notifications</Button
+        >
+    {:else}
+        <p>Subscribed to push notifications: <b>{isSubscribed}</b></p>
+        {#if isSubscribed}
+            <div>
+                <Button
+                    class="button"
+                    type="button"
+                    variant="secondary"
+                    on:click={() =>
+                        subtoChannel("channels:2586ro4vrlfei4taz2zn")}
+                    >Subscribe to the testing channel</Button
+                >
+                <Button
+                    class="button"
+                    type="button"
+                    variant="secondary"
+                    on:click={() => unsubscribe(isSubscribed)}
+                    >Unsubscribe from everything</Button
+                >
+            </div>
+        {/if}
+    {/if}
+</div>
+
+<form on:submit={handleUpdateUser}>
     <div class="flex justify-between">
         <h1 class="text-2xl">{$userData.name}</h1>
         <Button

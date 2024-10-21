@@ -1,6 +1,7 @@
 <script lang="ts">
     import Links from "$lib/links.svelte";
     import Optionbuttons from "$lib/optionbuttons.svelte";
+    import {Button} from "$ui/button"
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
     import { Toaster } from "$lib/components/ui/sonner";
