@@ -1,9 +1,10 @@
 import { writable, type Writable } from 'svelte/store'
-import { db, initDb, type user } from "@/db";
+import { initDb } from "@/db";
 import Surreal, { RecordId } from 'surrealdb';
+import type { User } from '@/types';
 
 // Userdata
-const initData: user = {
+const initData: User = {
   email: "",
   id: new RecordId("user", "tada"),
   name: "",
@@ -11,7 +12,7 @@ const initData: user = {
   role: "",
 };
 
-export const userData: Writable<user> = writable(initData)
+export const userData: Writable<User> = writable(initData)
 export const isLoggedIn = writable(false)
 export const DB = writable(new Surreal)
 
@@ -28,7 +29,7 @@ export async function checkLoggedIn(): Promise<Surreal | undefined> {
     db?.authenticate(token)
       .then(async () => {
         db?.authenticate(token)
-        let user = await db?.query<Array<Array<user>>>("SELECT * FROM user WHERE id = $auth.id");
+        let user = await db?.query<Array<Array<User>>>("SELECT * FROM user WHERE id = $auth.id");
         if (!user) return
         let u = user[0][0]
         userData.set(u)

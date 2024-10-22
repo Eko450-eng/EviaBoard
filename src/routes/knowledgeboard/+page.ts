@@ -1,16 +1,17 @@
-import { db, type post, type topic } from "@/db";
+import { db } from "@/db";
 import { checkLoggedIn, } from "../store";
+import type { Post, Topic } from "@/types";
 
 async function queryPosts() {
   let query =
     "select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE  !deleted OR deleted AND owner = $auth.id";
-  let posts_raw = await db?.query<Array<Array<post>>>(query);
+  let posts_raw = await db?.query<Array<Array<Post>>>(query);
   if (!posts_raw) return;
   return posts_raw[0];
 }
 
 async function queryTopics() {
-  let raw_data = await db?.select<topic>("topics");
+  let raw_data = await db?.select<Topic>("topics");
   return raw_data;
 }
 
@@ -31,7 +32,7 @@ async function loadPageData() {
 }
 
 
-export async function load({parent}) {
+export async function load({parent}: any) {
   await parent()
   let data = await loadPageData();
   return {

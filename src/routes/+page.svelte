@@ -10,7 +10,7 @@
     import { Button } from "$lib/components/ui/button/index";
     import { Icon } from "svelte-icons-pack";
     import { FaCalendarDays } from "svelte-icons-pack/fa";
-    import AvatarBar from "../lib/avatar.svelte";
+    import AvatarBar from "$lib/components/mycomp/avatar.svelte";
 
     let news: News_newspost[];
 

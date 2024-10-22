@@ -1,10 +1,8 @@
 <script lang="ts">
     import { db } from "@/db";
     import { onMount } from "svelte";
-    import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
     import { userData } from "../store";
-    import type { RecordId } from "surrealdb";
     import { get, writable } from "svelte/store";
 
     type ASBCheck = {

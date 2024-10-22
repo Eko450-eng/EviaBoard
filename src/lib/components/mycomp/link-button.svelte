@@ -1,8 +1,7 @@
 <script lang="ts">
-    import * as Tooltip from "$lib/components/ui/tooltip/index";
-    import { Button } from "../lib/components/ui/button/index";
+    import * as Tooltip from "$lib/components/ui/tooltip";
+    import { Button } from "$lib/components/ui/button";
     import "@fortawesome/fontawesome-free/css/all.min.css";
-    import "../app.css";
     import { Icon } from "svelte-icons-pack";
 
     export let link: any;

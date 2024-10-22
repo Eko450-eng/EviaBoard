@@ -1,19 +1,21 @@
 <script lang="ts">
     import DataTable from "./bug-table.svelte";
-    import { db, type Report } from "$lib/db";
+    import { db } from "$lib/db";
     import { toast } from "svelte-sonner";
-    import * as Dialog from "../../lib/components/ui/dialog/index.js";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import Plus from "svelte-radix/Plus.svelte";
-    import { Label } from "../../lib/components/ui/label/index.js";
-    import { Input } from "../../lib/components/ui/input/index.js";
-    import { Textarea } from "../../lib/components/ui/textarea/index.js";
-    import * as Select from "../../lib/components/ui/select/index.js";
+    import { Label } from "$lib/components/ui/label/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Textarea } from "$lib/components/ui/textarea/index.js";
+    import * as Select from "$lib/components/ui/select/index.js";
     import {
         Button,
         buttonVariants,
-    } from "../../lib/components/ui/button/index.js";
+    } from "$lib/components/ui/button/index.js";
     import { userData } from "../store";
     import { get } from "svelte/store";
+    import type { Report } from "@/types";
+    import { sendPush } from "@/helpers/push";
 
     let addPostOpen = false;
 
@@ -51,6 +53,7 @@
             };
             await db?.create("bugreports", data).then(() => {
                 addPostOpen = false;
+                sendPush("New Featureboard entries", "Es gab einen neuen Bug...");
                 toast.success("Yey", {
                     description: "Danke für dein Feedback!",
                 });

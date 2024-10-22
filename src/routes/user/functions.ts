@@ -1,11 +1,12 @@
-import { db, type user } from "@/db";
+import { db } from "@/db";
 import { generateAvatar } from "@/helpers/minio";
+import type { User } from "@/types";
 
-export async function updateUser(userData: user, user: user) {
+export async function updateUser(userData: User, user: User) {
   await generateAvatar(userData);
 
   return await db
-    ?.patch(userData.id, [
+    ?.patch(userData.id!, [
       {
         op: "replace",
         path: "/email",
@@ -32,7 +33,7 @@ export function requestNotificationPermission() {
   });
 }
 
-export async function sendSubscriptionToServer(subscription: PushSubscription, userData: user, isSubscribed: boolean) {
+export async function sendSubscriptionToServer(subscription: PushSubscription, userData: User, isSubscribed: boolean) {
   let d = subscription.toJSON();
   let data = {
     endpoint: d.endpoint,
@@ -57,11 +58,11 @@ export async function sendSubscriptionToServer(subscription: PushSubscription, u
     }
   } catch (error) {
     console.error("Third Error saving subscription on server:", error);
-    unsubscribe(isSubscribed);
+    unsubscribe(isSubscribed, userData);
   }
 }
 
-export async function checkSubscriptionStatus(userData: user, isSubscribed: boolean) {
+export async function checkSubscriptionStatus(userData: User, isSubscribed: boolean) {
   if ("serviceWorker" in navigator) {
     const registration = await navigator.serviceWorker.ready;
     const subscription =
@@ -76,7 +77,7 @@ export async function checkSubscriptionStatus(userData: user, isSubscribed: bool
   return false;
 }
 
-export async function subscribeUser(isSubscribed: boolean, userData: user) {
+export async function subscribeUser(isSubscribed: boolean, userData: User) {
   if ("serviceWorker" in navigator) {
     try {
       const res = await fetch("/api/vapidkey");
@@ -95,13 +96,15 @@ export async function subscribeUser(isSubscribed: boolean, userData: user) {
   }
 }
 
-export async function unsubscribe(isSubscribed: boolean) {
+export async function unsubscribe(isSubscribed: boolean, userData: User) {
   if ("serviceWorker" in navigator) {
     const registration = await navigator.serviceWorker.ready;
     const subscription =
       await registration.pushManager.getSubscription();
     if (subscription) {
       await subscription.unsubscribe();
+      await db?.query(`DELETE FROM pushkey_channel WHERE in.user.id = ${userData.id}`)
+      await db?.query(`DELETE FROM pushkey WHERE user = ${userData.id}`)
       isSubscribed = false;
     }
   }

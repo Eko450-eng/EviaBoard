@@ -5,19 +5,24 @@
         Subscribe,
         createRender,
     } from "svelte-headless-table";
-
-    import * as Dialog from "../../lib/components/ui/dialog/index.js";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { writable } from "svelte/store";
-    import * as Table from "../../lib/components/ui/table";
+    import * as Table from "$lib/components/ui/table";
     import { Input } from "$lib/components/ui/input";
     import DataTableActions from "./bug-table-actions.svelte";
     import { addSortBy, addTableFilter } from "svelte-headless-table/plugins";
     import Button from "@/components/ui/button/button.svelte";
     import { Icon } from "svelte-icons-pack";
     import { BsArrowDownUp } from "svelte-icons-pack/bs";
-    import { db, getDb, type Report } from "$lib/db";
+    import { db, getDb } from "$lib/db";
     import { onMount } from "svelte";
     import { env } from "$env/dynamic/public";
+    import type { Report as OriginalReport } from "@/types.js";
+
+    type Report = OriginalReport & {
+        value?: any,
+        original?: any
+    }
 
     export let data: Report[] = [];
     let cardOpen = false;
@@ -305,7 +310,7 @@
                             <Subscribe attrs={cell.attrs()} let:attrs>
                                 <Table.Cell
                                     class={cell.id === "status"
-                                        ? cell === 0
+                                        ? cell.value === 0
                                             ? "bg-blue-900 rounded-xl"
                                             : cell.value === 1
                                               ? "bg-teal-900 rounded-xl"

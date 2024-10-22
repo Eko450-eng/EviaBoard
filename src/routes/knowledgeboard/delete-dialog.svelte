@@ -1,9 +1,10 @@
 <script lang="ts">
-    import * as Dialog from "../../lib/components/ui/dialog/index.js";
-    import { db, type post } from "../../lib/db";
-    import { Button } from "../../lib/components/ui/button/index.js";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import { db } from "$lib/db";
+    import { Button } from "$lib/components/ui/button/index.js";
+    import type { Post } from "@/types";
 
-    async function deletePost(data: post) {
+    async function deletePost(data: Post) {
         let newData = data;
         newData.deleted = true;
         await db?.patch(data.id!, [
@@ -16,7 +17,7 @@
     }
 
     export let deleteDialog: boolean;
-    export let postToDelete: post | undefined;
+    export let postToDelete: Post | undefined;
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape" || event.key === "Esc") deleteDialog = false;

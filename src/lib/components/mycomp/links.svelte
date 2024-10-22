@@ -1,7 +1,6 @@
 <script lang="ts">
-    import "../app.css";
     import { page } from "$app/stores";
-    import { isLoggedIn } from "../routes/store";
+    import { isLoggedIn } from "../../../routes/store";
     import LinkButton from "./link-button.svelte";
     import {
         FaSolidArrowRightToBracket,

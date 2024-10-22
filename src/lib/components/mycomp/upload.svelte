@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { uploadToMinio } from "./minio";
+    import { uploadToMinio } from "$lib/minio";
     import { toast } from "svelte-sonner";
-    import { Button } from "./components/ui/button/index";
-    import { Input } from "./components/ui/input/index";
+    import { Button } from "$ui/button";
+    import { Input } from "$ui/input";
 
     let file: File | null = null;
 

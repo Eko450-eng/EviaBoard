@@ -8,49 +8,6 @@ let NS = env.PUBLIC_DB_NS;
 let DB_KEY = env.PUBLIC_DB_DB;
 let guestpw = env.PUBLIC_DB_GUEST_PW;
 
-export type Report = {
-  source?: string;
-  id?: RecordId | string;
-  title: string;
-  body: string;
-  status: number;
-  category: number;
-  upvotes: number;
-  owner: any
-};
-
-export type post = {
-  id?: RecordId;
-  title: string;
-  body: string;
-  solution: string;
-  owner: any;
-  topic: string;
-  deleted: boolean;
-};
-
-export type user = {
-  image?: string;
-  email: string;
-  id: RecordId;
-  name: string;
-  password: string;
-  role: string;
-};
-
-export type topic = {
-  id: RecordId;
-  name: string;
-};
-
-export type Downloadlinks = {
-  id: string;
-  name: string;
-  description: string;
-  link: string;
-  owner: { name: string; id: string; tb: string };
-};
-
 export let db: Surreal | undefined;
 
 export async function initDb(): Promise<Surreal | undefined> {

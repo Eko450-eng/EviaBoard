@@ -6,25 +6,25 @@
     import { onMount, tick } from "svelte";
     import { Button } from "../../lib/components/ui/button/index.js";
     import { Toggle } from "../../lib/components/ui/toggle/index.js";
-    import { type post, type topic } from "../../lib/db";
     import { checkLoggedIn, DB, userData } from "../store.js";
     import { goto, invalidateAll } from "$app/navigation";
     import { page } from "$app/stores";
     import DeleteDialog from "./delete-dialog.svelte";
     import RecoverDialog from "./recover-dialog.svelte";
     import AddPostDialog from "./add-post.svelte";
-    import AvatarBar from "$lib/avatar.svelte";
+    import AvatarBar from "$lib/components/mycomp/avatar.svelte";
     import DescriptionWithImage from "./description-with-image.svelte";
+    import type { Post, Topic } from "@/types.js";
 
-    let topics: Array<topic> | Array<{ id: string; name: string }> | undefined =
+    let topics: Array<Topic> | Array<{ id: string; name: string }> | undefined =
         [{ name: "Select a Topic", id: "placeholder" }];
 
     let open = false;
     let value = "";
 
     export let data: {
-        posts: post[] | undefined;
-        topics: topic[] | undefined;
+        posts: Post[] | undefined;
+        topics: Topic[] | undefined;
         failed: boolean;
     };
 
@@ -63,10 +63,10 @@
     let addPostOpen = false;
 
     let deleteDialog = false;
-    let postToDelete: post | undefined;
+    let postToDelete: Post | undefined;
 
     let recoverDialog = false;
-    let postToRecover: post | undefined;
+    let postToRecover: Post | undefined;
 
     let showDeleted: boolean = false;
 </script>

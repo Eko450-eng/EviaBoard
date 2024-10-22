@@ -11,6 +11,7 @@
     import { Input } from "../lib/components/ui/input/index.js";
     import type { News } from "@/types";
     import { userData } from "./store";
+    import { sendPush } from "@/helpers/push";
 
     export let addPostOpen: boolean;
     export let postData: News = {
@@ -32,9 +33,16 @@
                     }
                     `,
                 )
-                .then(() => (addPostOpen = false));
+                .then(() => {
+                    addPostOpen = false;
+                    try {
+                        sendPush("New News", "New News have been added");
+                    } catch (e) {
+                        console.error(e);
+                    }
+                });
         } catch (e) {
-            console.error(e)
+            console.error(e);
             toast.error("Fehler", {
                 description: `This failed due to: ${e}, probably not my fault`,
             });

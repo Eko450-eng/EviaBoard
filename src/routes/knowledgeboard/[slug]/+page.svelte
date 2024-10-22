@@ -1,6 +1,5 @@
 <script lang="ts">
-    import type { post, topic } from "@/db.js";
-    import { Button } from "../../../lib/components/ui/button/index.js";
+    import { Button } from "$lib/components/ui/button/index.js";
     import { Icon } from "svelte-icons-pack";
     import { FaSolidArrowLeft, FaSolidPencil } from "svelte-icons-pack/fa";
     import { goto } from "$app/navigation";
@@ -9,12 +8,13 @@
     import { userData } from "../../store.js";
     import EditPostDialog from "./edit-post.svelte";
     import Comments from "./comment-view.svelte";
-    import AvatarBar from "$lib/avatar.svelte";
-    import Idview from "@/idview.svelte";
     import DescriptionWithImage from "../description-with-image.svelte";
     import { onMount } from "svelte";
+    import type { Post, Topic } from "@/types.js";
+    import Idview from "@/components/mycomp/idview.svelte";
+    import AvatarBar from "@/components/mycomp/avatar.svelte";
 
-    export let data: { posts: post[]; topics: topic[] };
+    export let data: { posts: Post[]; topics: Topic[] };
 
     let post = data.posts[0];
     let editPostOpen = false;

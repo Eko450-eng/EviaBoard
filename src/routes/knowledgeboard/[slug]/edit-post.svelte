@@ -1,14 +1,15 @@
 <script lang="ts">
-    import * as Dialog from "../../../lib/components/ui/dialog/index.js";
-    import { db, type post } from "../../../lib/db";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import { db} from "../../../lib/db";
     import { toast } from "svelte-sonner";
-    import { Button } from "../../../lib/components/ui/button/index.js";
-    import { Label } from "../../../lib/components/ui/label/index.js";
-    import { Input } from "../../../lib/components/ui/input/index.js";
-    import { Textarea } from "../../../lib/components/ui/textarea";
+    import { Button } from "$lib/components/ui/button/index.js";
+    import { Label } from "$lib/components/ui/label/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Textarea } from "$lib/components/ui/textarea";
+    import type { Post } from "@/types";
 
     export let editPostOpen: boolean;
-    export let postData: post;
+    export let postData: Post;
 
     async function editPost() {
         try {

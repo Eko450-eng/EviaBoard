@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { isLoggedIn } from "../routes/store";
-    import { Button } from "./components/ui/button/index";
+    import { isLoggedIn } from "../../../routes/store";
+    import { Button } from "$ui/button";
     import { toggleMode } from "mode-watcher";
     import Sun from "svelte-radix/Sun.svelte";
     import Moon from "svelte-radix/Moon.svelte";

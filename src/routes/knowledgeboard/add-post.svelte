@@ -1,22 +1,21 @@
 <script lang="ts">
-    import * as Dialog from "../../lib/components/ui/dialog/index.js";
-    import * as Select from "../../lib/components/ui/select/index.js";
-    import { db, type post } from "../../lib/db";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import * as Select from "$lib/components/ui/select/index.js";
+    import { db } from "$lib/db";
     import { toast } from "svelte-sonner";
-    import {
-        Button,
-        buttonVariants,
-    } from "../../lib/components/ui/button/index.js";
+    import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
     import { userData } from "../store.js";
     import Plus from "svelte-radix/Plus.svelte";
-    import { Label } from "../../lib/components/ui/label/index.js";
-    import { Input } from "../../lib/components/ui/input/index.js";
-    import { Textarea } from "../../lib/components/ui/textarea";
+    import { Label } from "$lib/components/ui/label/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Textarea } from "$lib/components/ui/textarea";
+    import type { Post } from "@/types.js";
+    import { sendPush } from "@/helpers/push.js";
 
     export let addPostOpen: boolean;
     export let selectedTopic: any;
     export let topics: any;
-    export let postData: post = {
+    export let postData: Post = {
         deleted: false,
         title: "",
         body: "",
@@ -48,7 +47,10 @@
             topic: ${topic}
         }`,
                 )
-                .then(() => (addPostOpen = false));
+                .then(() => {
+                    addPostOpen = false;
+                    sendPush("New Posts", "Es gab einen neuen Post!");
+                });
         } catch (e) {
             toast.error("Fehler", {
                 description: `This failed due to: ${e}, probably not my fault`,

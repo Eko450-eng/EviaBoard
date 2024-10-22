@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { type post } from "../../lib/db";
     import { onMount } from "svelte";
-    import * as Dialog from "../../lib/components/ui/dialog/index.js";
-    import { Button, buttonVariants } from "../../lib/components/ui/button";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import { Button } from "$lib/components/ui/button";
+    import type { Post } from "@/types";
 
-    export let post: post | null;
+    export let post: Post | null;
 
     let texts: string[] = [];
 
@@ -41,6 +41,7 @@
     }
 
     onMount(() => {
+        if (!post) return;
         loadImageWithText(post.body);
     });
     let imageOpened = false;

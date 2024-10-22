@@ -18,12 +18,19 @@ export const POST = (async ({ request }) => {
     }
 
     if (body.user.id === "user:tada") return json({ success: false })
+
     let userId = body.user.id as string;
     let userID = new RecordId("user", userId.replace("user:", ""));
-    db?.upsert(new RecordId("pushkey", userId), {
-      user: userID,
-      data: body.subscription
-    })
+
+    try {
+      await db?.create("pushkey", {
+        user: userID,
+        data: body.subscription
+      })
+    } catch (e) {
+      console.error(e)
+    }
+
     return json({ success: true });
   } catch (e) {
     console.error("Failed to add subscription: ", e)

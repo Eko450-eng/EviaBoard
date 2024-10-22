@@ -1,18 +1,16 @@
 <script lang="ts">
-    import * as Card from "../../../lib/components/ui/card/index.js";
-    import { Input } from "../../../lib/components/ui/input/index.js";
-    import { Button } from "../../../lib/components/ui/button/index.js";
-    import { Label } from "../../../lib/components/ui/label/index.js";
+    import * as Card from "$lib/components/ui/card/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Button } from "$lib/components/ui/button/index.js";
+    import { Label } from "$lib/components/ui/label/index.js";
     import { page } from "$app/stores";
-    import { db, type post } from "@/db";
-    import type { Comments } from "@/types";
+    import { db } from "@/db";
+    import type { Comments, Post } from "@/types";
     import { onMount } from "svelte";
     import { formatDate } from "@/helpers/formating";
     import { userData } from "../../store.js";
     import type { RecordId, Uuid } from "surrealdb";
-    import AvatarBar from "$lib/avatar.svelte";
-    import { Icon } from "svelte-icons-pack";
-    import { FaCalendarDays } from "svelte-icons-pack/fa";
+    import AvatarBar from "$lib/components/mycomp/avatar.svelte"
 
     let comments: Comments[] = [];
     let message: string = "";
@@ -23,7 +21,7 @@
 
     type Kb_comment = {
         id?: RecordId;
-        in: post;
+        in: Post;
         out: Comments;
     };
 

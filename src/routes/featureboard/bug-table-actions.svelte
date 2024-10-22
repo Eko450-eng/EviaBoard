@@ -2,11 +2,11 @@
     import DotsHorizontal from "svelte-radix/DotsHorizontal.svelte";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
     import { Button } from "$lib/components/ui/button";
-    import { db, type Report } from "@/db";
+    import { db } from "@/db";
     import { RecordId } from "surrealdb";
     import { userData } from "../store";
     import { toast } from "svelte-sonner";
-    import { get } from "svelte/store";
+    import type { Report } from "@/types";
 
     export let id: string;
     type Votes = {

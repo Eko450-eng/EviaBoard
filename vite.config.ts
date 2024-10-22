@@ -13,8 +13,12 @@ export default defineConfig({
     sveltekit(),
     SvelteKitPWA({
       strategies: 'injectManifest',
+      injectManifest: {
+        swSrc: 'src/service-worker.js',
+        swDest: 'build/service-worker.js'
+      },
       srcDir: 'src',
-      filename: 'service-worker.ts',
+      filename: 'service-worker.js',
       manifest: {
         name: 'Eviaboard',
         short_name: 'Eviaboard',

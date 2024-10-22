@@ -3,14 +3,15 @@
         Button,
         buttonVariants,
     } from "../../lib/components/ui/button/index.js";
-    import { db, getDb, type Downloadlinks } from "../../lib/db";
+    import { db, getDb } from "$lib/db";
     import { onMount } from "svelte";
-    import * as Dialog from "../../lib/components/ui/dialog/index.js";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import Plus from "svelte-radix/Plus.svelte";
     import Label from "@/components/ui/label/label.svelte";
     import Input from "@/components/ui/input/input.svelte";
     import { RecordId } from "surrealdb";
     import { userData } from "../store.js";
+    import type { Downloadlinks } from "@/types.js";
 
     let downloadlinks: Array<Downloadlinks> = [];
 
@@ -24,15 +25,15 @@
     let dialogOpen = false;
 
     let postData: Downloadlinks = {
-        id: "",
+        id: new RecordId("", ""),
         name: "Name",
         description: "Kurze Beschreibung!",
         link: "https://....",
-        owner: { id: "", name: "" , tb: ""},
+        owner: { id: "", name: "", tb: "" },
     };
 
-    async function deleteLink(id: string) {
-        await db?.delete(new RecordId("downloadlinks", id));
+    async function deleteLink(id: RecordId) {
+        await db?.delete(id);
     }
 
     let user_id = $userData.id;
