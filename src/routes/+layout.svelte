@@ -5,10 +5,12 @@
     import "../app.css";
     import { Toaster } from "$lib/components/ui/sonner";
     import { onMount } from "svelte";
-    import { checkLoggedIn, DB } from "./store";
+    import { checkAdminMode, checkLoggedIn, DB, userData } from "./store";
+    import { adminOnly } from "@/helpers/admin";
 
     onMount(async () => {
         checkLoggedIn();
+        checkAdminMode();
     });
 </script>
 
@@ -16,21 +18,23 @@
 <Toaster />
 
 <div class="bg-muted/40 flex min-h-screen w-full flex-col">
-    <aside
-        class="bg-background fixed inset-y-0 left-0 z-10 w-14 flex-col border-r sm:flex"
-    >
-        <nav
-            class="flex flex-col items-center gap-4 px-2 py-4 h-full border-r border-teal-500"
+    <main class="m-4">
+        <aside
+            class="bg-background fixed inset-y-0 left-0 z-10 w-20 flex-col border-r sm:flex"
         >
-            <div class="flex flex-col justify-between content-between h-full">
-                <div>
-                    <Links />
+            <nav
+                class="flex flex-col items-center gap-4 px-2 py-4 h-full border-r border-teal-500"
+            >
+                <div
+                    class="flex flex-col justify-between content-between h-full"
+                >
+                    <div>
+                        <Links />
+                    </div>
+                    <Optionbuttons />
                 </div>
-                <Optionbuttons />
-            </div>
-        </nav>
-    </aside>
-    <main>
+            </nav>
+        </aside>
         <div class="logo"></div>
         <slot></slot>
     </main>
@@ -45,7 +49,7 @@
     }
 
     main {
-        margin-left: 4em;
+        margin-left: 6em;
     }
 
     .logo {

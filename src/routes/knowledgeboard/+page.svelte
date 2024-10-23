@@ -71,7 +71,7 @@
     let showDeleted: boolean = false;
 </script>
 
-<div class="flex p-4 items-center justify-between">
+<div class="flex flex-wrap p-4 items-center justify-between">
     <h1>Knowledgebase</h1>
     <DeleteDialog bind:deleteDialog {postToDelete} />
     <RecoverDialog bind:recoverDialog {postToRecover} />
@@ -136,8 +136,9 @@
             {#each $page.data.posts as post}
                 {#if (showDeleted && post.deleted) || !post.deleted}
                     {#if selectedValue === "Select a Topic" || post.topic === selectedValue.toLowerCase()}
-                        <div class="hoverpointer">
-                            <Card.Root class="my-2 w-[350px]">
+                        <div class="hoverpointer w-full">
+                            <!-- <Card.Root class="my-2 w-[33%]"> -->
+                            <Card.Root class="">
                                 <div
                                     class="hoverpointer"
                                     role="button"
@@ -174,22 +175,24 @@
                                     <Card.Description>
                                         <AvatarBar user={post.owner} />
                                     </Card.Description>
-                                    {#if post.owner.id.toString() === $userData.id.toString() && !post.deleted}
-                                        <Button
-                                            variant="destructive"
-                                            on:click={() => {
-                                                deleteDialog = true;
-                                                postToDelete = post;
-                                            }}>Delete</Button
-                                        >
-                                    {:else if post.owner.id.toString() === $userData.id.toString() && post.deleted}
-                                        <Button
-                                            variant="default"
-                                            on:click={() => {
-                                                recoverDialog = true;
-                                                postToRecover = post;
-                                            }}>Recover</Button
-                                        >
+                                    {#if $userData.id}
+                                        {#if post.owner.id.toString() === $userData.id.toString() && !post.deleted}
+                                            <Button
+                                                variant="destructive"
+                                                on:click={() => {
+                                                    deleteDialog = true;
+                                                    postToDelete = post;
+                                                }}>Delete</Button
+                                            >
+                                        {:else if post.owner.id.toString() === $userData.id.toString() && post.deleted}
+                                            <Button
+                                                variant="default"
+                                                on:click={() => {
+                                                    recoverDialog = true;
+                                                    postToRecover = post;
+                                                }}>Recover</Button
+                                            >
+                                        {/if}
                                     {/if}
                                 </Card.Footer>
                             </Card.Root>

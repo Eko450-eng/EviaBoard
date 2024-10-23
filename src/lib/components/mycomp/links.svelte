@@ -1,4 +1,5 @@
 <script lang="ts">
+
     import { page } from "$app/stores";
     import { isLoggedIn } from "../../../routes/store";
     import LinkButton from "./link-button.svelte";
@@ -30,11 +31,6 @@
 
     let unauthenticatedLinks = [
         {
-            icon: FaSolidBook,
-            name: "knowledgeboard",
-            value: "/knowledgeboard",
-        },
-        {
             icon: FaSolidArrowRightToBracket,
             name: "Login or Signup",
             value: "/login",
@@ -62,3 +58,4 @@
         <LinkButton {link} pathname={$page.url.pathname} />
     {/each}
 {/if}
+

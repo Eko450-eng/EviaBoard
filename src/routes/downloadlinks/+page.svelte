@@ -12,6 +12,7 @@
     import { RecordId } from "surrealdb";
     import { userData } from "../store.js";
     import type { Downloadlinks } from "@/types.js";
+    import { editorOnly } from "@/helpers/admin.js";
 
     let downloadlinks: Array<Downloadlinks> = [];
 
@@ -76,9 +77,9 @@
     });
 </script>
 
-<div class="flex items-center justify-end">
+<div class="flex flex-wrap items-center justify-end">
     <Dialog.Root open={dialogOpen}>
-        {#if $userData.role === "editor" || $userData.role === "admin"}
+        {#if editorOnly($userData)}
             <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
                 <Plus />
             </Dialog.Trigger>
@@ -125,12 +126,12 @@
 
 <div>
     {#each downloadlinks as link}
-        <div class="flex flex-wrap">
+        <div class="flex flex-wrap w-full justify-between my-2">
             <Button variant="link" href={link.link} target="_blank">
-                <h1 class="mx-2">{link.name}</h1>
+                <h1>{link.name}</h1>
                 <p>{link.description}</p>
             </Button>
-            {#if link.owner.tb + ":" + link.owner.id == $userData.id.toString()}
+            {#if $userData.id && link.owner.tb + ":" + link.owner.id == $userData.id.toString()}
                 <Button
                     variant="destructive"
                     on:click={() => {

@@ -1,4 +1,4 @@
-import { writable, type Writable } from 'svelte/store'
+import { get, writable, type Writable } from 'svelte/store'
 import { initDb } from "@/db";
 import Surreal, { RecordId } from 'surrealdb';
 import type { User } from '@/types';
@@ -13,6 +13,7 @@ const initData: User = {
 };
 
 export const userData: Writable<User> = writable(initData)
+
 export const isLoggedIn = writable(false)
 export const DB = writable(new Surreal)
 
@@ -46,4 +47,18 @@ export async function checkLoggedIn(): Promise<Surreal | undefined> {
 
 export function checkIsLoggedIn(state: boolean) {
   isLoggedIn.set(state)
+}
+
+// Adminmode
+export const adminMode: Writable<boolean> = writable(true)
+
+export function checkAdminMode() {
+  let state = localStorage.getItem("adminMode") === "1" ? true : false;
+  adminMode.set(state);
+}
+
+export function changeAdminMode() {
+  adminMode.set(!get(adminMode));
+  let state = get(adminMode) ? "1" : "0";
+  localStorage.setItem("adminMode", state);
 }

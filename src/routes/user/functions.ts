@@ -77,23 +77,27 @@ export async function checkSubscriptionStatus(userData: User, isSubscribed: bool
   return false;
 }
 
-export async function subscribeUser(isSubscribed: boolean, userData: User) {
+export async function subscribeUser(isSubscribed: boolean, userData: User): Promise<boolean> {
   if ("serviceWorker" in navigator) {
     try {
       const res = await fetch("/api/vapidkey");
       const { data } = await res.json();
 
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
+      await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: data,
+      }).then(async (subscription) => {
+        sendSubscriptionToServer(subscription, userData, isSubscribed);
       });
       isSubscribed = true;
-      sendSubscriptionToServer(subscription, userData, isSubscribed);
     } catch (err) {
       console.error("Error subscribing:", err);
+      return false;
     }
+    return true;
   }
+  return false;
 }
 
 export async function unsubscribe(isSubscribed: boolean, userData: User) {

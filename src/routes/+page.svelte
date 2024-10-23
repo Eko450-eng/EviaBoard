@@ -4,13 +4,14 @@
     import Addnews from "./addnews.svelte";
     import type { News, News_newspost } from "@/types";
     import { formatDate } from "@/helpers/formating";
-    import { userData } from "./store";
+    import { adminMode, userData } from "./store";
     import Addnewspost from "./addnewspost.svelte";
     import type { Uuid } from "surrealdb";
     import { Button } from "$lib/components/ui/button/index";
     import { Icon } from "svelte-icons-pack";
     import { FaCalendarDays } from "svelte-icons-pack/fa";
     import AvatarBar from "$lib/components/mycomp/avatar.svelte";
+    import { adminOnly } from "@/helpers/admin";
 
     let news: News_newspost[];
 
@@ -66,8 +67,8 @@
     let selectedPost: News | undefined;
 </script>
 
-{#if $userData.role == "admin"}
-    <Addnews bind:addPostOpen={addPostOpen} />
+{#if adminOnly($userData, $adminMode)}
+    <Addnews bind:addPostOpen />
 {/if}
 <Addnewspost bind:addPostOpen={addNewsPostOpen} post={selectedPost} />
 
@@ -76,10 +77,10 @@
         <div class="border rounded my-2 py-2">
             <div class="flex justify-between">
                 <h2 class="text-2xl p-2">{post.title}</h2>
-                {#if $userData.role == "admin"}
+                {#if adminOnly($userData, $adminMode)}
                     <Button
                         on:click={() => {
-                            if ($userData.role !== "admin") return;
+                            if (!adminOnly($userData, $adminMode)) return;
                             selectedPost = post;
                             addNewsPostOpen = true;
                         }}>Add post</Button

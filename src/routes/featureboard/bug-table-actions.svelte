@@ -7,6 +7,7 @@
     import { userData } from "../store";
     import { toast } from "svelte-sonner";
     import type { Report } from "@/types";
+    import { editorOnly } from "@/helpers/admin";
 
     export let id: string;
     type Votes = {
@@ -102,7 +103,7 @@
         </DropdownMenu.Group>
         <DropdownMenu.Separator />
 
-        {#if $userData.role == "editor" || $userData.role == "admin"}
+        {#if editorOnly($userData)}
             <DropdownMenu.Item on:click={() => setStatus(id, 0)}
                 >Open</DropdownMenu.Item
             >
