@@ -48,6 +48,7 @@ export async function sendSubscriptionToServer(subscription: PushSubscription, u
       },
       body: JSON.stringify({ subscription: data, user: userData }),
     });
+
     if (!res.ok) {
       console.error(
         `First Error saving subscription on server: ${res.statusText} (${res.status})`,
@@ -107,8 +108,8 @@ export async function unsubscribe(isSubscribed: boolean, userData: User) {
       await registration.pushManager.getSubscription();
     if (subscription) {
       await subscription.unsubscribe();
-      await db?.query(`DELETE FROM pushkey_channel WHERE in.user.id = ${userData.id}`)
-      await db?.query(`DELETE FROM pushkey WHERE user = ${userData.id}`)
+      let query = `DELETE FROM pushkey WHERE user = ${userData.id} AND data.endpoint = '${subscription.endpoint}'`;
+      await db?.query(query)
       isSubscribed = false;
     }
   }

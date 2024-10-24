@@ -62,6 +62,7 @@
             //    }
             //}
         }
+
         await getChannels();
     });
 
@@ -74,6 +75,13 @@
     }
 
     async function getChannels() {
+        let subscription: PushSubscription | null;
+        if ("serviceWorker" in navigator) {
+            const registration = await navigator.serviceWorker.ready;
+            let sub = await registration.pushManager.getSubscription();
+            subscription = sub;
+        }
+
         let channelsQuery = await db?.query<Array<Array<Channel>>>(
             "SELECT * FROM channels",
         );
@@ -81,7 +89,7 @@
 
         let c: ChannelSubsCheckable[] = [];
         channelsQuery[0].forEach(async (channel) => {
-            const q = `SELECT out.channelname as channelname, out.id as id, in.user.* as user from pushkey_channel WHERE in.user.id = ${$userData.id} AND out.id = ${channel.id}`;
+            let q = `SELECT out.channelname as channelname, out.id as id, in.user.* as user from pushkey_channel WHERE in.user.id = ${$userData.id} AND out.id = ${channel.id} AND in.data.endpoint = '${subscription?.endpoint}'`;
             let isSubbed = await db?.query<
                 Array<
                     Array<{
@@ -95,7 +103,8 @@
             if (!isSubbed || !isSubbed[0]) return;
             let s = isSubbed[0];
 
-            if (s.length >= 1) {
+            if (subscription && s.length >= 1) {
+            console.log(q)
                 cc = {
                     channel,
                     userIsSubbed: true,
