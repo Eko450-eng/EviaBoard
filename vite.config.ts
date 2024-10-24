@@ -1,6 +1,6 @@
 // import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { sveltekit } from '@sveltejs/kit/vite';
-import { SvelteKitPWA } from '@vite-pwa/sveltekit'
+import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -11,11 +11,16 @@ export default defineConfig({
   // },
   plugins: [
     sveltekit(),
-    SvelteKitPWA({
+    VitePWA({
+      registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true
+      },
+      injectRegister: 'auto',
       strategies: 'injectManifest',
       injectManifest: {
-        swSrc: 'src/service-worker.js',
-        swDest: 'build/service-worker.js'
+        swSrc: './src/service-worker.js',
+        swDest: '.svelte-kit/output/client/service-worker.js'
       },
       srcDir: 'src',
       filename: 'service-worker.js',
