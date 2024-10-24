@@ -48,4 +48,12 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      external: ['workbox-precaching'],
+    }
+  },
+  optimizeDeps: {
+    include: ['workbox-precaching']
+  }
 });
