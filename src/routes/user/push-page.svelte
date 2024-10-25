@@ -104,7 +104,6 @@
             let s = isSubbed[0];
 
             if (subscription && s.length >= 1) {
-            console.log(q)
                 cc = {
                     channel,
                     userIsSubbed: true,

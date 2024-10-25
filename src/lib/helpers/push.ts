@@ -8,8 +8,6 @@ export async function sendPush(channelName: string, payload: string) {
       body: JSON.stringify({ payload, channelName }),
     });
 
-
-    console.log("Send")
     return await response.json();
   } catch (e) {
     console.error(e);

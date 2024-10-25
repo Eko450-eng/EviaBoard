@@ -43,7 +43,6 @@ export const POST = (async ({ request }) => {
     try {
       let query = `SELECT * FROM pushkey WHERE data.endpoint = '${body.subscription.endpoint}'`;
       let exists = await db?.query<Array<Array<Pushkey>>>(query)
-      if (exists) console.log(exists[0].length <= 0)
       if (exists && exists[0].length <= 0) {
         await db?.create("pushkey", {
           user: userID,

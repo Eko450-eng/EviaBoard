@@ -32,17 +32,14 @@ export const POST = async ({ request }: any) => {
 
   let queryChannels = `SELECT * FROM channels WHERE channelname='${channelName}'`;
   let channels: any = await db?.query(queryChannels)
-  console.log("channels, ", channels[0])
 
   let usersList = await db.query(`SELECT in.data as subscriptions from pushkey_channel WHERE out = ${channels[0][0].id}`);
   let users: Array<{ subscriptions: webPush.PushSubscription }> = usersList[0] as any[]
-  console.log("users ", users[0])
 
   users.forEach(async (sub: { subscriptions: webPush.PushSubscription }) => {
     let subscription = sub.subscriptions
     try {
       await webPush.sendNotification(subscription, JSON.stringify(payload));
-      console.log("PUSH SEND")
       return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (err: any) {
       console.error('Error sending notification:', err);
