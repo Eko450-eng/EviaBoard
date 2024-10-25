@@ -21,6 +21,7 @@ export async function initDb(): Promise<Surreal | undefined> {
   try {
     await db.connect(HOST
       , {
+        versionCheck: false,
         auth: {
           namespace: NS,
           database: DB_KEY,

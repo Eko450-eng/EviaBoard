@@ -12,6 +12,9 @@ export default defineConfig({
   plugins: [
     sveltekit(),
     VitePWA({
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+      },
       registerType: 'autoUpdate',
       devOptions: {
         enabled: true

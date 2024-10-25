@@ -32,7 +32,7 @@ async function loadPageData() {
 }
 
 
-export async function load({parent}: any) {
+export async function load({ parent }: any) {
   await parent()
   let data = await loadPageData();
   return {

@@ -28,7 +28,9 @@
         image: $userData.image,
     };
 
-    onMount(async () => {});
+    onMount(async () => {
+        if (!$userData.email) goto("/");
+    });
 
     async function handleUpdateUser() {
         await updateUser($userData, user).then(() => {

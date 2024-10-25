@@ -1,9 +1,3 @@
-// import { precacheAndRoute } from 'workbox-precaching';
-//
-// self.__WB_MANIFEST;
-//
-// precacheAndRoute(self.__WB_MANIFEST || []);
-//
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js');
 
 self.__WB_MANIFEST;
