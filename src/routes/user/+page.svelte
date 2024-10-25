@@ -17,6 +17,7 @@
     import { updateUser } from "./functions";
     import type { User } from "@/types";
     import PushPage from "./push-page.svelte";
+    import { goto } from "$app/navigation";
 
     let user: User = {
         id: $userData.id,
@@ -52,8 +53,19 @@
         <Button
             class="mx-4"
             on:click={async () => {
-                signOut();
-                checkIsLoggedIn(false);
+                signOut().then((res) => {
+                    if (res.error) {
+                        toast.error(res.title, {
+                            description: res.desc,
+                        });
+                    } else {
+                        toast.success(res.title, {
+                            description: res.desc,
+                        });
+                        goto("/");
+                        checkIsLoggedIn(true);
+                    }
+                });
             }}
             variant="outline"
             size="icon"

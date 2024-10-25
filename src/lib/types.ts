@@ -1,49 +1,57 @@
 import type { RecordId } from "surrealdb";
 
+export type NotificationResult = {
+  title: string;
+  desc: string;
+  error: boolean;
+}
+
 export type ASBCheck = {
-  id?: RecordId,
-  name: string,
+  id?: RecordId;
+  name: string;
 }
 
 export type Channel = {
-  id?: RecordId,
-  channelname: string,
+  id?: RecordId;
+  channelname: string;
 }
 
 export type Pushkey = {
-  id?: RecordId,
-  data: object,
-  user: User,
+  id?: RecordId;
+  data: object;
+  user: User;
+  created_at?: Date;
 }
 
 export type Pushkey_Channel = {
-  id?: RecordId,
-  in: Pushkey,
-  out: Channel,
+  id?: RecordId;
+  in: Pushkey;
+  out: Channel;
 }
 
 
 export type Votes = {
-  id?: RecordId,
-  voter: User,
+  id?: RecordId;
+  voter: User;
 }
 
 export type Tickets = {
-  id?: RecordId,
-  name: string,
-  no: number,
+  id?: RecordId;
+  created_at?: Date;
+  name: string;
+  no: number;
 }
 
 export type Kb_Comment = {
   id?: RecordId
-  in: Post,
-  out: Comments,
+  in: Post;
+  out: Comments;
 }
 
 export type Comments = {
   id?: RecordId
   owner: User
-  created_at: Date
+  created_at?: Date
   comment: string
 }
 
@@ -57,9 +65,9 @@ export type News_newspost = {
 
 
 export type News_Post = {
-  id?: RecordId,
-  in: News,
-  out: Newspost,
+  id?: RecordId;
+  in: News;
+  out: Newspost;
 }
 
 export type News = {
@@ -73,6 +81,7 @@ export type Newspost = {
   id?: RecordId;
   name: string;
   owner: User;
+  created_at?: Date;
 };
 
 export type Report = {
@@ -83,7 +92,8 @@ export type Report = {
   status: number;
   category: number;
   upvotes: number;
-  owner: any
+  owner: any;
+  created_at?: Date;
 };
 
 export type Post = {
@@ -94,6 +104,7 @@ export type Post = {
   owner: any;
   topic: string;
   deleted: boolean;
+  created_at?: Date;
 };
 
 export type User = {
@@ -103,6 +114,7 @@ export type User = {
   name: string;
   password: string;
   role: string;
+  created_at?: Date;
 };
 
 export type Topic = {

@@ -6,6 +6,7 @@
     import { signIn, signUp } from "$lib/db";
     import { checkIsLoggedIn } from "../store";
     import { goto } from "$app/navigation";
+    import { toast } from "svelte-sonner";
 
     let data = {
         username: "",
@@ -17,16 +18,35 @@
     let registering: boolean = true;
 
     async function signInHandler() {
-        let login = await signIn(data);
-        if (login){
-          goto("/")
-        }
-        checkIsLoggedIn(true)
+        await signIn(data).then((res) => {
+            if (res.error) {
+                toast.error(res.title, {
+                    description: res.desc,
+                });
+            } else {
+                toast.success(res.title, {
+                    description: res.desc,
+                });
+                goto("/");
+                checkIsLoggedIn(true);
+            }
+        });
     }
 
     async function signUpHandler() {
-        signUp(data);
-        checkIsLoggedIn(true)
+        signUp(data).then((res) => {
+            if (res.error) {
+                toast.error(res.title, {
+                    description: res.desc,
+                });
+            } else {
+                toast.success(res.title, {
+                    description: res.desc,
+                });
+                goto("/");
+                checkIsLoggedIn(true);
+            }
+        });
     }
 </script>
 
