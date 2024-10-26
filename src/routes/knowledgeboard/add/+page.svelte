@@ -11,6 +11,7 @@
     import Cartaeditor from "@/components/mycomp/cartaeditor.svelte";
 
     let { data } = $props();
+    // eslint-disable-next-line
     let selectedTopic: any = $state();
     let topics: Topic[] = $state([]);
 
@@ -80,6 +81,7 @@
     <Select.Root
         selected={selectedTopic}
         onSelectedChange={(v) => {
+            // eslint-disable-next-line
             v && (selectedTopic = v.value);
         }}
     >

@@ -61,10 +61,12 @@
             getLinks();
             const queryUuid = await db?.live(
                 "downloadlinks",
+                // eslint-disable-next-line
                 (action, _result) => {
                     if (action === "CLOSE") return;
                 },
             );
+            // eslint-disable-next-line
             await db?.subscribeLive(queryUuid!, async (action, _result) => {
                 if (
                     action === "CREATE" ||
@@ -128,7 +130,12 @@
 <div>
     {#each downloadlinks as link}
         <div class="flex flex-wrap w-full justify-between my-2">
-            <Button class="gap-3" variant="link" href={link.link} target="_blank">
+            <Button
+                class="gap-3"
+                variant="link"
+                href={link.link}
+                target="_blank"
+            >
                 <p>{link.name}</p>
                 <p class="text-gray-500">{link.description}</p>
             </Button>

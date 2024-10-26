@@ -32,6 +32,7 @@ export async function initDb(): Promise<Surreal | undefined> {
     );
     return db;
   } catch (err) {
+    console.error(err)
     throw err;
   }
 }
@@ -74,6 +75,7 @@ export async function signIn(data: { username: string, email: string, pass: stri
       };
     }
   } catch (e) {
+    console.error(e)
     return {
       title: "Oops",
       desc: "Sicher dass alle deine Daten korrekt eingetragen sind?",
@@ -147,6 +149,7 @@ export async function signOut() {
         }
       );
     } catch (err) {
+      console.error(err)
       throw err;
     }
   }

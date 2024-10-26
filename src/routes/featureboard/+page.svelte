@@ -20,6 +20,7 @@
     let addPostOpen = false;
 
     let topics: Array<string> | undefined = ["Bug", "Feature", "Question"];
+    // eslint-disable-next-line
     let selectedTopic: any = "";
 
     let postData: Report = {
@@ -38,12 +39,16 @@
         switch (selectedTopic) {
             case "Bug":
                 category = 0;
+                break;
             case "Feature":
                 category = 1;
+                break;
             case "Question":
                 category = 2;
+                break;
             default:
                 category = 0;
+                break;
         }
         try {
             let data: Report = {
@@ -95,13 +100,14 @@
                 <Label for="body" class="text-right">Beschreibung</Label>
                 <Textarea
                     id="body"
-                    bind:value={postData.body}
+                    bind:value={postData.body as string}
                     class="col-span-3"
                 />
             </div>
             <Select.Root
                 selected={selectedTopic}
                 onSelectedChange={(v) => {
+                    // eslint-disable-next-line
                     v && (selectedTopic = v.value);
                 }}
             >

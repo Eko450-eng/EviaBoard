@@ -28,6 +28,7 @@
 
     async function subscribeNews(queryUuid: Uuid | undefined) {
         if (!queryUuid) return;
+        // eslint-disable-next-line
         await db?.subscribeLive(queryUuid!, async (action, _result) => {
             if (
                 action === "CREATE" ||
@@ -41,17 +42,20 @@
 
     onMount(async () => {
         await loadData();
+        // eslint-disable-next-line
         const queryUuidNews = await db?.live("news", (action, _result) => {
             if (action === "CLOSE") return;
         });
         const queryUuidNewsPost = await db?.live(
             "newspost",
+            // eslint-disable-next-line
             (action, _result) => {
                 if (action === "CLOSE") return;
             },
         );
         const queryUuidNewsPostRelation = await db?.live(
             "news_post",
+            // eslint-disable-next-line
             (action, _result) => {
                 if (action === "CLOSE") return;
             },

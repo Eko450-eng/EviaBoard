@@ -1,4 +1,4 @@
-import { getFromMinio, uploadToMinio } from "@/minio";
+import { uploadToMinio } from "@/minio";
 import type { User } from "@/types";
 
 let file: File | null;
@@ -45,13 +45,10 @@ export const uploadFile = async (fileName: string): Promise<{ success: boolean, 
 };
 
 export async function generateAvatar(userData: User) {
-  let image: any;
-  if(!userData.id) return;
+  if (!userData.id) return;
 
   let userid = userData.id.toString();
-  let userImage = userid + ".png";
   if (!userid) return "";
-  image = await getFromMinio("eviaboard", userImage);
 
   await uploadFile(userData.id + ".png");
 }

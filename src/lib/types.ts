@@ -92,7 +92,7 @@ export type Report = {
   status: number;
   category: number;
   upvotes: number;
-  owner: any;
+  owner: User;
   created_at?: Date;
 };
 
@@ -101,7 +101,7 @@ export type Post = {
   title: string;
   body: string;
   solution: string;
-  owner: any;
+  owner: User;
   topic: string;
   deleted: boolean;
   created_at?: Date;

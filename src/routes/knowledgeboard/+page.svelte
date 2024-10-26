@@ -47,9 +47,11 @@
         checkLoggedIn();
         if (data.failed) goto("/");
 
+        // eslint-disable-next-line
         const queryUuid = await $DB?.live("posts", (action, _result) => {
             if (action === "CLOSE") return;
         });
+        // eslint-disable-next-line
         await $DB?.subscribeLive(queryUuid!, async (action, _result) => {
             if (
                 action === "CREATE" ||

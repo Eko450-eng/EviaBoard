@@ -26,5 +26,10 @@ export default [
 	},
 	{
 		ignores: ['build/', '.svelte-kit/', 'dist/', 'src/lib/components/ui', 'src/service-worker.js']
-	}
+	},
+  {
+    rules: {
+      "prefer-const": "off"
+    }
+  }
 ];

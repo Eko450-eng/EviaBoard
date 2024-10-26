@@ -20,9 +20,11 @@
     import type { Report as OriginalReport } from "@/types.js";
 
     type Report = OriginalReport & {
-        value?: any,
-        original?: any
-    }
+        // eslint-disable-next-line
+        value?: any;
+        // eslint-disable-next-line
+        original?: any;
+    };
 
     export let data: Report[] = [];
     let cardOpen = false;
@@ -42,6 +44,7 @@
 
         const response = await fetch(`${ejAPI}?${ejParams}`, {}).then(
             async (response) => {
+                // eslint-disable-next-line
                 let respon: Array<any> = await response.json();
                 let results: Report[] = [];
                 respon.forEach((res) => {
@@ -101,9 +104,11 @@
         await getDb();
         updateTable();
 
+        // eslint-disable-next-line
         const queryUuid = await db?.live("bugreports", (action, _result) => {
             if (action === "CLOSE") return;
         });
+        // eslint-disable-next-line
         await db?.subscribeLive(queryUuid!, async (action, _result) => {
             if (
                 action === "CREATE" ||
@@ -248,6 +253,7 @@
                     disable: true,
                 },
             },
+            // eslint-disable-next-line
             cell: ({ value }: any) => {
                 return createRender(DataTableActions, { id: value.id });
             },

@@ -39,8 +39,8 @@
         await db?.query<Array<Array<CommentRelation>>>(query).then((value) => {
             comments = value[0][0].comments;
             comments.sort((a: Comments, b: Comments) => {
-                const dateA = new Date(a.created_at).getTime();
-                const dateB = new Date(b.created_at).getTime();
+                const dateA = new Date(a.created_at!).getTime();
+                const dateB = new Date(b.created_at!).getTime();
                 return dateB - dateA;
             });
         });
@@ -48,6 +48,7 @@
 
     async function subscribeComments(queryUuid: Uuid | undefined) {
         if (!queryUuid) return;
+        // eslint-disable-next-line
         await db?.subscribeLive(queryUuid!, async (action, _result) => {
             if (
                 action === "CREATE" ||
@@ -62,6 +63,7 @@
     }
 
     onMount(async () => {
+        // eslint-disable-next-line
         const queryUuid = await db?.live("kbcomment", (action, _result) => {
             if (action === "CLOSE") return;
         });
@@ -92,7 +94,7 @@
             </div>
             <Card.Description class="text-xs text-gray-500">
                 <span class="flex items-center gap-2">
-                    {formatDate(comment.created_at)}
+                    {formatDate(comment.created_at ?? new Date())}
                 </span>
             </Card.Description>
         </Card.Content>

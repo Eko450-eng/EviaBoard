@@ -32,6 +32,7 @@ async function loadPageData() {
 }
 
 
+// eslint-disable-next-line
 export async function load({ parent }: any) {
   await parent()
   let data = await loadPageData();

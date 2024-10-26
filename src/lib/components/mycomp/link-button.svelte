@@ -4,6 +4,7 @@
     import "@fortawesome/fontawesome-free/css/all.min.css";
     import { Icon } from "svelte-icons-pack";
 
+    //eslint-disable-next-line
     export let link: any;
     export let pathname: string;
 </script>

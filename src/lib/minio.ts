@@ -1,7 +1,5 @@
-// lib/minio.js
 import { env } from "$env/dynamic/public";
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-
 
 const SK = env.PUBLIC_MINIO_SK || ""
 const AK = env.PUBLIC_MINIO_AK || ""

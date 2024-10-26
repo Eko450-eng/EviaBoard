@@ -8,6 +8,7 @@ async function queryTopics() {
 
 export let ssr = false;
 
+// eslint-disable-next-line
 export async function load({ params, parent }: any) {
   await parent()
   let topics = await queryTopics();

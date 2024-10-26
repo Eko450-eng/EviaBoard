@@ -1,4 +1,5 @@
 import { env } from "$env/dynamic/public";
+import type { Channel } from "@/types";
 import { json } from "@sveltejs/kit";
 import Surreal from "surrealdb";
 import webPush from "web-push";
@@ -14,7 +15,7 @@ let NS = env.PUBLIC_DB_NS;
 let DB_KEY = env.PUBLIC_DB_DB;
 let guestpw = env.PUBLIC_DB_GUEST_PW;
 
-export const POST = async ({ request }: any) => {
+export const POST = async ({ request }: { request: Request }) => {
   const body = await request.json();
   const { payload, channelName } = body;
 
@@ -31,9 +32,10 @@ export const POST = async ({ request }: any) => {
     })
 
   let queryChannels = `SELECT * FROM channels WHERE channelname='${channelName}'`;
-  let channels: any = await db?.query(queryChannels)
+  let channels: Channel[][] = await db?.query<Array<Array<Channel>>>(queryChannels)
 
   let usersList = await db.query(`SELECT in.data as subscriptions from pushkey_channel WHERE out = ${channels[0][0].id}`);
+  // eslint-disable-next-line
   let users: Array<{ subscriptions: webPush.PushSubscription }> = usersList[0] as any[]
 
   users.forEach(async (sub: { subscriptions: webPush.PushSubscription }) => {
@@ -41,6 +43,7 @@ export const POST = async ({ request }: any) => {
     try {
       await webPush.sendNotification(subscription, JSON.stringify(payload));
       return new Response(JSON.stringify({ success: true }), { status: 200 });
+      // eslint-disable-next-line
     } catch (err: any) {
       console.error('Error sending notification:', err);
       return new Response(JSON.stringify({ success: false, error: err.message }), { status: 500 });

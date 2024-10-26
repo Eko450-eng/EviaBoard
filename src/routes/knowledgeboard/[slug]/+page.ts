@@ -1,13 +1,7 @@
 import type { Post, Topic } from "@/types";
-import Surreal from "surrealdb";
-import { env } from "$env/dynamic/public";
 import { db } from "@/db";
 
 export let ssr = false
-let HOST = env.PUBLIC_DB_HOST;
-let guestpw = env.PUBLIC_DB_GUEST_PW;
-
-// let db = new Surreal();
 
 async function queryPosts(id: string) {
   let query =
@@ -24,22 +18,6 @@ async function queryTopics() {
 
 
 async function loadPageData(id: string) {
-  // try {
-  //   await db.connect(HOST
-  //     , {
-  //       versionCheck: false,
-  //       auth: {
-  //         namespace: "evia",
-  //         database: "knowledgebase",
-  //         username: "eviaguest",
-  //         password: guestpw
-  //       }
-  //     }
-  //   )
-  // } catch (err) {
-  //   console.error("FAIL")
-  // }
-
   let response;
   let resPosts = await queryPosts(id);
   let resTopics = await queryTopics();
@@ -52,6 +30,7 @@ async function loadPageData(id: string) {
 }
 
 
+// eslint-disable-next-line
 export async function load({ params }: any) {
   console.time("Startd")
   let data = await loadPageData(params.slug);
