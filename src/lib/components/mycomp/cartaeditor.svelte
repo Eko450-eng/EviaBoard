@@ -8,6 +8,7 @@
     import { uploadFileGeneric } from "@/helpers/minio.js";
     import "$lib/themes/github.scss";
     import "$lib/themes/discord.scss";
+    import "$lib/themes/codedark.scss";
     import "carta-md/default.css";
     import "@cartamd/plugin-anchor/default.css";
     import "@cartamd/plugin-code/default.css";
@@ -30,4 +31,12 @@
     let { text = $bindable() }: { text: string } = $props();
 </script>
 
-<MarkdownEditor scroll="async" mode="tabs" theme="github" {carta} bind:value={text} />
+<div class="w-full">
+    <MarkdownEditor
+        scroll="async"
+        mode="tabs"
+        theme="github"
+        {carta}
+        bind:value={text}
+    />
+</div>
