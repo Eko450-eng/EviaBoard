@@ -1,75 +1,71 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { db } from "@/db";
-    import Addnews from "./addnews.svelte";
-    import type { News, News_newspost } from "@/types";
-    import { formatDate } from "@/helpers/formating";
-    import { adminMode, userData } from "./store";
-    import Addnewspost from "./addnewspost.svelte";
-    import type { Uuid } from "surrealdb";
-    import { Button } from "$lib/components/ui/button/index";
-    import { Icon } from "svelte-icons-pack";
-    import { FaCalendarDays } from "svelte-icons-pack/fa";
-    import AvatarBar from "$lib/components/mycomp/avatar.svelte";
-    import { adminOnly } from "@/helpers/admin";
-    import { Skeleton } from "$ui/skeleton";
+import AvatarBar from "$lib/components/mycomp/avatar.svelte";
+import { Button } from "$lib/components/ui/button/index";
+import { Skeleton } from "$ui/skeleton";
+import { db } from "@/db";
+import { adminOnly } from "@/helpers/admin";
+import { formatDate } from "@/helpers/formating";
+import type { News, News_newspost } from "@/types";
+import type { Uuid } from "surrealdb";
+import { onMount } from "svelte";
+import { Icon } from "svelte-icons-pack";
+import { FaCalendarDays } from "svelte-icons-pack/fa";
+import Addnews from "./addnews.svelte";
+import Addnewspost from "./addnewspost.svelte";
+import { adminMode, userData } from "./store";
 
-    let news: News_newspost[];
+let news: News_newspost[];
 
-    async function loadData() {
-        let query =
-            "SELECT *, owner.name, owner.image, -> news_post.out.* as newspost from news ORDER BY date desc";
+async function loadData() {
+	const query =
+		"SELECT *, owner.name, owner.image, -> news_post.out.* as newspost from news ORDER BY date desc";
 
-        let data = await db?.query<Array<Array<News_newspost>>>(query);
+	const data = await db?.query<Array<Array<News_newspost>>>(query);
 
-        if (!data) return;
-        let d = data[0];
-        news = d;
-    }
+	if (!data) return;
+	const d = data[0];
+	news = d;
+}
 
-    async function subscribeNews(queryUuid: Uuid | undefined) {
-        if (!queryUuid) return;
-        // eslint-disable-next-line
-        await db?.subscribeLive(queryUuid!, async (action, _result) => {
-            if (
-                action === "CREATE" ||
-                action === "UPDATE" ||
-                action === "DELETE"
-            ) {
-                await loadData();
-            }
-        });
-    }
+async function subscribeNews(queryUuid: Uuid | undefined) {
+	if (!queryUuid) return;
+	// eslint-disable-next-line
+	await db?.subscribeLive(queryUuid!, async (action, _result) => {
+		if (action === "CREATE" || action === "UPDATE" || action === "DELETE") {
+			await loadData();
+		}
+	});
+}
 
-    onMount(async () => {
-        await loadData();
-        // eslint-disable-next-line
-        const queryUuidNews = await db?.live("news", (action, _result) => {
-            if (action === "CLOSE") return;
-        });
-        const queryUuidNewsPost = await db?.live(
-            "newspost",
-            // eslint-disable-next-line
-            (action, _result) => {
-                if (action === "CLOSE") return;
-            },
-        );
-        const queryUuidNewsPostRelation = await db?.live(
-            "news_post",
-            // eslint-disable-next-line
-            (action, _result) => {
-                if (action === "CLOSE") return;
-            },
-        );
+onMount(async () => {
+	await loadData();
+	// eslint-disable-next-line
+	const queryUuidNews = await db?.live("news", (action, _result) => {
+		if (action === "CLOSE") return;
+	});
+	const queryUuidNewsPost = await db?.live(
+		"newspost",
+		// eslint-disable-next-line
+		(action, _result) => {
+			if (action === "CLOSE") return;
+		},
+	);
+	const queryUuidNewsPostRelation = await db?.live(
+		"news_post",
+		// eslint-disable-next-line
+		(action, _result) => {
+			if (action === "CLOSE") return;
+		},
+	);
 
-        subscribeNews(queryUuidNews);
-        subscribeNews(queryUuidNewsPost);
-        subscribeNews(queryUuidNewsPostRelation);
-    });
+	subscribeNews(queryUuidNews);
+	subscribeNews(queryUuidNewsPost);
+	subscribeNews(queryUuidNewsPostRelation);
+});
 
-    let addPostOpen = false;
-    let addNewsPostOpen = false;
-    let selectedPost: News | undefined;
+const addPostOpen = false;
+const addNewsPostOpen = false;
+let selectedPost: News | undefined;
 </script>
 
 {#if adminOnly($userData, $adminMode)}

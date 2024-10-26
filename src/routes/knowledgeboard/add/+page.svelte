@@ -9,6 +9,7 @@
     import type { Post, Topic } from "@/types.js";
     import { sendPush } from "@/helpers/push.js";
     import Cartaeditor from "@/components/mycomp/cartaeditor.svelte";
+    import { RecordId } from "surrealdb";
 
     let { data } = $props();
     // eslint-disable-next-line
@@ -20,7 +21,7 @@
         title: "",
         body: "",
         solution: "",
-        owner: { id: "", name: "" },
+        owner: new RecordId("", ""),
         topic: "",
     });
 
@@ -53,7 +54,10 @@
         }`,
                 )
                 .then(() => {
-                    sendPush("New Posts", "Es gab einen neuen Post!");
+                    sendPush(
+                        "New Posts",
+                        `Es gab einen neuen Post von ${$userData.name} - ${postData.title}`,
+                    );
                 });
         } catch (e) {
             toast.error("Fehler", {

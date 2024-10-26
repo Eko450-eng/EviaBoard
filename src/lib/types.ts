@@ -50,14 +50,14 @@ export type Kb_Comment = {
 
 export type Comments = {
   id?: RecordId
-  owner: User
+  owner: User | RecordId;
   created_at?: Date
   comment: string
 }
 
 export type News_newspost = {
   id?: RecordId;
-  owner: User;
+  owner: User | RecordId;
   title: string;
   date: Date;
   newspost: Newspost[];
@@ -72,7 +72,7 @@ export type News_Post = {
 
 export type News = {
   id?: RecordId;
-  owner: User;
+  owner: User | RecordId;
   title: string;
   date: Date;
 };
@@ -80,7 +80,7 @@ export type News = {
 export type Newspost = {
   id?: RecordId;
   name: string;
-  owner: User;
+  owner: User | RecordId;
   created_at?: Date;
 };
 
@@ -92,7 +92,7 @@ export type Report = {
   status: number;
   category: number;
   upvotes: number;
-  owner: User;
+  owner: User | RecordId;
   created_at?: Date;
 };
 
@@ -101,7 +101,7 @@ export type Post = {
   title: string;
   body: string;
   solution: string;
-  owner: User;
+  owner: User | RecordId;
   topic: string;
   deleted: boolean;
   created_at?: Date;
@@ -127,5 +127,5 @@ export type Downloadlinks = {
   name: string;
   description: string;
   link: string;
-  owner: { name: string; id: string; tb: string };
+  owner: User | { name: string; id: string; tb: string };
 };

@@ -1,10 +1,10 @@
 <script lang="ts">
     import Links from "$lib/components/mycomp/links.svelte";
-    import Optionbuttons from "$lib/components/mycomp/optionbuttons.svelte";
+        import Optionbuttons from "$lib/components/mycomp/optionbuttons.svelte";
     import { ModeWatcher } from "mode-watcher";
     import "../app.css";
     import { Toaster } from "$lib/components/ui/sonner";
-    import { onMount } from "svelte";
+import { onMount } from "svelte";
     import { checkAdminMode, checkLoggedIn, DB } from "./store";
     import { Button } from "$ui/button";
     import { afterNavigate, goto } from "$app/navigation";
@@ -46,7 +46,11 @@
             </nav>
         </aside>
         <div class="flex flex-row gap-4 items-center">
-            <Button aria-label="go to last page" variant="outline" on:click={() => goto("/knowledgeboard")}>
+            <Button
+                aria-label="go to last page"
+                variant="outline"
+                on:click={() => goto("/knowledgeboard")}
+            >
                 <Icon src={FaSolidArrowLeft} />
             </Button>
             <div class="logo"></div>

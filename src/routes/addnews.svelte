@@ -16,7 +16,7 @@
     export let addPostOpen: boolean;
     export let postData: News = {
         title: "",
-        owner: $userData,
+        owner: $userData.id!,
         date: new Date(),
     };
 
@@ -35,7 +35,7 @@
                 .then(() => {
                     addPostOpen = false;
                     try {
-                        sendPush("New News", "New News have been added");
+                        sendPush("New News", `Brand neu! - ${postData.title}`);
                     } catch (e) {
                         console.error(e);
                     }

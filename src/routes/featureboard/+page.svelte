@@ -16,6 +16,7 @@
     import { get } from "svelte/store";
     import type { Report } from "@/types";
     import { sendPush } from "@/helpers/push";
+    import { RecordId } from "surrealdb";
 
     let addPostOpen = false;
 
@@ -29,7 +30,7 @@
         status: 0,
         category: 0,
         upvotes: 0,
-        owner: { name: "", id: "" },
+        owner: new RecordId("", ""),
     };
 
     async function addPost() {
@@ -54,11 +55,23 @@
             let data: Report = {
                 ...postData,
                 category: category,
-                owner: user.id,
+                owner: user.id!,
             };
             await db?.create("bugreports", data).then(() => {
                 addPostOpen = false;
-                sendPush("New Featureboard entries", "Es gab einen neuen Bug...");
+                const message = ()=>{
+                    switch(data.category){
+                        case 0:
+                            return `Jemand bemängelt ${data.title}`
+                        case 1:
+                            return `Jemand will ${data.title}`
+                        case 2:
+                            return `Jemand fragte ${data.title}`
+                        default:
+                            return `Jemand bemängelt ${data.title}`
+                    }
+                }
+                sendPush("New Featureboard entries", message());
                 toast.success("Yey", {
                     description: "Danke für dein Feedback!",
                 });

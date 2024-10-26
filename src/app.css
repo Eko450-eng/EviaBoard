@@ -156,3 +156,22 @@
   }
 }
 
+
+.soon{
+    position: relative;
+}
+
+.soon:before{
+    content: "SOON";
+    position: absolute;
+    top: -.5em;
+    left: 88%;
+    transform: rotate(35deg);
+    z-index: 10;
+
+        color: white;
+        border-radius: 10px;
+        background-color: indigo;
+        padding: 0 .6em;
+        font-size: 10px;
+    }
