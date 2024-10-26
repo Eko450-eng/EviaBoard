@@ -84,7 +84,7 @@
         </Toggle>
     {/if}
 
-    <Button variant="outline" on:click={() => goto("/knowledgeboard/add")}>
+    <Button aria-label="Select a topic from a dropdown menu" variant="outline" on:click={() => goto("/knowledgeboard/add")}>
         <Plus />
     </Button>
 </div>

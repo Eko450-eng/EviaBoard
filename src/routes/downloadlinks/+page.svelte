@@ -137,7 +137,7 @@
                 target="_blank"
             >
                 <p>{link.name}</p>
-                <p class="text-gray-500">{link.description}</p>
+                <p class="text-blue-200">{link.description}</p>
             </Button>
             {#if $userData.id && link.owner.tb + ":" + link.owner.id == $userData.id.toString()}
                 <Button

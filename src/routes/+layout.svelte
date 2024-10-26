@@ -46,7 +46,7 @@
             </nav>
         </aside>
         <div class="flex flex-row gap-4 items-center">
-            <Button variant="outline" on:click={() => goto("/knowledgeboard")}>
+            <Button aria-label="go to last page" variant="outline" on:click={() => goto("/knowledgeboard")}>
                 <Icon src={FaSolidArrowLeft} />
             </Button>
             <div class="logo"></div>

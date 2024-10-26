@@ -1,7 +1,6 @@
 <script lang="ts">
     import * as Tooltip from "$lib/components/ui/tooltip";
     import { Button } from "$lib/components/ui/button";
-    import "@fortawesome/fontawesome-free/css/all.min.css";
     import { Icon } from "svelte-icons-pack";
 
     //eslint-disable-next-line
@@ -11,7 +10,7 @@
 
 <Tooltip.Root>
     <Tooltip.Trigger asChild let:builder>
-        <Button variant="link" builders={[builder]} href={link.value}>
+        <Button aria-label={link.value} variant="link" builders={[builder]} href={link.value}>
             <span
                 class={pathname === link.value
                     ? "linkButton-active text-muted-foreground"

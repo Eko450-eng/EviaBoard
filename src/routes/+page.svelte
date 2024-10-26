@@ -12,6 +12,7 @@
     import { FaCalendarDays } from "svelte-icons-pack/fa";
     import AvatarBar from "$lib/components/mycomp/avatar.svelte";
     import { adminOnly } from "@/helpers/admin";
+    import { Skeleton } from "$ui/skeleton";
 
     let news: News_newspost[];
 
@@ -83,6 +84,7 @@
                 <h2 class="text-2xl p-2">{post.title}</h2>
                 {#if adminOnly($userData, $adminMode)}
                     <Button
+                        aria-label="Add a post"
                         on:click={() => {
                             if (!adminOnly($userData, $adminMode)) return;
                             selectedPost = post;
@@ -92,7 +94,7 @@
                 {/if}
             </div>
             <div class="flex flex-col">
-                <p class="p-2 text-gray-500">
+                <p class="p-2 text-blue-200">
                     <span class="flex items-center gap-2">
                         <Icon src={FaCalendarDays} size={15} />
                         {formatDate(post.date)}
@@ -109,45 +111,15 @@
             <AvatarBar user={post.owner} />
         </div>
     {/each}
+{:else}
+    <div class="flex items-center space-x-4">
+        <div class="space-y-2 w-full">
+            <Skeleton class="h-4 w-4/5 rounded-full" />
+            <Skeleton class="h-4 w-2/5 rounded-full" />
+            <Skeleton class="h-4 w-3/5 rounded-full" />
+        </div>
+    </div>
 {/if}
-
-<div>
-    <h2 class="text-2xl p-2">Todos</h2>
-    <ul class="main-feature-list-item">
-        <li>Add Knowledgeboard - WIP</li>
-        <li>Add Knowledgeboard addon - Scripts</li>
-        <ul class="feature-description-list-item">
-            <li>
-                A collection of usefull code snippets that can be helpful and
-                often get lost in our P: directory
-            </li>
-        </ul>
-        <li>Add Knowledgeboard addon - Problematic fields</li>
-        <ul class="feature-description-list-item">
-            <li>
-                Adds a statistic that shows in which fields the key issues for
-                our team are, for example you could see here, if we were to have
-                tons of tickets regarding Datev which might indicate a lack of
-                knowledge in the topic datev and could be used to precisely talk
-                about those issues
-            </li>
-        </ul>
-        <li>Add XML Generator</li>
-        <li>Add group file Generator</li>
-        <li>Add Coma Structure Generator</li>
-        <li>Add Invoice Process generator</li>
-        <li>Prompt before Deleting</li>
-        <li>Close Dialog when submited</li>
-        <li>Add images to posts</li>
-        <li>Design Changes</li>
-        <li>
-            Janky übersetzungen grade ziehen.... (An manchen Tagen bevorzuge ich
-            es auf Deutsch zu schreiben on other days I rather write in English,
-            this is also auffällig in meinen Notizen, muss ich mir echt mal
-            abgewöhnen)
-        </li>
-    </ul>
-</div>
 
 <style>
     ul {

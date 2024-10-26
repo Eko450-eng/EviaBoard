@@ -20,8 +20,9 @@
             <h1
                 class="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
             >
-                {#if $userData.id == post.owner.id.toString()}
+                {#if $userData.id === post.owner.id}
                     <Button
+                        aria-label="Post bearbeiten"
                         variant="outline"
                         on:click={() => goto(`/knowledgeboard/${post.id}/edit`)}
                     >
@@ -42,13 +43,13 @@
             <div
                 class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6"
             >
-                <p class="text-sm text-gray-500">Beschreibung</p>
+                <p class="text-sm text-blue-200">Beschreibung</p>
                 <CartaRender text={post.body} />
             </div>
             <div
                 class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6"
             >
-                <p class="text-sm text-gray-500">Lösung</p>
+                <p class="text-sm text-blue-200">Lösung</p>
                 {#if post.solution}
                     <CartaRender text={post.solution} />
                 {:else}
@@ -56,7 +57,7 @@
                 {/if}
             </div>
             <div
-                class="flex flex-col justify-between my-5 border-t text-sm text-gray-500"
+                class="flex flex-col justify-between my-5 border-t text-sm text-blue-200"
             >
                 <p>Kategorie: {post.topic}</p>
                 <AvatarBar user={post.owner} />

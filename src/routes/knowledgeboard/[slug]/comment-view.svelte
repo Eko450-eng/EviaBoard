@@ -92,7 +92,7 @@
             <div class="flex flex-col">
                 <p class="text-m">{comment.comment}</p>
             </div>
-            <Card.Description class="text-xs text-gray-500">
+            <Card.Description class="text-xs text-blue-200">
                 <span class="flex items-center gap-2">
                     {formatDate(comment.created_at ?? new Date())}
                 </span>
