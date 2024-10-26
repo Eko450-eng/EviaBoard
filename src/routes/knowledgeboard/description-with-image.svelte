@@ -1,52 +1,52 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { Button } from "$lib/components/ui/button";
-    import type { Post } from "@/types";
+import { Button } from "$lib/components/ui/button";
+import * as Dialog from "$lib/components/ui/dialog/index.js";
+import type { Post } from "@/types";
+import { onMount } from "svelte";
 
-    export let post: Post | null;
+export let post: Post | null;
 
-    let texts: string[] = [];
+let texts: string[] = [];
 
-    function loadImageWithText(input: string) {
-        const regex = /\[\[(.*?)\]\]/g;
+function loadImageWithText(input: string) {
+	const regex = /\[\[(.*?)\]\]/g;
 
-        let textParts: string[] = [];
+	const textParts: string[] = [];
 
-        // Track the last index to split text outside of [[...]]
-        let lastIndex = 0;
+	// Track the last index to split text outside of [[...]]
+	let lastIndex = 0;
 
-        let match;
-        while ((match = regex.exec(input)) !== null) {
-            // Extract the text before the match
-            const textBefore = input.slice(lastIndex, match.index).trim();
-            if (textBefore) {
-                textParts.push(textBefore);
-            }
+	let match;
+	while ((match = regex.exec(input)) !== null) {
+		// Extract the text before the match
+		const textBefore = input.slice(lastIndex, match.index).trim();
+		if (textBefore) {
+			textParts.push(textBefore);
+		}
 
-            // Push the content inside [[...]] into the images array
-            textParts.push(match[1].trim());
+		// Push the content inside [[...]] into the images array
+		textParts.push(match[1].trim());
 
-            // Update the last index to the end of the current match
-            lastIndex = regex.lastIndex;
-        }
+		// Update the last index to the end of the current match
+		lastIndex = regex.lastIndex;
+	}
 
-        // Add the remaining text after the last match
-        const remainingText = input.slice(lastIndex).trim();
-        if (remainingText) {
-            textParts.push(remainingText);
-        }
+	// Add the remaining text after the last match
+	const remainingText = input.slice(lastIndex).trim();
+	if (remainingText) {
+		textParts.push(remainingText);
+	}
 
-        texts = textParts;
-    }
+	texts = textParts;
+}
 
-    onMount(() => {
-        if (!post) return;
-        loadImageWithText(post.body);
-    });
-    let imageOpened = false;
-    let imageUrl = "";
-    export let clickable: boolean;
+onMount(() => {
+	if (!post) return;
+	loadImageWithText(post.body);
+});
+const imageOpened = false;
+const imageUrl = "";
+export let clickable: boolean;
 </script>
 
 {#if texts}

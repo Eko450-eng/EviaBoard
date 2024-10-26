@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { HTMLAttributes } from "svelte/elements";
-	import { cn } from "$lib/utils.js";
+import { cn } from "$lib/utils.js";
+import type { HTMLAttributes } from "svelte/elements";
 
-	type $$Props = HTMLAttributes<HTMLTableRowElement> & {
-		"data-state"?: unknown;
-	};
+type $$Props = HTMLAttributes<HTMLTableRowElement> & {
+	"data-state"?: unknown;
+};
 
-	let className: $$Props["class"] = undefined;
-	export { className as class };
+const className: $$Props["class"] = undefined;
+export { className as class };
 </script>
 
 <tr

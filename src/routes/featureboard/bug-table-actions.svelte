@@ -1,80 +1,78 @@
 <script lang="ts">
-    import DotsHorizontal from "svelte-radix/DotsHorizontal.svelte";
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-    import { Button } from "$lib/components/ui/button";
-    import { db } from "@/db";
-    import { RecordId } from "surrealdb";
-    import { userData } from "../store";
-    import { toast } from "svelte-sonner";
-    import type { Report } from "@/types";
-    import { editorOnly } from "@/helpers/admin";
+import { Button } from "$lib/components/ui/button";
+import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+import { db } from "@/db";
+import { editorOnly } from "@/helpers/admin";
+import type { Report } from "@/types";
+import { RecordId } from "surrealdb";
+import DotsHorizontal from "svelte-radix/DotsHorizontal.svelte";
+import { toast } from "svelte-sonner";
+import { userData } from "../store";
 
-    export let id: string;
-    type Votes = {
-        id: RecordId;
-        bugreports: string;
-        voter: string;
-    };
+export let id: string;
+type Votes = {
+	id: RecordId;
+	bugreports: string;
+	voter: string;
+};
 
-    async function upvote(id: string) {
-        let recordId = new RecordId("bugreports", id);
-        let userId = new RecordId("user", $userData.id? $userData.id.id : "");
+async function upvote(id: string) {
+	const recordId = new RecordId("bugreports", id);
+	const userId = new RecordId("user", $userData.id ? $userData.id.id : "");
 
-        let report = await db?.select<Report>(recordId);
+	const report = await db?.select<Report>(recordId);
 
-        let votes = await db?.query<
-            Array<Array<Votes>>
-        >(`SELECT * FROM votes WHERE 
+	const votes = await db?.query<Array<Array<Votes>>>(`SELECT * FROM votes WHERE 
                   voter = ${"user:" + userId.id}
                   AND
                   bugreport = ${"bugreports:" + id}
                   `);
 
-        if (!report || !votes) return;
-        let newUpvotes = report?.upvotes;
+	if (!report || !votes) return;
+	let newUpvotes = report?.upvotes;
 
-        if (votes[0]?.length >= 1) {
-            await db?.delete(votes[0][0].id);
-            newUpvotes -= 1;
-        } else {
-            newUpvotes += 1;
-            await db?.create("votes", {
-                bugreport: recordId,
-                voter: userId,
-            });
-        }
+	if (votes[0]?.length >= 1) {
+		await db?.delete(votes[0][0].id);
+		newUpvotes -= 1;
+	} else {
+		newUpvotes += 1;
+		await db?.create("votes", {
+			bugreport: recordId,
+			voter: userId,
+		});
+	}
 
-        await db
-            ?.patch(recordId, [
-                {
-                    op: "replace",
-                    path: "/upvotes",
-                    value: newUpvotes,
-                },
-            ])
-            .then(() => {
-                toast.success("Yey", {
-                    description: "Danke für dein Feedback!",
-                });
-            });
-    }
+	await db
+		?.patch(recordId, [
+			{
+				op: "replace",
+				path: "/upvotes",
+				value: newUpvotes,
+			},
+		])
+		.then(() => {
+			toast.success("Yey", {
+				description: "Danke für dein Feedback!",
+			});
+		});
+}
 
-    async function setStatus(id: string, status: number) {
-        let recordId = new RecordId("bugreports", id);
-        await db
-            ?.patch(recordId, [
-                {
-                    op: "replace",
-                    path: "/status",
-                    value: status,
-                },
-            ])
-            .then(() => {
-                toast.success("Yey", {
-                    description: "Status gändert",
-                });
-            });
-    }
+async function setStatus(id: string, status: number) {
+	const recordId = new RecordId("bugreports", id);
+	await db
+		?.patch(recordId, [
+			{
+				op: "replace",
+				path: "/status",
+				value: status,
+			},
+		])
+		.then(() => {
+			toast.success("Yey", {
+				description: "Status gändert",
+			});
+		});
+}
 </script>
 
 <DropdownMenu.Root>

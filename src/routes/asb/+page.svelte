@@ -1,53 +1,53 @@
 <script lang="ts">
-    import { db } from "@/db";
-    import { onMount } from "svelte";
-    import { Button } from "$lib/components/ui/button";
-    import { userData } from "../store";
-    import { get, writable } from "svelte/store";
+import { Button } from "$lib/components/ui/button";
+import { db } from "@/db";
+import { onMount } from "svelte";
+import { get, writable } from "svelte/store";
+import { userData } from "../store";
 
-    type ASBCheck = {
-        id: string;
-        name: string;
-    };
+type ASBCheck = {
+	id: string;
+	name: string;
+};
 
-    let userNamesRaw: Array<ASBCheck> = [];
-    let userNames = writable(userNamesRaw);
+const userNamesRaw: Array<ASBCheck> = [];
+const userNames = writable(userNamesRaw);
 
-    async function queryPosts() {
-        let data = await db?.select<ASBCheck>("ASBCheck");
-        if (!data) {
-            return;
-        }
+async function queryPosts() {
+	const data = await db?.select<ASBCheck>("ASBCheck");
+	if (!data) {
+		return;
+	}
 
-        data.forEach((u) => {
-            userNamesRaw.push(u);
-        });
+	data.forEach((u) => {
+		userNamesRaw.push(u);
+	});
 
-        userNames.set(userNamesRaw);
-    }
+	userNames.set(userNamesRaw);
+}
 
-    async function meldenHandler() {
-        db?.create("ASBCheck", {
-            name: $userData.email,
-        }).then(async () => {
-            await queryPosts();
-        });
-    }
-    async function abmeldenHandler() {
-        try {
-            await db
-                ?.query(`DELETE ASBCheck WHERE name = '${get(userData).email}'`)
-                .then(async () => {
-                    await queryPosts();
-                });
-        } catch (e) {
-            console.error(e);
-        }
-    }
+async function meldenHandler() {
+	db?.create("ASBCheck", {
+		name: $userData.email,
+	}).then(async () => {
+		await queryPosts();
+	});
+}
+async function abmeldenHandler() {
+	try {
+		await db
+			?.query(`DELETE ASBCheck WHERE name = '${get(userData).email}'`)
+			.then(async () => {
+				await queryPosts();
+			});
+	} catch (e) {
+		console.error(e);
+	}
+}
 
-    onMount(async () => {
-        await queryPosts();
-    });
+onMount(async () => {
+	await queryPosts();
+});
 </script>
 
 <div>

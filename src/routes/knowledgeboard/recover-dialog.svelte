@@ -1,26 +1,26 @@
 <script lang="ts">
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { db} from "$lib/db";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import type { Post } from "@/types";
+import { Button } from "$lib/components/ui/button/index.js";
+import * as Dialog from "$lib/components/ui/dialog/index.js";
+import { db } from "$lib/db";
+import type { Post } from "@/types";
 
-    async function recoverPost(data: Post) {
-        let newData = data;
-        newData.deleted = true;
-        await db?.patch(data.id!, [
-            {
-                op: "replace",
-                path: "/deleted",
-                value: false,
-            },
-        ]);
-    }
+async function recoverPost(data: Post) {
+	const newData = data;
+	newData.deleted = true;
+	await db?.patch(data.id!, [
+		{
+			op: "replace",
+			path: "/deleted",
+			value: false,
+		},
+	]);
+}
 
-    export let recoverDialog: boolean;
-    export let postToRecover: Post | undefined;
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" || event.key === "Esc") recoverDialog = false;
-    });
+export let recoverDialog: boolean;
+export let postToRecover: Post | undefined;
+document.addEventListener("keydown", (event) => {
+	if (event.key === "Escape" || event.key === "Esc") recoverDialog = false;
+});
 </script>
 
 <Dialog.Root

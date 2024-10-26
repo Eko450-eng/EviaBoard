@@ -1,14 +1,14 @@
 <script lang="ts">
-    import type { RecordId } from "surrealdb";
-    import { Icon } from "svelte-icons-pack";
-    import { FaSolidCodeCommit } from "svelte-icons-pack/fa";
-    import * as Tooltip from "$lib/components/ui/tooltip/index";
-    import { Button } from "$lib/components/ui/button/index";
+import { Button } from "$lib/components/ui/button/index";
+import * as Tooltip from "$lib/components/ui/tooltip/index";
+import type { RecordId } from "surrealdb";
+import { Icon } from "svelte-icons-pack";
+import { FaSolidCodeCommit } from "svelte-icons-pack/fa";
 
-    export let id: RecordId;
-    function copy() {
-        navigator.clipboard.writeText(id.toString());
-    }
+export let id: RecordId;
+function copy() {
+	navigator.clipboard.writeText(id.toString());
+}
 </script>
 
 <Tooltip.Root >

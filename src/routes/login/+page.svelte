@@ -1,53 +1,53 @@
 <script lang="ts">
-    import { Input } from "$lib/components/ui/input";
-    import { Toggle } from "$lib/components/ui/toggle";
-    import { Button } from "$lib/components/ui/button";
-    import Label from "@/components/ui/label/label.svelte";
-    import { signIn, signUp } from "$lib/db";
-    import { checkIsLoggedIn } from "../store";
-    import { goto } from "$app/navigation";
-    import { toast } from "svelte-sonner";
+import { goto } from "$app/navigation";
+import { Button } from "$lib/components/ui/button";
+import { Input } from "$lib/components/ui/input";
+import { Toggle } from "$lib/components/ui/toggle";
+import { signIn, signUp } from "$lib/db";
+import Label from "@/components/ui/label/label.svelte";
+import { toast } from "svelte-sonner";
+import { checkIsLoggedIn } from "../store";
 
-    let data = {
-        username: "",
-        email: "",
-        pass: "",
-        confirmPass: "",
-    };
+const data = {
+	username: "",
+	email: "",
+	pass: "",
+	confirmPass: "",
+};
 
-    let registering: boolean = true;
+const registering = true;
 
-    async function signInHandler() {
-        await signIn(data).then((res) => {
-            if (res.error) {
-                toast.error(res.title, {
-                    description: res.desc,
-                });
-            } else {
-                toast.success(res.title, {
-                    description: res.desc,
-                });
-                goto("/");
-                checkIsLoggedIn(true);
-            }
-        });
-    }
+async function signInHandler() {
+	await signIn(data).then((res) => {
+		if (res.error) {
+			toast.error(res.title, {
+				description: res.desc,
+			});
+		} else {
+			toast.success(res.title, {
+				description: res.desc,
+			});
+			goto("/");
+			checkIsLoggedIn(true);
+		}
+	});
+}
 
-    async function signUpHandler() {
-        signUp(data).then((res) => {
-            if (res.error) {
-                toast.error(res.title, {
-                    description: res.desc,
-                });
-            } else {
-                toast.success(res.title, {
-                    description: res.desc,
-                });
-                goto("/");
-                checkIsLoggedIn(true);
-            }
-        });
-    }
+async function signUpHandler() {
+	signUp(data).then((res) => {
+		if (res.error) {
+			toast.error(res.title, {
+				description: res.desc,
+			});
+		} else {
+			toast.success(res.title, {
+				description: res.desc,
+			});
+			goto("/");
+			checkIsLoggedIn(true);
+		}
+	});
+}
 </script>
 
 <div class="px-4">

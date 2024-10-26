@@ -1,83 +1,79 @@
 <script lang="ts">
-    import {
-        Button,
-        buttonVariants,
-    } from "../../lib/components/ui/button/index.js";
-    import { db, getDb } from "$lib/db";
-    import { onMount } from "svelte";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import Plus from "svelte-radix/Plus.svelte";
-    import Label from "@/components/ui/label/label.svelte";
-    import Input from "@/components/ui/input/input.svelte";
-    import { RecordId } from "surrealdb";
-    import { userData } from "../store.js";
-    import type { Downloadlinks } from "@/types.js";
-    import { editorOnly } from "@/helpers/admin.js";
+import * as Dialog from "$lib/components/ui/dialog/index.js";
+import { db, getDb } from "$lib/db";
+import Input from "@/components/ui/input/input.svelte";
+import Label from "@/components/ui/label/label.svelte";
+import { editorOnly } from "@/helpers/admin.js";
+import type { Downloadlinks } from "@/types.js";
+import { RecordId } from "surrealdb";
+import { onMount } from "svelte";
+import Plus from "svelte-radix/Plus.svelte";
+import {
+	Button,
+	buttonVariants,
+} from "../../lib/components/ui/button/index.js";
+import { userData } from "../store.js";
 
-    let downloadlinks: Array<Downloadlinks> = [];
+let downloadlinks: Array<Downloadlinks> = [];
 
-    async function getLinks() {
-        let dl = await db?.select<Downloadlinks>("downloadlinks");
-        if (dl) {
-            downloadlinks = dl;
-        }
-    }
+async function getLinks() {
+	const dl = await db?.select<Downloadlinks>("downloadlinks");
+	if (dl) {
+		downloadlinks = dl;
+	}
+}
 
-    let dialogOpen = false;
+let dialogOpen = false;
 
-    let postData: Downloadlinks = {
-        id: new RecordId("", ""),
-        name: "Name",
-        description: "Kurze Beschreibung!",
-        link: "https://....",
-        owner: { id: "", name: "", tb: "" },
-    };
+const postData: Downloadlinks = {
+	id: new RecordId("", ""),
+	name: "Name",
+	description: "Kurze Beschreibung!",
+	link: "https://....",
+	owner: { id: "", name: "", tb: "" },
+};
 
-    async function deleteLink(id: RecordId) {
-        await db?.delete(id);
-    }
+async function deleteLink(id: RecordId) {
+	await db?.delete(id);
+}
 
-    let user_id = $userData.id;
+const user_id = $userData.id;
 
-    async function postLinks() {
-        await db
-            ?.query(
-                ` CREATE downloadlinks CONTENT{
+async function postLinks() {
+	await db
+		?.query(
+			` CREATE downloadlinks CONTENT{
             name:  "${postData.name}",
             description:  "${postData.description}",
             link:  "${postData.link}",
             owner: ${user_id},
             created_at: d"${new Date().toISOString()}", 
         }`,
-            )
-            .then(() => {
-                dialogOpen = false;
-            });
-    }
+		)
+		.then(() => {
+			dialogOpen = false;
+		});
+}
 
-    onMount(async () => {
-        await getDb();
-        if (db && db.ready) {
-            getLinks();
-            const queryUuid = await db?.live(
-                "downloadlinks",
-                // eslint-disable-next-line
-                (action, _result) => {
-                    if (action === "CLOSE") return;
-                },
-            );
-            // eslint-disable-next-line
-            await db?.subscribeLive(queryUuid!, async (action, _result) => {
-                if (
-                    action === "CREATE" ||
-                    action === "UPDATE" ||
-                    action === "DELETE"
-                ) {
-                    getLinks();
-                }
-            });
-        }
-    });
+onMount(async () => {
+	await getDb();
+	if (db && db.ready) {
+		getLinks();
+		const queryUuid = await db?.live(
+			"downloadlinks",
+			// eslint-disable-next-line
+			(action, _result) => {
+				if (action === "CLOSE") return;
+			},
+		);
+		// eslint-disable-next-line
+		await db?.subscribeLive(queryUuid!, async (action, _result) => {
+			if (action === "CREATE" || action === "UPDATE" || action === "DELETE") {
+				getLinks();
+			}
+		});
+	}
+});
 </script>
 
 <div class="flex flex-wrap items-center justify-end">

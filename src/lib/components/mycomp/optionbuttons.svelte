@@ -1,14 +1,11 @@
 <script lang="ts">
-    import { isLoggedIn } from "../../../routes/store";
-    import { Button } from "$ui/button";
-    import { toggleMode } from "mode-watcher";
-    import Sun from "svelte-radix/Sun.svelte";
-    import Moon from "svelte-radix/Moon.svelte";
-    import { Icon } from "svelte-icons-pack";
-    import {
-        FaSolidUser,
-        FaSolidBug,
-    } from "svelte-icons-pack/fa";
+import { Button } from "$ui/button";
+import { toggleMode } from "mode-watcher";
+import { Icon } from "svelte-icons-pack";
+import { FaSolidBug, FaSolidUser } from "svelte-icons-pack/fa";
+import Moon from "svelte-radix/Moon.svelte";
+import Sun from "svelte-radix/Sun.svelte";
+import { isLoggedIn } from "../../../routes/store";
 </script>
 
 <div class="optionButtons">

@@ -1,52 +1,49 @@
 <script lang="ts">
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { db } from "../lib/db";
-    import { toast } from "svelte-sonner";
-    import {
-        Button,
-        buttonVariants,
-    } from "../lib/components/ui/button/index.js";
-    import Plus from "svelte-radix/Plus.svelte";
-    import { Label } from "../lib/components/ui/label/index.js";
-    import { Input } from "../lib/components/ui/input/index.js";
-    import type { News } from "@/types";
-    import { userData } from "./store";
-    import { sendPush } from "@/helpers/push";
+import * as Dialog from "$lib/components/ui/dialog/index.js";
+import { sendPush } from "@/helpers/push";
+import type { News } from "@/types";
+import Plus from "svelte-radix/Plus.svelte";
+import { toast } from "svelte-sonner";
+import { Button, buttonVariants } from "../lib/components/ui/button/index.js";
+import { Input } from "../lib/components/ui/input/index.js";
+import { Label } from "../lib/components/ui/label/index.js";
+import { db } from "../lib/db";
+import { userData } from "./store";
 
-    export let addPostOpen: boolean;
-    export let postData: News = {
-        title: "",
-        owner: $userData.id!,
-        date: new Date(),
-    };
+export let addPostOpen: boolean;
+export const postData: News = {
+	title: "",
+	owner: $userData.id!,
+	date: new Date(),
+};
 
-    async function addPost() {
-        try {
-            if (!postData) return;
-            await db
-                ?.query(
-                    `
+async function addPost() {
+	try {
+		if (!postData) return;
+		await db
+			?.query(
+				`
                     CREATE news CONTENT{ 
                         title:  "${postData.title}", 
                         owner: ${$userData.id}, 
                     }
                     `,
-                )
-                .then(() => {
-                    addPostOpen = false;
-                    try {
-                        sendPush("New News", `Brand neu! - ${postData.title}`);
-                    } catch (e) {
-                        console.error(e);
-                    }
-                });
-        } catch (e) {
-            console.error(e);
-            toast.error("Fehler", {
-                description: `This failed due to: ${e}, probably not my fault`,
-            });
-        }
-    }
+			)
+			.then(() => {
+				addPostOpen = false;
+				try {
+					sendPush("New News", `Brand neu! - ${postData.title}`);
+				} catch (e) {
+					console.error(e);
+				}
+			});
+	} catch (e) {
+		console.error(e);
+		toast.error("Fehler", {
+			description: `This failed due to: ${e}, probably not my fault`,
+		});
+	}
+}
 </script>
 
 <Dialog.Root

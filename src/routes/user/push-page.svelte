@@ -1,111 +1,107 @@
 <script lang="ts">
-    import { Checkbox } from "$ui/checkbox";
-    import { Label } from "$ui/label";
-    import { Button } from "$ui/button";
-    import {
-        checkSubscriptionStatus,
-        requestNotificationPermission,
-        subscribeUser,
-        unsubscribe,
-    } from "./functions";
-    import { RecordId } from "surrealdb";
-    import type { Channel, User } from "$lib/types";
-    import { sendPush } from "@/helpers/push";
-    import { db } from "@/db";
-    import { adminMode, userData } from "../store";
-    import { writable, type Writable } from "svelte/store";
-    import { onMount } from "svelte";
-    import { adminOnly } from "@/helpers/admin";
-    import { channelHandler } from "./notifyFunctions";
-    import { toast } from "svelte-sonner";
+import type { Channel, User } from "$lib/types";
+import { Button } from "$ui/button";
+import { Checkbox } from "$ui/checkbox";
+import { Label } from "$ui/label";
+import { db } from "@/db";
+import { adminOnly } from "@/helpers/admin";
+import { sendPush } from "@/helpers/push";
+import { RecordId } from "surrealdb";
+import { onMount } from "svelte";
+import { toast } from "svelte-sonner";
+import { type Writable, writable } from "svelte/store";
+import { adminMode, userData } from "../store";
+import {
+	checkSubscriptionStatus,
+	requestNotificationPermission,
+	subscribeUser,
+	unsubscribe,
+} from "./functions";
+import { channelHandler } from "./notifyFunctions";
 
-    type ChannelSubsCheckable = {
-        channel: Channel;
-        userIsSubbed: boolean;
-    };
+type ChannelSubsCheckable = {
+	channel: Channel;
+	userIsSubbed: boolean;
+};
 
-    let nottifPermGranted: boolean | null = null;
-    let channels: Writable<ChannelSubsCheckable[]> = writable([]);
-    let isSubscribed = false;
+let nottifPermGranted: boolean | null = null;
+const channels: Writable<ChannelSubsCheckable[]> = writable([]);
+let isSubscribed = false;
 
-    onMount(async () => {
-        nottifPermGranted = Notification.permission === "granted";
-        if (
-            $userData.id?.toString() !== new RecordId("user", "tada").toString()
-        ) {
-            await getChannels();
-        } else {
-            userData.subscribe(async () => {
-                await getChannels();
-            });
-        }
+onMount(async () => {
+	nottifPermGranted = Notification.permission === "granted";
+	if ($userData.id?.toString() !== new RecordId("user", "tada").toString()) {
+		await getChannels();
+	} else {
+		userData.subscribe(async () => {
+			await getChannels();
+		});
+	}
 
-        if (nottifPermGranted) {
-            isSubscribed = await checkSubscriptionStatus(
-                $userData,
-                isSubscribed,
-            );
-        }
+	if (nottifPermGranted) {
+		isSubscribed = await checkSubscriptionStatus($userData, isSubscribed);
+	}
 
-        await getChannels();
-    });
+	await getChannels();
+});
 
-    async function sendPushHandler() {
-        try {
-            await sendPush("testing", "test");
-        } catch (e) {
-            console.error(e);
-        }
-    }
+async function sendPushHandler() {
+	try {
+		await sendPush("testing", "test");
+	} catch (e) {
+		console.error(e);
+	}
+}
 
-    async function getChannels() {
-        let subscription: PushSubscription | null;
-        if ("serviceWorker" in navigator) {
-            const registration = await navigator.serviceWorker.ready;
-            let sub = await registration.pushManager.getSubscription();
-            subscription = sub;
-        }
+async function getChannels() {
+	let subscription: PushSubscription | null;
+	if ("serviceWorker" in navigator) {
+		const registration = await navigator.serviceWorker.ready;
+		const sub = await registration.pushManager.getSubscription();
+		subscription = sub;
+	}
 
-        let channelsQuery = await db?.query<Array<Array<Channel>>>(
-            "SELECT * FROM channels",
-        );
-        if (!channelsQuery) return;
+	const channelsQuery = await db?.query<Array<Array<Channel>>>(
+		"SELECT * FROM channels",
+	);
+	if (!channelsQuery) return;
 
-        let c: ChannelSubsCheckable[] = [];
-        channelsQuery[0].forEach(async (channel) => {
-            let q = `SELECT out.channelname as channelname, out.id as id, in.user.* as user from pushkey_channel WHERE in.user.id = ${$userData.id} AND out.id = ${channel.id} AND in.data.endpoint = '${subscription?.endpoint}'`;
-            let isSubbed = await db?.query<
-                Array<
-                    Array<{
-                        channelname: string;
-                        id: RecordId;
-                        user: User;
-                    }>
-                >
-            >(q);
-            let cc: ChannelSubsCheckable;
-            if (!isSubbed || !isSubbed[0]) return;
-            let s = isSubbed[0];
+	const c: ChannelSubsCheckable[] = [];
+	channelsQuery[0].forEach(async (channel) => {
+		const q = `SELECT out.channelname as channelname, out.id as id, in.user.* as user from pushkey_channel WHERE in.user.id = ${$userData.id} AND out.id = ${channel.id} AND in.data.endpoint = '${subscription?.endpoint}'`;
+		const isSubbed =
+			await db?.query<
+				Array<
+					Array<{
+						channelname: string;
+						id: RecordId;
+						user: User;
+					}>
+				>
+			>(q);
+		let cc: ChannelSubsCheckable;
+		if (!isSubbed || !isSubbed[0]) return;
+		const s = isSubbed[0];
 
-            if (subscription && s.length >= 1) {
-                cc = {
-                    channel,
-                    userIsSubbed: true,
-                };
-            } else {
-                cc = {
-                    channel,
-                    userIsSubbed: false,
-                };
-            }
-            c.push(cc);
-            channels.set(c);
-        });
+		if (subscription && s.length >= 1) {
+			cc = {
+				channel,
+				userIsSubbed: true,
+			};
+		} else {
+			cc = {
+				channel,
+				userIsSubbed: false,
+			};
+		}
+		c.push(cc);
+		channels.set(c);
+	});
 
-        $channels.sort((a: ChannelSubsCheckable, b: ChannelSubsCheckable) =>
-            a.channel.channelname.localeCompare(b.channel.channelname),
-        );
-    }
+	$channels.sort((a: ChannelSubsCheckable, b: ChannelSubsCheckable) =>
+		a.channel.channelname.localeCompare(b.channel.channelname),
+	);
+}
 </script>
 
 <div class="flex flex-col">

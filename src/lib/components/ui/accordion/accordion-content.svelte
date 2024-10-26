@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { Accordion as AccordionPrimitive } from "bits-ui";
-	import { slide } from "svelte/transition";
-	import { cn } from "$lib/utils.js";
+import { cn } from "$lib/utils.js";
+import type { Accordion as AccordionPrimitive } from "bits-ui";
+import { slide } from "svelte/transition";
 
-	type $$Props = AccordionPrimitive.ContentProps;
+type $$Props = AccordionPrimitive.ContentProps;
 
-	let className: $$Props["class"] = undefined;
-	export let transition: $$Props["transition"] = slide;
-	export let transitionConfig: $$Props["transitionConfig"] = {
-		duration: 200,
-	};
+const className: $$Props["class"] = undefined;
+export const transition: $$Props["transition"] = slide;
+export const transitionConfig: $$Props["transitionConfig"] = {
+	duration: 200,
+};
 
-	export { className as class };
+export { className as class };
 </script>
 
 <AccordionPrimitive.Content

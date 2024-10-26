@@ -1,27 +1,27 @@
 <script lang="ts">
-    import Links from "$lib/components/mycomp/links.svelte";
-        import Optionbuttons from "$lib/components/mycomp/optionbuttons.svelte";
-    import { ModeWatcher } from "mode-watcher";
-    import "../app.css";
-    import { Toaster } from "$lib/components/ui/sonner";
+import Links from "$lib/components/mycomp/links.svelte";
+import Optionbuttons from "$lib/components/mycomp/optionbuttons.svelte";
+import { ModeWatcher } from "mode-watcher";
+import "../app.css";
+import { afterNavigate, goto } from "$app/navigation";
+import { Toaster } from "$lib/components/ui/sonner";
+import { Button } from "$ui/button";
 import { onMount } from "svelte";
-    import { checkAdminMode, checkLoggedIn, DB } from "./store";
-    import { Button } from "$ui/button";
-    import { afterNavigate, goto } from "$app/navigation";
-    import { FaSolidArrowLeft } from "svelte-icons-pack/fa";
-    import { Icon } from "svelte-icons-pack";
+import { Icon } from "svelte-icons-pack";
+import { FaSolidArrowLeft } from "svelte-icons-pack/fa";
+import { DB, checkAdminMode, checkLoggedIn } from "./store";
 
-    let previousPage = $state("/");
+let previousPage = $state("/");
 
-    afterNavigate(({ from }) => {
-        if (!from?.url) return;
-        previousPage = from.url.pathname || previousPage;
-    });
+afterNavigate(({ from }) => {
+	if (!from?.url) return;
+	previousPage = from.url.pathname || previousPage;
+});
 
-    onMount(async () => {
-        checkLoggedIn();
-        checkAdminMode();
-    });
+onMount(async () => {
+	checkLoggedIn();
+	checkAdminMode();
+});
 </script>
 
 <ModeWatcher />

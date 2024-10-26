@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { Command as CommandPrimitive } from "cmdk-sv";
-	import { cn } from "$lib/utils.js";
+import { cn } from "$lib/utils.js";
+import type { Command as CommandPrimitive } from "cmdk-sv";
 
-	type $$Props = CommandPrimitive.ItemProps;
+type $$Props = CommandPrimitive.ItemProps;
 
-	export let asChild = false;
+export const asChild = false;
 
-	let className: string | undefined | null = undefined;
-	export { className as class };
+const className: string | undefined | null = undefined;
+export { className as class };
 </script>
 
 <CommandPrimitive.Item

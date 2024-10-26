@@ -1,11 +1,11 @@
 <script lang="ts">
-    import * as Tooltip from "$lib/components/ui/tooltip";
-    import { Button } from "$lib/components/ui/button";
-    import { Icon } from "svelte-icons-pack";
+import { Button } from "$lib/components/ui/button";
+import * as Tooltip from "$lib/components/ui/tooltip";
+import { Icon } from "svelte-icons-pack";
 
-    //eslint-disable-next-line
-    export let link: any;
-    export let pathname: string;
+//eslint-disable-next-line
+export let link: any;
+export let pathname: string;
 </script>
 
 <Tooltip.Root>

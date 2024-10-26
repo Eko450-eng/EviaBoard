@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { Avatar as AvatarPrimitive } from "bits-ui";
-	import { cn } from "$lib/utils.js";
+import { cn } from "$lib/utils.js";
+import type { Avatar as AvatarPrimitive } from "bits-ui";
 
-	type $$Props = AvatarPrimitive.Props;
+type $$Props = AvatarPrimitive.Props;
 
-	let className: $$Props["class"] = undefined;
-	export let delayMs: $$Props["delayMs"] = undefined;
-	export { className as class };
+const className: $$Props["class"] = undefined;
+export const delayMs: $$Props["delayMs"] = undefined;
+export { className as class };
 </script>
 
 <AvatarPrimitive.Root

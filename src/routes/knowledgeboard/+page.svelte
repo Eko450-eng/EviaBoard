@@ -1,75 +1,72 @@
 <script lang="ts">
-    import * as Command from "../../lib/components/ui/command/index.js";
-    import * as Popover from "../../lib/components/ui/popover/index.js";
-    import * as Card from "../../lib/components/ui/card/index.js";
-    import Cross from "svelte-radix/Cross1.svelte";
-    import { onMount, tick } from "svelte";
-    import { Button } from "../../lib/components/ui/button/index.js";
-    import { Toggle } from "../../lib/components/ui/toggle/index.js";
-    import { checkLoggedIn, DB, userData } from "../store.js";
-    import { goto, invalidateAll } from "$app/navigation";
-    import { page } from "$app/stores";
-    import DeleteDialog from "./delete-dialog.svelte";
-    import RecoverDialog from "./recover-dialog.svelte";
-    import AvatarBar from "$lib/components/mycomp/avatar.svelte";
-    import type { Post, Topic } from "@/types.js";
-    import Plus from "svelte-radix/Plus.svelte";
-    import Cartarender from "@/components/mycomp/cartarender.svelte";
-    import { formatDate } from "@/helpers/formating.js";
-    import { FaCalendarDays } from "svelte-icons-pack/fa";
-    import { Icon } from "svelte-icons-pack";
+import { goto, invalidateAll } from "$app/navigation";
+import { page } from "$app/stores";
+import AvatarBar from "$lib/components/mycomp/avatar.svelte";
+import Cartarender from "@/components/mycomp/cartarender.svelte";
+import { formatDate } from "@/helpers/formating.js";
+import type { Post, Topic } from "@/types.js";
+import { onMount, tick } from "svelte";
+import { Icon } from "svelte-icons-pack";
+import { FaCalendarDays } from "svelte-icons-pack/fa";
+import Cross from "svelte-radix/Cross1.svelte";
+import Plus from "svelte-radix/Plus.svelte";
+import { Button } from "../../lib/components/ui/button/index.js";
+import * as Card from "../../lib/components/ui/card/index.js";
+import * as Command from "../../lib/components/ui/command/index.js";
+import * as Popover from "../../lib/components/ui/popover/index.js";
+import { Toggle } from "../../lib/components/ui/toggle/index.js";
+import { DB, checkLoggedIn, userData } from "../store.js";
+import DeleteDialog from "./delete-dialog.svelte";
+import RecoverDialog from "./recover-dialog.svelte";
 
-    let topics: Array<Topic> | Array<{ id: string; name: string }> | undefined =
-        [{ name: "Select a Topic", id: "placeholder" }];
+let topics: Array<Topic> | Array<{ id: string; name: string }> | undefined = [
+	{ name: "Select a Topic", id: "placeholder" },
+];
 
-    let open = false;
-    let value = "";
+let open = false;
+const value = "";
 
-    export let data: {
-        posts: Post[] | undefined;
-        topics: Topic[] | undefined;
-        failed: boolean;
-    };
+export let data: {
+	posts: Post[] | undefined;
+	topics: Topic[] | undefined;
+	failed: boolean;
+};
 
-    topics = data.topics;
+topics = data.topics;
 
-    $: selectedValue =
-        topics?.find((f) => f.name === value)?.name ?? "Select a Topic";
+$: selectedValue =
+	topics?.find((f) => f.name === value)?.name ?? "Select a Topic";
 
-    function closeAndFocusTrigger(triggerId: string) {
-        open = false;
-        tick().then(() => {
-            document.getElementById(triggerId)?.focus();
-        });
-    }
+function closeAndFocusTrigger(triggerId: string) {
+	open = false;
+	tick().then(() => {
+		document.getElementById(triggerId)?.focus();
+	});
+}
 
-    onMount(async () => {
-        checkLoggedIn();
-        if (data.failed) goto("/");
+onMount(async () => {
+	checkLoggedIn();
+	if (data.failed) goto("/");
 
-        // eslint-disable-next-line
-        const queryUuid = await $DB?.live("posts", (action, _result) => {
-            if (action === "CLOSE") return;
-        });
-        // eslint-disable-next-line
-        await $DB?.subscribeLive(queryUuid!, async (action, _result) => {
-            if (
-                action === "CREATE" ||
-                action === "UPDATE" ||
-                action === "DELETE"
-            ) {
-                await invalidateAll();
-            }
-        });
-    });
+	// eslint-disable-next-line
+	const queryUuid = await $DB?.live("posts", (action, _result) => {
+		if (action === "CLOSE") return;
+	});
+	// eslint-disable-next-line
+	await $DB?.subscribeLive(queryUuid!, async (action, _result) => {
+		if (action === "CREATE" || action === "UPDATE" || action === "DELETE") {
+			await invalidateAll();
+		}
+	});
+});
 
-    let deleteDialog = false;
-    let postToDelete: Post | undefined;
+const deleteDialog = false;
+let postToDelete: Post | undefined;
 
-    let recoverDialog = false;
-    let postToRecover: Post | undefined;
+const recoverDialog = false;
+let postToRecover: Post | undefined;
 
-    let showDeleted: boolean = false;
+const showDeleted = false;
 </script>
 
 <div class="flex flex-wrap p-4 items-center justify-between">
