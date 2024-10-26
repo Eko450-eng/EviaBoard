@@ -5,8 +5,18 @@
     import "../app.css";
     import { Toaster } from "$lib/components/ui/sonner";
     import { onMount } from "svelte";
-    import { checkAdminMode, checkLoggedIn, DB, userData } from "./store";
-    import { adminOnly } from "@/helpers/admin";
+    import { checkAdminMode, checkLoggedIn, DB } from "./store";
+    import { Button } from "$ui/button";
+    import { afterNavigate, goto } from "$app/navigation";
+    import { FaSolidArrowLeft } from "svelte-icons-pack/fa";
+    import { Icon } from "svelte-icons-pack";
+
+    let previousPage = $state("/");
+
+    afterNavigate(({ from }) => {
+        if (!from?.url) return;
+        previousPage = from.url.pathname || previousPage;
+    });
 
     onMount(async () => {
         checkLoggedIn();
@@ -35,7 +45,12 @@
                 </div>
             </nav>
         </aside>
-        <div class="logo"></div>
+        <div class="flex flex-row gap-4 items-center">
+            <Button variant="outline" on:click={() => goto("/knowledgeboard")}>
+                <Icon src={FaSolidArrowLeft} />
+            </Button>
+            <div class="logo"></div>
+        </div>
         <slot></slot>
     </main>
 </div>

@@ -4,10 +4,12 @@ self.__WB_MANIFEST;
 
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST || []);
 
+// tslint:disable-next-line
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing.');
 });
 
+// tslint:disable-next-line
 self.addEventListener('activate', (event) => {
   console.log('Service Worker activated.');
 });

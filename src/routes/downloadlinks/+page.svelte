@@ -47,6 +47,7 @@
             description:  "${postData.description}",
             link:  "${postData.link}",
             owner: ${user_id},
+            created_at: d"${new Date().toISOString()}", 
         }`,
             )
             .then(() => {
@@ -127,9 +128,9 @@
 <div>
     {#each downloadlinks as link}
         <div class="flex flex-wrap w-full justify-between my-2">
-            <Button variant="link" href={link.link} target="_blank">
-                <h1>{link.name}</h1>
-                <p>{link.description}</p>
+            <Button class="gap-3" variant="link" href={link.link} target="_blank">
+                <p>{link.name}</p>
+                <p class="text-gray-500">{link.description}</p>
             </Button>
             {#if $userData.id && link.owner.tb + ":" + link.owner.id == $userData.id.toString()}
                 <Button

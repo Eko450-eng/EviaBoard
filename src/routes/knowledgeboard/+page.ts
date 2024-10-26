@@ -4,7 +4,7 @@ import type { Post, Topic } from "@/types";
 
 async function queryPosts() {
   let query =
-    "select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE  !deleted OR deleted AND owner = $auth.id";
+    "select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted, created_at from posts WHERE  !deleted OR deleted AND owner = $auth.id";
   let posts_raw = await db?.query<Array<Array<Post>>>(query);
   if (!posts_raw) return;
   return posts_raw[0];

@@ -1,5 +1,5 @@
-import type { user } from "@/db";
 import { getFromMinio, uploadToMinio } from "@/minio";
+import type { User } from "@/types";
 
 let file: File | null;
 
@@ -8,6 +8,18 @@ export function fileUploadHandler(e: Event) {
   if (!input.files || !input.files[0]) return;
   file = input.files[0];
 }
+
+export const uploadFileGeneric = async (input: File): Promise<string | null> => {
+  if (!input) return null;
+
+  try {
+    uploadToMinio("eviaboard", input.name, input);
+    return `https://minio.eko450eng.org/eviaboard/${input.name} =100x100`
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    return null
+  }
+};
 
 // Function to handle the file upload
 export const uploadFile = async (fileName: string): Promise<{ success: boolean, msg: string }> => {
@@ -32,8 +44,9 @@ export const uploadFile = async (fileName: string): Promise<{ success: boolean, 
   }
 };
 
-export async function generateAvatar(userData: user) {
+export async function generateAvatar(userData: User) {
   let image: any;
+  if(!userData.id) return;
 
   let userid = userData.id.toString();
   let userImage = userid + ".png";
@@ -42,3 +55,5 @@ export async function generateAvatar(userData: user) {
 
   await uploadFile(userData.id + ".png");
 }
+
+

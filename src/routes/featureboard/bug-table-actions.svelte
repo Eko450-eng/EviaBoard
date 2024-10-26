@@ -18,7 +18,7 @@
 
     async function upvote(id: string) {
         let recordId = new RecordId("bugreports", id);
-        let userId = new RecordId("user", $userData.id.id);
+        let userId = new RecordId("user", $userData.id? $userData.id.id : "");
 
         let report = await db?.select<Report>(recordId);
 

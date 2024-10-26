@@ -88,12 +88,12 @@
                 {/if}
             </div>
             <div class="flex flex-col">
-                <h2 class="text-1xl p-2 text-gray-500">
+                <p class="p-2 text-gray-500">
                     <span class="flex items-center gap-2">
                         <Icon src={FaCalendarDays} size={15} />
                         {formatDate(post.date)}
                     </span>
-                </h2>
+                </p>
                 <ul class="feature-description-list-item list-disc">
                     {#each post.newspost as entry}
                         <li>

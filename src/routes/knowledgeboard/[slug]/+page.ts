@@ -1,12 +1,13 @@
 import type { Post, Topic } from "@/types";
 import Surreal from "surrealdb";
 import { env } from "$env/dynamic/public";
+import { db } from "@/db";
 
 export let ssr = false
 let HOST = env.PUBLIC_DB_HOST;
 let guestpw = env.PUBLIC_DB_GUEST_PW;
 
-let db = new Surreal();
+// let db = new Surreal();
 
 async function queryPosts(id: string) {
   let query =
@@ -23,34 +24,23 @@ async function queryTopics() {
 
 
 async function loadPageData(id: string) {
-  try {
-    await db.connect(HOST
-      , {
-        versionCheck: false,
-        auth: {
-          namespace: "evia",
-          database: "knowledgebase",
-          username: "eviaguest",
-          password: guestpw
-        }
-      }
-    )
-  } catch (err) {
-    // throw err;
-    console.error("FAIL")
-  }
+  // try {
+  //   await db.connect(HOST
+  //     , {
+  //       versionCheck: false,
+  //       auth: {
+  //         namespace: "evia",
+  //         database: "knowledgebase",
+  //         username: "eviaguest",
+  //         password: guestpw
+  //       }
+  //     }
+  //   )
+  // } catch (err) {
+  //   console.error("FAIL")
+  // }
 
-
-  //checkLoggedIn()
-  // let user = get(userData);
   let response;
-  // if (!user.email) {
-  //   response = {
-  //     posts: [],
-  //     topics: [],
-  //     failed: true
-  //   }
-  // } else {
   let resPosts = await queryPosts(id);
   let resTopics = await queryTopics();
   response = {
@@ -58,15 +48,14 @@ async function loadPageData(id: string) {
     topics: resTopics,
     failed: false
   }
-  //}
   return response
 }
 
 
-export async function load({ params, parent }: any) {
-  await parent()
+export async function load({ params }: any) {
+  console.time("Startd")
   let data = await loadPageData(params.slug);
-  console.log("Hier", data)
+  console.timeEnd("Startd")
   return data
 }
 

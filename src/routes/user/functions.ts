@@ -34,8 +34,8 @@ export function requestNotificationPermission() {
 }
 
 export async function sendSubscriptionToServer(subscription: PushSubscription, userData: User, isSubscribed: boolean) {
-  let d = subscription.toJSON();
-  let data = {
+  const d = subscription.toJSON();
+  const data = {
     endpoint: d.endpoint,
     keys: d.keys,
     expirationTime: d.expirationTime,
@@ -108,7 +108,7 @@ export async function unsubscribe(isSubscribed: boolean, userData: User) {
       await registration.pushManager.getSubscription();
     if (subscription) {
       await subscription.unsubscribe();
-      let query = `DELETE FROM pushkey WHERE user = ${userData.id} AND data.endpoint = '${subscription.endpoint}'`;
+      const query = `DELETE FROM pushkey WHERE user = ${userData.id} AND data.endpoint = '${subscription.endpoint}'`;
       await db?.query(query)
       isSubscribed = false;
     }

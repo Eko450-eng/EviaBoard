@@ -10,7 +10,7 @@
         <Avatar.Image src={user.image} />
         <Avatar.Fallback>CN</Avatar.Fallback>
     </Avatar.Root>
-    <h2 class="text-1xl p-2">
+    <p class="p-2">
         {user.name}
-    </h2>
+    </p>
 </div>

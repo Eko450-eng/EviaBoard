@@ -11,10 +11,13 @@
     import { page } from "$app/stores";
     import DeleteDialog from "./delete-dialog.svelte";
     import RecoverDialog from "./recover-dialog.svelte";
-    import AddPostDialog from "./add-post.svelte";
     import AvatarBar from "$lib/components/mycomp/avatar.svelte";
-    import DescriptionWithImage from "./description-with-image.svelte";
     import type { Post, Topic } from "@/types.js";
+    import Plus from "svelte-radix/Plus.svelte";
+    import Cartarender from "@/components/mycomp/cartarender.svelte";
+    import { formatDate } from "@/helpers/formating.js";
+    import { FaCalendarDays } from "svelte-icons-pack/fa";
+    import { Icon } from "svelte-icons-pack";
 
     let topics: Array<Topic> | Array<{ id: string; name: string }> | undefined =
         [{ name: "Select a Topic", id: "placeholder" }];
@@ -58,10 +61,6 @@
         });
     });
 
-    let selectedTopic: any = "";
-
-    let addPostOpen = false;
-
     let deleteDialog = false;
     let postToDelete: Post | undefined;
 
@@ -83,7 +82,9 @@
         </Toggle>
     {/if}
 
-    <AddPostDialog bind:addPostOpen {selectedTopic} {topics} />
+    <Button variant="outline" on:click={() => goto("/knowledgeboard/add")}>
+        <Plus />
+    </Button>
 </div>
 
 <div class="p-4">
@@ -163,9 +164,11 @@
                                             <div
                                                 class="flex flex-col space-y-1.5"
                                             >
-                                                <DescriptionWithImage
-                                                    {post}
-                                                    clickable={false}
+                                                <Cartarender
+                                                    text={post.body.substring(
+                                                        0,
+                                                        30,
+                                                    ) + "..."}
                                                 />
                                             </div>
                                         </div>
@@ -174,6 +177,15 @@
                                 <Card.Footer class="flex justify-between">
                                     <Card.Description>
                                         <AvatarBar user={post.owner} />
+                                        <span
+                                            class="flex items-center gap-2"
+                                        >
+                                            <Icon
+                                                src={FaCalendarDays}
+                                                size={15}
+                                            />
+                                            {formatDate(post.created_at)}
+                                        </span>
                                     </Card.Description>
                                     {#if $userData.id}
                                         {#if post.owner.id.toString() === $userData.id.toString() && !post.deleted}
@@ -205,6 +217,10 @@
 </div>
 
 <style>
+    :global(.carta-font-code) {
+        font-family: "...", monospace;
+        font-size: 1.1rem;
+    }
     .deleted {
         color: red;
     }

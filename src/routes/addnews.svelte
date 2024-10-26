@@ -29,7 +29,6 @@
                     CREATE news CONTENT{ 
                         title:  "${postData.title}", 
                         owner: ${$userData.id}, 
-                        date: d"${postData.date.toISOString()}", 
                     }
                     `,
                 )

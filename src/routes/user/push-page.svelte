@@ -45,22 +45,6 @@
                 $userData,
                 isSubscribed,
             );
-
-            //if (!isSubscribed) {
-            //    if (!$userData.email) {
-            //    } else {
-            //        userData.subscribe(async () => {
-            //            if (isSubscribed) return;
-            //            if (!$userData.email) {
-            //            console.log("retry")
-            //                await subscribeUser(isSubscribed, $userData);
-            //            }
-            //        });
-            //    }
-            //    {
-            //        await subscribeUser(isSubscribed, $userData);
-            //    }
-            //}
         }
 
         await getChannels();
