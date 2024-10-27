@@ -63,8 +63,8 @@ onMount(async () => {
 	subscribeNews(queryUuidNewsPostRelation);
 });
 
-const addPostOpen = false;
-const addNewsPostOpen = false;
+let addPostOpen = false;
+let addNewsPostOpen = false;
 let selectedPost: News | undefined;
 </script>
 
