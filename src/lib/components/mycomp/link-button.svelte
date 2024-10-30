@@ -1,29 +1,31 @@
 <script lang="ts">
-    import * as Tooltip from "$lib/components/ui/tooltip";
-    import { Button } from "$lib/components/ui/button";
-    import { Icon } from "svelte-icons-pack";
+import * as Tooltip from '$lib/components/ui/tooltip';
+import { Button } from '$lib/components/ui/button';
+import { Icon } from 'svelte-icons-pack';
 
-    //eslint-disable-next-line
-    export let link: any;
-    export let pathname: string;
+//eslint-disable-next-line
+export let link: any;
+export let pathname: string;
 </script>
 
-<Tooltip.Root>
-    <Tooltip.Trigger asChild let:builder>
-        <Button aria-label={link.value} variant="link" builders={[builder]} href={link.value}>
-            <span
-                class={pathname === link.value
-                    ? "linkButton-active text-muted-foreground"
-                    : "linkButton text-secondary-foreground"}
-            >
-                <Icon src={link.icon} size={24} />
-            </span>
-        </Button>
-    </Tooltip.Trigger>
-    <Tooltip.Content>
-        <p>{link.name}</p>
-    </Tooltip.Content>
-</Tooltip.Root>
+<Tooltip.Provider>
+    <Tooltip.Root>
+        <Tooltip.Trigger>
+            <Button aria-label={link.value} variant="link" href={link.value}>
+                <span
+                    class={pathname === link.value
+                        ? "linkButton-active text-muted-foreground"
+                        : "linkButton text-secondary-foreground"}
+                >
+                    <Icon src={link.icon} size={24} />
+                </span>
+            </Button>
+        </Tooltip.Trigger>
+        <Tooltip.Content>
+            <p>{link.name}</p>
+        </Tooltip.Content>
+    </Tooltip.Root>
+</Tooltip.Provider>
 
 <style>
     .linkButton, .linkButton-active  {

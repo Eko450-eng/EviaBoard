@@ -1,70 +1,64 @@
 <script lang="ts">
-    import * as Select from "$lib/components/ui/select/index.js";
-    import { db } from "$lib/db";
-    import { toast } from "svelte-sonner";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import { userData } from "../../store.js";
-    import { Label } from "$lib/components/ui/label/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
-    import type { Post, Topic } from "@/types.js";
-    import { sendPush } from "@/helpers/push.js";
-    import Cartaeditor from "@/components/mycomp/cartaeditor.svelte";
-    import { RecordId } from "surrealdb";
+import * as Select from '$lib/components/ui/select/index.js';
+import { db } from '$lib/db';
+import { toast } from 'svelte-sonner';
+import { Button } from '$lib/components/ui/button/index.js';
+import { userData } from '../../store.js';
+import { Label } from '$lib/components/ui/label/index.js';
+import { Input } from '$lib/components/ui/input/index.js';
+import type { Post, Topic } from '@/types.js';
+import { sendPush } from '@/helpers/push.js';
+import { RecordId } from 'surrealdb';
+import carta from '@/helpers/carta.js';
+import { MarkdownEditor } from 'carta-md';
 
-    let { data } = $props();
-    // eslint-disable-next-line
-    let selectedTopic: any = $state();
-    let topics: Topic[] = $state([]);
+let { data } = $props();
+// eslint-disable-next-line
+let value: any = $state();
+let topics: Topic[] = $state([]);
 
-    let postData: Post = $state({
-        deleted: false,
-        title: "",
-        body: "",
-        solution: "",
-        owner: new RecordId("", ""),
-        topic: "",
-    });
+let postData: Post = $state({
+	deleted: false,
+	title: '',
+	body: '',
+	solution: '',
+	owner: new RecordId('', ''),
+	topic: new RecordId('', ''),
+});
 
-    $effect(() => {
-        topics = data.topics as Topic[];
-    });
+$effect(() => {
+	topics = data.topics as Topic[];
+});
 
-    async function addPost() {
-        let topic = `topics:${selectedTopic}`;
-        postData.topic = topic;
+async function addPost() {
+	let topic = new RecordId('topics', value);
+	postData.topic = topic;
+	postData.owner = $userData.id!;
 
-        if (postData.topic === "") {
-            toast.error("Fehler", {
-                description: "Kategorie nicht vergessen!",
-            });
-            return;
-        }
-        try {
-            if (!postData) return;
-            await db
-                ?.query(
-                    ` CREATE posts CONTENT{
-            title:  "${postData.title}",
-            deleted:  ${postData.deleted},
-            body:  "${postData.body}",
-            solution:  "${postData.solution}",
-            owner: ${$userData.id},
-            topic: ${topic},
-            created_at: d"${new Date().toISOString()}"
-        }`,
-                )
-                .then(() => {
-                    sendPush(
-                        "New Posts",
-                        `Es gab einen neuen Post von ${$userData.name} - ${postData.title}`,
-                    );
-                });
-        } catch (e) {
-            toast.error("Fehler", {
-                description: `This failed due to: ${e}, probably not my fault`,
-            });
-        }
-    }
+	if (!postData.topic || postData.topic === new RecordId('', '')) {
+		toast.error('Fehler', {
+			description: 'Kategorie nicht vergessen!',
+		});
+		return;
+	}
+	try {
+		if (!postData) return;
+		await db?.create<Post>('posts', postData).then(() => {
+			sendPush(
+				'New Posts',
+				`Es gab einen neuen Post von ${$userData.name} - ${postData.title}`,
+			);
+		});
+	} catch (e) {
+		console.error(e);
+		toast.error('Fehler', {
+			description: `This failed due to: ${e}, probably not my fault`,
+		});
+	}
+}
+const triggerContent = $derived(
+	data.topics!.find((f) => f.name === value)?.name ?? 'Kategorie',
+);
 </script>
 
 <h1>Post beitragen</h1>
@@ -76,37 +70,36 @@
     </div>
     <div>
         <Label for="body" class="text-right">Beschreibung</Label>
-        <Cartaeditor bind:text={postData.body} />
+        <MarkdownEditor
+            mode="tabs"
+            theme="discord"
+            {carta}
+            bind:value={postData.body}
+        />
     </div>
     <div>
         <Label for="solution" class="text-right">Lösung</Label>
-        <Cartaeditor bind:text={postData.solution} />
+        <MarkdownEditor
+            mode="tabs"
+            theme="discord"
+            {carta}
+            bind:value={postData.solution}
+        />
     </div>
-    <Select.Root
-        selected={selectedTopic}
-        onSelectedChange={(v) => {
-            // eslint-disable-next-line
-            v && (selectedTopic = v.value);
-        }}
-    >
-        <Select.Trigger class="w-[180px]">
-            <Select.Value
-                placeholder={selectedTopic == "" ? "Kategorie" : selectedTopic}
-            />
-        </Select.Trigger>
-        <Select.Content>
-            <Select.Group>
-                <Select.Label>Themen</Select.Label>
-                {#if topics}
-                    {#each topics as topic}
-                        <Select.Item value={topic.name} label={topic.name}
-                            >{topic.name}</Select.Item
-                        >
-                    {/each}
-                {/if}
-            </Select.Group>
-        </Select.Content>
-        <Select.Input name="selectedTopic" />
+    <Select.Root type="single" name="topic" bind:value={value}>
+      <Select.Trigger class="w-[180px]">
+        {triggerContent}
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Group>
+          <Select.GroupHeading>Kategorie</Select.GroupHeading>
+          {#each data.topics! as topic}
+            <Select.Item value={topic.name} label={topic.name}
+              >{topic.name}</Select.Item
+            >
+          {/each}
+        </Select.Group>
+      </Select.Content>
     </Select.Root>
 </div>
-<Button type="submit" on:click={addPost}>Posten</Button>
+<Button type="submit" onclick={addPost}>Posten</Button>

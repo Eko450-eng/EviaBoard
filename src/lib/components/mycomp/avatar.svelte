@@ -1,8 +1,8 @@
 <script lang="ts">
-    import * as Avatar from "$ui/avatar/index";
-    import type { User } from "$lib/types";
+import * as Avatar from '$ui/avatar/index';
+import type { User } from '$lib/types';
 
-    export let user: User;
+export let user: User;
 </script>
 
 <div class="flex center mx-2 items-center">

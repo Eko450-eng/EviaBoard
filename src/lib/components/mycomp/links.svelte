@@ -1,49 +1,48 @@
 <script lang="ts">
+import { page } from '$app/stores';
+import { isLoggedIn } from '../../../routes/store';
+import LinkButton from './link-button.svelte';
+import {
+	FaSolidArrowRightToBracket,
+	FaSolidBook,
+	FaSolidDownload,
+	FaSolidGlobe,
+	FaSolidHouse,
+} from 'svelte-icons-pack/fa';
 
-    import { page } from "$app/stores";
-    import { isLoggedIn } from "../../../routes/store";
-    import LinkButton from "./link-button.svelte";
-    import {
-        FaSolidArrowRightToBracket,
-        FaSolidBook,
-        FaSolidDownload,
-        FaSolidGlobe,
-        FaSolidHouse,
-    } from "svelte-icons-pack/fa";
+let authenticatedLinks = [
+	{
+		icon: FaSolidBook,
+		name: 'knowledgeboard',
+		value: '/knowledgeboard',
+	},
+	{
+		icon: FaSolidDownload,
+		name: 'Links',
+		value: '/downloadlinks',
+	},
+	{
+		icon: FaSolidGlobe,
+		name: 'ASB',
+		value: '/asb',
+	},
+];
 
-    let authenticatedLinks = [
-        {
-            icon: FaSolidBook,
-            name: "knowledgeboard",
-            value: "/knowledgeboard",
-        },
-        {
-            icon: FaSolidDownload,
-            name: "Links",
-            value: "/downloadlinks",
-        },
-        {
-            icon: FaSolidGlobe,
-            name: "ASB",
-            value: "/asb",
-        },
-    ];
+let unauthenticatedLinks = [
+	{
+		icon: FaSolidArrowRightToBracket,
+		name: 'Login or Signup',
+		value: '/login',
+	},
+];
 
-    let unauthenticatedLinks = [
-        {
-            icon: FaSolidArrowRightToBracket,
-            name: "Login or Signup",
-            value: "/login",
-        },
-    ];
-
-    let links = [
-        {
-            icon: FaSolidHouse,
-            name: "Home & News",
-            value: "/",
-        },
-    ];
+let links = [
+	{
+		icon: FaSolidHouse,
+		name: 'Home & News',
+		value: '/',
+	},
+];
 </script>
 
 {#each links as link}

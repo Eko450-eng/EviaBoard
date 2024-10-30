@@ -7,7 +7,9 @@
     import { Input } from "$lib/components/ui/input/index.js";
     import type { Post, Topic } from "@/types.js";
     import { goto } from "$app/navigation";
-    import Cartaeditor from "@/components/mycomp/cartaeditor.svelte";
+    import { RecordId } from "surrealdb";
+    import carta from "@/helpers/carta.js";
+    import { MarkdownEditor } from "carta-md";
 
     let { data } = $props();
     // eslint-disable-next-line
@@ -33,7 +35,7 @@
         title: "",
         body: "",
         solution: "",
-        owner: { id: "", name: "" },
+        owner: new RecordId("", ""),
         topic: "",
     });
 
@@ -84,26 +86,28 @@
     <div>
         <Label for="body" class="text-right">Beschreibung</Label>
     </div>
-    <Cartaeditor bind:text={postData.body} />
+    <MarkdownEditor
+        mode="tabs"
+        theme="discord"
+        {carta}
+        bind:value={postData.body}
+    />
     <div>
         <Label for="solution" class="text-right">Lösung</Label>
-        <Cartaeditor bind:text={postData.solution} />
+        <MarkdownEditor
+            mode="tabs"
+            theme="discord"
+            {carta}
+            bind:value={postData.solution}
+        />
     </div>
-    <Select.Root
-        selected={selectedTopic}
-        onSelectedChange={(v) => {
-            // eslint-disable-next-line
-            v && (selectedTopic = v.value);
-        }}
-    >
+    <Select.Root type="single">
         <Select.Trigger class="w-[180px]">
-            <Select.Value
-                placeholder={selectedTopic == "" ? "Kategorie" : selectedTopic}
-            />
+            <Select.Item value={selectedTopic} />
         </Select.Trigger>
         <Select.Content>
             <Select.Group>
-                <Select.Label>Themen</Select.Label>
+                <Select.GroupHeading>Themen</Select.GroupHeading>
                 {#if topics}
                     {#each topics as topic}
                         <Select.Item value={topic.name} label={topic.name}
@@ -113,7 +117,6 @@
                 {/if}
             </Select.Group>
         </Select.Content>
-        <Select.Input name="selectedTopic" />
     </Select.Root>
 </div>
-<Button type="submit" on:click={editPost}>Updaten</Button>
+<Button type="submit" onclick={editPost}>Updaten</Button>

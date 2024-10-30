@@ -1,10 +1,11 @@
+
     .carta-theme__github {
         // Core styles
         $background: #0d1117;
         $background-light: #161b22;
         $border: #2b3138;
         $accent: #1f6feb;
-
+      
         max-width: 70vw;
 
         &.carta-editor {
@@ -32,7 +33,6 @@
                 font-family: "Fira Code", monospace;
                 caret-color: white;
                 font-size: 1.1rem;
-                color: white;
             }
 
             .carta-toolbar {
@@ -211,5 +211,5 @@
 
     html.dark .shiki,
     html.dark .shiki span {
-        color: white !important;
+        color: var(--shiki-dark) !important;
     }

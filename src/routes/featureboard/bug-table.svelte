@@ -1,269 +1,265 @@
 <script lang="ts">
-    import {
-        createTable,
-        Render,
-        Subscribe,
-        createRender,
-    } from "svelte-headless-table";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { writable } from "svelte/store";
-    import * as Table from "$lib/components/ui/table";
-    import { Input } from "$lib/components/ui/input";
-    import DataTableActions from "./bug-table-actions.svelte";
-    import { addSortBy, addTableFilter } from "svelte-headless-table/plugins";
-    import Button from "@/components/ui/button/button.svelte";
-    import { Icon } from "svelte-icons-pack";
-    import { BsArrowDownUp } from "svelte-icons-pack/bs";
-    import { db, getDb } from "$lib/db";
-    import { onMount } from "svelte";
-    import { env } from "$env/dynamic/public";
-    import type { Report as OriginalReport } from "@/types.js";
+import {
+	createTable,
+	Render,
+	Subscribe,
+	createRender,
+} from 'svelte-headless-table';
+import * as Dialog from '$lib/components/ui/dialog/index.js';
+import { writable } from 'svelte/store';
+import * as Table from '$lib/components/ui/table';
+import { Input } from '$lib/components/ui/input';
+import DataTableActions from './bug-table-actions.svelte';
+import { addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
+import Button from '@/components/ui/button/button.svelte';
+import { Icon } from 'svelte-icons-pack';
+import { BsArrowDownUp } from 'svelte-icons-pack/bs';
+import { db, getDb } from '$lib/db';
+import { onMount } from 'svelte';
+import { env } from '$env/dynamic/public';
+import type { Report as OriginalReport } from '@/types.js';
 
-    type Report = OriginalReport & {
-        // eslint-disable-next-line
-        value?: any;
-        // eslint-disable-next-line
-        original?: any;
-    };
+type Report = OriginalReport & {
+	// eslint-disable-next-line
+	value?: any;
+	// eslint-disable-next-line
+	original?: any;
+};
 
-    export let data: Report[] = [];
-    let cardOpen = false;
-    let cardContent: Report;
+export let data: Report[] = [];
+let cardOpen = false;
+let cardContent: Report;
 
-    let dataNew = writable(data);
-    let token = env.PUBLIC_EJ_TOKEN;
+let dataNew = writable(data);
+let token = env.PUBLIC_EJ_TOKEN;
 
-    async function getEJData() {
-        if (!token) return;
-        const ejParams = new URLSearchParams({
-            type: "ekoapi",
-            token: token,
-            action: "getReports",
-        }).toString();
-        const ejAPI = "https://ejberichtsheft.de/";
+async function getEJData() {
+	if (!token) return;
+	const ejParams = new URLSearchParams({
+		type: 'ekoapi',
+		token: token,
+		action: 'getReports',
+	}).toString();
+	const ejAPI = 'https://ejberichtsheft.de/';
 
-        const response = await fetch(`${ejAPI}?${ejParams}`, {}).then(
-            async (response) => {
-                // eslint-disable-next-line
-                let respon: Array<any> = await response.json();
-                let results: Report[] = [];
-                respon.forEach((res) => {
-                    let result: Report = {
-                        source: "Typer",
-                        id: res.report_key,
-                        title: res.report_title,
-                        body: res.report_description,
-                        status: res.report_state,
-                        category: res.report_type,
-                        upvotes: 0,
-                        owner: res.user_name,
-                    };
-                    results.push(result);
-                });
-                let oldSet = $dataNew;
-                oldSet = [...oldSet, ...results];
-                dataNew.set(oldSet);
-            },
-        );
-        return response;
-    }
+	const response = await fetch(`${ejAPI}?${ejParams}`, {}).then(
+		async (response) => {
+			// eslint-disable-next-line
+			let respon: Array<any> = await response.json();
+			let results: Report[] = [];
+			respon.forEach((res) => {
+				let result: Report = {
+					source: 'Typer',
+					id: res.report_key,
+					title: res.report_title,
+					body: res.report_description,
+					status: res.report_state,
+					category: res.report_type,
+					upvotes: 0,
+					owner: res.user_name,
+				};
+				results.push(result);
+			});
+			let oldSet = $dataNew;
+			oldSet = [...oldSet, ...results];
+			dataNew.set(oldSet);
+		},
+	);
+	return response;
+}
 
-    export async function updateTable() {
-        await getDb();
-        if (db && db.ready) {
-            await db
-                ?.query<
-                    Report[][]
-                >("select id, title, body, status, category, upvotes, owner.name as owner from bugreports WHERE status != 10")
-                .then((v) => {
-                    let responses = v[0];
-                    let results: Report[] = [];
+export async function updateTable() {
+	await getDb();
+	if (db && db.ready) {
+		await db
+			?.query<Report[][]>(
+				'select id, title, body, status, category, upvotes, owner.name as owner from bugreports WHERE status != 10',
+			)
+			.then((v) => {
+				let responses = v[0];
+				let results: Report[] = [];
 
-                    responses.forEach((res) => {
-                        let result: Report = {
-                            source: "Eviaboard",
-                            id: res.id,
-                            title: res.title,
-                            body: res.body,
-                            status: res.status,
-                            category: res.category,
-                            upvotes: res.upvotes,
-                            owner: res.owner,
-                        };
-                        results.push(result);
-                    });
+				responses.forEach((res) => {
+					let result: Report = {
+						source: 'Eviaboard',
+						id: res.id,
+						title: res.title,
+						body: res.body,
+						status: res.status,
+						category: res.category,
+						upvotes: res.upvotes,
+						owner: res.owner,
+					};
+					results.push(result);
+				});
 
-                    dataNew.set(results);
-                    getEJData();
-                    return v;
-                });
-        }
-    }
+				dataNew.set(results);
+				getEJData();
+				return v;
+			});
+	}
+}
 
-    onMount(async () => {
-        await getDb();
-        updateTable();
+onMount(async () => {
+	await getDb();
+	updateTable();
 
-        // eslint-disable-next-line
-        const queryUuid = await db?.live("bugreports", (action, _result) => {
-            if (action === "CLOSE") return;
-        });
-        // eslint-disable-next-line
-        await db?.subscribeLive(queryUuid!, async (action, _result) => {
-            if (
-                action === "CREATE" ||
-                action === "UPDATE" ||
-                action === "DELETE"
-            ) {
-                updateTable();
-            }
-        });
-    });
+	// eslint-disable-next-line
+	const queryUuid = await db?.live('bugreports', (action, _result) => {
+		if (action === 'CLOSE') return;
+	});
+	// eslint-disable-next-line
+	await db?.subscribeLive(queryUuid!, async (action, _result) => {
+		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
+			updateTable();
+		}
+	});
+});
 
-    let table = createTable(dataNew, {
-        sort: addSortBy(),
-        filter: addTableFilter({
-            fn: ({ filterValue, value }) => {
-                return value.toLowerCase().includes(filterValue.toLowerCase());
-            },
-        }),
-    });
+let table = createTable(dataNew, {
+	sort: addSortBy(),
+	filter: addTableFilter({
+		fn: ({ filterValue, value }) => {
+			return value.toLowerCase().includes(filterValue.toLowerCase());
+		},
+	}),
+});
 
-    const columns = table.createColumns([
-        table.column({
-            accessor: "source",
-            header: "App",
-            plugins: {
-                filter: {
-                    getFilterValue(value) {
-                        return "app:" + value;
-                    },
-                },
-                sort: {
-                    disable: false,
-                },
-            },
-        }),
-        table.column({
-            accessor: "title",
-            header: "title",
-            plugins: {
-                sort: {
-                    disable: false,
-                },
-            },
-        }),
-        table.column({
-            accessor: "body",
-            header: "body",
-            plugins: {
-                sort: {
-                    disable: false,
-                },
-            },
-            cell: ({ value }) => {
-                if (value.length > 30) {
-                    return `${value.substring(0, 30)}...`;
-                } else {
-                    return value;
-                }
-            },
-        }),
-        table.column({
-            accessor: "status",
-            header: "status",
-            plugins: {
-                filter: {
-                    getFilterValue(value) {
-                        return "status:" + value;
-                    },
-                },
-                sort: {
-                    disable: false,
-                },
-            },
-            cell: ({ value }) => {
-                switch (value) {
-                    case 0:
-                        return "Open";
-                    case 1:
-                        return "WIP";
-                    case 2:
-                        return "Accepted";
-                    case 3:
-                        return "Denied";
-                    case 4:
-                        return "Closed";
-                    case 10:
-                        return "Archived";
-                    default:
-                        return "Open";
-                }
-            },
-        }),
-        table.column({
-            accessor: "category",
-            header: "category",
-            plugins: {
-                filter: {
-                    getFilterValue(value) {
-                        return "category:" + value;
-                    },
-                },
-                sort: {
-                    disable: false,
-                },
-            },
-            cell: ({ value }) => {
-                switch (value) {
-                    case 0:
-                        return "Bug";
-                    case 1:
-                        return "Feature";
-                    case 2:
-                        return "Question";
-                    default:
-                        return "Bug";
-                }
-            },
-        }),
-        table.column({
-            accessor: "upvotes",
-            header: "upvotes",
-            plugins: {
-                sort: {
-                    disable: false,
-                },
-            },
-        }),
-        table.column({
-            accessor: "owner",
-            header: "owner",
-            plugins: {
-                sort: {
-                    disable: false,
-                },
-            },
-        }),
-        table.column({
-            accessor: "id",
-            header: "actions",
-            plugins: {
-                sort: {
-                    disable: true,
-                },
-            },
-            // eslint-disable-next-line
-            cell: ({ value }: any) => {
-                return createRender(DataTableActions, { id: value.id });
-            },
-        }),
-    ]);
+const columns = table.createColumns([
+	table.column({
+		accessor: 'source',
+		header: 'App',
+		plugins: {
+			filter: {
+				getFilterValue(value) {
+					return 'app:' + value;
+				},
+			},
+			sort: {
+				disable: false,
+			},
+		},
+	}),
+	table.column({
+		accessor: 'title',
+		header: 'title',
+		plugins: {
+			sort: {
+				disable: false,
+			},
+		},
+	}),
+	table.column({
+		accessor: 'body',
+		header: 'body',
+		plugins: {
+			sort: {
+				disable: false,
+			},
+		},
+		cell: ({ value }) => {
+			if (value.length > 30) {
+				return `${value.substring(0, 30)}...`;
+			} else {
+				return value;
+			}
+		},
+	}),
+	table.column({
+		accessor: 'status',
+		header: 'status',
+		plugins: {
+			filter: {
+				getFilterValue(value) {
+					return 'status:' + value;
+				},
+			},
+			sort: {
+				disable: false,
+			},
+		},
+		cell: ({ value }) => {
+			switch (value) {
+				case 0:
+					return 'Open';
+				case 1:
+					return 'WIP';
+				case 2:
+					return 'Accepted';
+				case 3:
+					return 'Denied';
+				case 4:
+					return 'Closed';
+				case 10:
+					return 'Archived';
+				default:
+					return 'Open';
+			}
+		},
+	}),
+	table.column({
+		accessor: 'category',
+		header: 'category',
+		plugins: {
+			filter: {
+				getFilterValue(value) {
+					return 'category:' + value;
+				},
+			},
+			sort: {
+				disable: false,
+			},
+		},
+		cell: ({ value }) => {
+			switch (value) {
+				case 0:
+					return 'Bug';
+				case 1:
+					return 'Feature';
+				case 2:
+					return 'Question';
+				default:
+					return 'Bug';
+			}
+		},
+	}),
+	table.column({
+		accessor: 'upvotes',
+		header: 'upvotes',
+		plugins: {
+			sort: {
+				disable: false,
+			},
+		},
+	}),
+	table.column({
+		accessor: 'owner',
+		header: 'owner',
+		plugins: {
+			sort: {
+				disable: false,
+			},
+		},
+	}),
+	table.column({
+		accessor: 'id',
+		header: 'actions',
+		plugins: {
+			sort: {
+				disable: true,
+			},
+		},
+		// eslint-disable-next-line
+		cell: ({ value }: any) => {
+			return createRender(DataTableActions, { id: value.id });
+		},
+	}),
+]);
 
-    const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-        table.createViewModel(columns);
+const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
+	table.createViewModel(columns);
 
-    const { filterValue } = pluginStates.filter;
+const { filterValue } = pluginStates.filter;
 </script>
 
 <div class="flex items-center py-4">
@@ -292,7 +288,7 @@
                                     {#if cell.id !== "id"}
                                         <Button
                                             variant="ghost"
-                                            on:click={props.sort.toggle}
+                                            onclick={props.sort.toggle}
                                         >
                                             <Render of={cell.render()} />
                                             <Icon
@@ -328,7 +324,7 @@
                                                     ? "bg-green-900 rounded-xl"
                                                     : ""
                                         : ""}
-                                    on:click={() => {
+                                    onclick={() => {
                                         if (cell.id !== "id") {
                                             cardOpen = true;
                                             cardContent = row.original;

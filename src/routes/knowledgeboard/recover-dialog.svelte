@@ -1,26 +1,26 @@
 <script lang="ts">
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { db} from "$lib/db";
-    import { Button } from "$lib/components/ui/button/index.js";
-    import type { Post } from "@/types";
+import * as Dialog from '$lib/components/ui/dialog/index.js';
+import { db } from '$lib/db';
+import { Button } from '$lib/components/ui/button/index.js';
+import type { Post } from '@/types';
 
-    async function recoverPost(data: Post) {
-        let newData = data;
-        newData.deleted = true;
-        await db?.patch(data.id!, [
-            {
-                op: "replace",
-                path: "/deleted",
-                value: false,
-            },
-        ]);
-    }
+async function recoverPost(data: Post) {
+	let newData = data;
+	newData.deleted = true;
+	await db?.patch(data.id!, [
+		{
+			op: 'replace',
+			path: '/deleted',
+			value: false,
+		},
+	]);
+}
 
-    export let recoverDialog: boolean;
-    export let postToRecover: Post | undefined;
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" || event.key === "Esc") recoverDialog = false;
-    });
+export let recoverDialog: boolean;
+export let postToRecover: Post | undefined;
+document.addEventListener('keydown', function (event) {
+	if (event.key === 'Escape' || event.key === 'Esc') recoverDialog = false;
+});
 </script>
 
 <Dialog.Root
@@ -32,7 +32,7 @@
             <Dialog.Title>Really?</Dialog.Title>
             <Button
                 variant="destructive"
-                on:click={() => {
+                onclick={() => {
                     if (postToRecover) {
                         recoverPost(postToRecover);
                         recoverDialog = !recoverDialog;
@@ -40,7 +40,7 @@
                 }}>Yes</Button
             >
             <Button
-                on:click={() => {
+                onclick={() => {
                     recoverDialog = !recoverDialog;
                     postToRecover = undefined;
                 }}>No</Button

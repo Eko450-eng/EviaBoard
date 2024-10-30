@@ -1,49 +1,49 @@
 <script lang="ts">
-    import {
-        adminMode,
-        changeAdminMode,
-        checkIsLoggedIn,
-        userData,
-    } from "../store";
-    import { Label } from "$ui/label";
-    import { Button } from "$ui/button";
-    import { Input } from "$ui/input";
-    import { fileUploadHandler } from "@/helpers/minio";
-    import { signOut } from "@/db";
-    import { toast } from "svelte-sonner";
-    import { Icon } from "svelte-icons-pack";
-    import { FaSolidArrowRightFromBracket } from "svelte-icons-pack/fa";
-    import { onMount } from "svelte";
-    import { updateUser } from "./functions";
-    import type { User } from "@/types";
-    import PushPage from "./push-page.svelte";
-    import { goto } from "$app/navigation";
+import {
+	adminMode,
+	changeAdminMode,
+	checkIsLoggedIn,
+	userData,
+} from '../store';
+import { Label } from '$ui/label';
+import { Button } from '$ui/button';
+import { Input } from '$ui/input';
+import { fileUploadHandler } from '@/helpers/minio';
+import { signOut } from '@/db';
+import { toast } from 'svelte-sonner';
+import { Icon } from 'svelte-icons-pack';
+import { FaSolidArrowRightFromBracket } from 'svelte-icons-pack/fa';
+import { onMount } from 'svelte';
+import { updateUser } from './functions';
+import type { User } from '@/types';
+import PushPage from './push-page.svelte';
+import { goto } from '$app/navigation';
 
-    let user: User = {
-        id: $userData.id,
-        password: $userData.password,
-        role: $userData.role,
-        email: $userData.email,
-        name: $userData.name,
-        image: $userData.image,
-    };
+let user: User = {
+	id: $userData.id,
+	password: $userData.password,
+	role: $userData.role,
+	email: $userData.email,
+	name: $userData.name,
+	image: $userData.image,
+};
 
-    onMount(async () => {
-        if (!$userData.email) goto("/");
-    });
+onMount(async () => {
+	if (!$userData.email) goto('/');
+});
 
-    async function handleUpdateUser() {
-        await updateUser($userData, user).then(() => {
-            toast.success("Yey", {
-                description: "User updated",
-            });
-        });
-    }
+async function handleUpdateUser() {
+	await updateUser($userData, user).then(() => {
+		toast.success('Yey', {
+			description: 'User updated',
+		});
+	});
+}
 </script>
 
 <div class="flex flex-col my-5">
     {#if $userData.role === "admin"}
-        <Button variant="outline" on:click={changeAdminMode}
+        <Button variant="outline" onclick={changeAdminMode}
             >Adminmode: {$adminMode ? "Activated" : "Disabled"}</Button
         >
     {/if}
@@ -54,7 +54,7 @@
         <h1 class="text-2xl">{$userData.name}</h1>
         <Button
             class="mx-4"
-            on:click={async () => {
+            onclick={async () => {
                 signOut().then((res) => {
                     if (res.error) {
                         toast.error(res.title, {
@@ -93,7 +93,7 @@
     <Label for="image">Image</Label>
 
     <div class="flex gap-2">
-        <Input type="file" on:change={fileUploadHandler} />
+        <Input type="file" onchange={fileUploadHandler} />
     </div>
     <Button class="my-4" type="submit" variant="secondary">Speichern</Button>
 </form>

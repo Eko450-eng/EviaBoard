@@ -1,18 +1,18 @@
 <script lang="ts">
-import { goto } from "$app/navigation";
-import { env } from "$env/dynamic/public";
-import * as Alert from "$lib/components/ui/alert/index.js";
-import { Button } from "$lib/components/ui/button";
-import AvatarBar from "@/components/mycomp/avatar.svelte";
-import CartaRender from "@/components/mycomp/cartarender.svelte";
-import Idview from "@/components/mycomp/idview.svelte";
-import type { User } from "@/types.js";
-import { RecordId } from "surrealdb";
-import { Icon } from "svelte-icons-pack";
-import { FaSolidPencil } from "svelte-icons-pack/fa";
-import { FiAlertTriangle } from "svelte-icons-pack/fi";
-import { userData } from "../../store.js";
-import Comments from "./comment-view.svelte";
+import { goto } from '$app/navigation';
+import { env } from '$env/dynamic/public';
+import * as Alert from '$lib/components/ui/alert/index.js';
+import { Button } from '$lib/components/ui/button';
+import AvatarBar from '@/components/mycomp/avatar.svelte';
+import CartaRender from '@/components/mycomp/cartarender.svelte';
+import Idview from '@/components/mycomp/idview.svelte';
+import type { User } from '@/types.js';
+import { RecordId } from 'surrealdb';
+import { Icon } from 'svelte-icons-pack';
+import { FaSolidPencil } from 'svelte-icons-pack/fa';
+import { FiAlertTriangle } from 'svelte-icons-pack/fi';
+import { userData } from '../../store.js';
+import Comments from './comment-view.svelte';
 
 const { data } = $props();
 
@@ -20,39 +20,39 @@ async function downloadPdf(onlySolution: boolean) {
 	const formData = new URLSearchParams();
 	if (onlySolution) {
 		if (!data.posts) return;
-		formData.append("markdown", data.posts[0].solution);
+		formData.append('markdown', data.posts[0].solution);
 	} else {
 		formData.append(
-			"markdown",
+			'markdown',
 			`${data.posts?.[0].body} ${data.posts?.[0].solution}`,
 		);
 	}
 
 	try {
-		const response = await fetch("https://md-to-pdf.fly.dev", {
-			method: "POST",
+		const response = await fetch('https://md-to-pdf.fly.dev', {
+			method: 'POST',
 			headers: {
-				"Content-Type": "application/x-www-form-urlencoded",
+				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: formData,
 		});
 
 		if (!response.ok) {
-			throw new Error("PDF konnte nicht generiert werden");
+			throw new Error('PDF konnte nicht generiert werden');
 		}
 
 		const blob = await response.blob();
 
 		const url = URL.createObjectURL(blob);
 
-		const a = document.createElement("a");
+		const a = document.createElement('a');
 		a.href = url;
 		a.download = `${data.posts?.[0].title}.pdf`;
 		a.click();
 
 		URL.revokeObjectURL(url);
 	} catch (error) {
-		console.error("Error:", error);
+		console.error('Error:', error);
 	}
 }
 </script>
@@ -67,7 +67,7 @@ async function downloadPdf(onlySolution: boolean) {
                     <Button
                         aria-label="Post bearbeiten"
                         variant="outline"
-                        on:click={() => goto(`/knowledgeboard/${post.id}/edit`)}
+                        onclick={() => goto(`/knowledgeboard/${post.id}/edit`)}
                     >
                         <Icon src={FaSolidPencil} />
                     </Button>
@@ -75,7 +75,7 @@ async function downloadPdf(onlySolution: boolean) {
                 <div class="flex items-center justify-between mr-5">
                     {post.title}
                     <div class={env.PUBLIC_FEATURE_DOWNLOAD === "1" ? "w-min" : "soon w-min"}>
-                        <Button variant="outline" disabled={env.PUBLIC_FEATURE_DOWNLOAD === "0"} on:click={()=>downloadPdf(true)}>
+                        <Button variant="outline" disabled={env.PUBLIC_FEATURE_DOWNLOAD === "0"} onclick={()=>downloadPdf(true)}>
                             Download als PDF
                         </Button>
                     </div>

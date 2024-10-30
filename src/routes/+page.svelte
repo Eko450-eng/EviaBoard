@@ -1,71 +1,48 @@
 <script lang="ts">
-import AvatarBar from "$lib/components/mycomp/avatar.svelte";
-import { Button } from "$lib/components/ui/button/index";
-import { Skeleton } from "$ui/skeleton";
-import { db } from "@/db";
-import { adminOnly } from "@/helpers/admin";
-import { formatDate } from "@/helpers/formating";
-import type { News, News_newspost } from "@/types";
-import type { Uuid } from "surrealdb";
-import { onMount } from "svelte";
-import { Icon } from "svelte-icons-pack";
-import { FaCalendarDays } from "svelte-icons-pack/fa";
-import Addnews from "./addnews.svelte";
-import Addnewspost from "./addnewspost.svelte";
-import { adminMode, userData } from "./store";
+import AvatarBar from '$lib/components/mycomp/avatar.svelte';
+import { Button } from '$lib/components/ui/button/index';
+import { Skeleton } from '$ui/skeleton';
+import { db } from '@/db';
+import { adminOnly } from '@/helpers/admin';
+import { formatDate } from '@/helpers/formating';
+import type { News, News_newspost, User } from '@/types';
+import type { Uuid } from 'surrealdb';
+import { onMount } from 'svelte';
+import { Icon } from 'svelte-icons-pack';
+import { FaCalendarDays } from 'svelte-icons-pack/fa';
+import Addnews from './addnews.svelte';
+import Addnewspost from './addnewspost.svelte';
+import { adminMode, userData } from './store';
+import { invalidateAll } from '$app/navigation';
 
-let news: News_newspost[];
+let { data } = $props();
+let news: News_newspost[] | undefined = $state(data.data);
 
-async function loadData() {
-	const query =
-		"SELECT *, owner.name, owner.image, -> news_post.out.* as newspost from news ORDER BY date desc";
-
-	const data = await db?.query<Array<Array<News_newspost>>>(query);
-
-	if (!data) return;
-	const d = data[0];
-	news = d;
-}
+$effect(() => {
+	news = data.data;
+});
 
 async function subscribeNews(queryUuid: Uuid | undefined) {
 	if (!queryUuid) return;
 	// eslint-disable-next-line
 	await db?.subscribeLive(queryUuid!, async (action, _result) => {
-		if (action === "CREATE" || action === "UPDATE" || action === "DELETE") {
-			await loadData();
+		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
+			await invalidateAll();
 		}
 	});
 }
 
 onMount(async () => {
-	await loadData();
 	// eslint-disable-next-line
-	const queryUuidNews = await db?.live("news", (action, _result) => {
-		if (action === "CLOSE") return;
+	const queryUuidNews = await db?.live('news', (action, _result) => {
+		if (action === 'CLOSE') return;
 	});
-	const queryUuidNewsPost = await db?.live(
-		"newspost",
-		// eslint-disable-next-line
-		(action, _result) => {
-			if (action === "CLOSE") return;
-		},
-	);
-	const queryUuidNewsPostRelation = await db?.live(
-		"news_post",
-		// eslint-disable-next-line
-		(action, _result) => {
-			if (action === "CLOSE") return;
-		},
-	);
-
 	subscribeNews(queryUuidNews);
-	subscribeNews(queryUuidNewsPost);
-	subscribeNews(queryUuidNewsPostRelation);
 });
 
-let addPostOpen = false;
-let addNewsPostOpen = false;
-let selectedPost: News | undefined;
+let addPostOpen = $state(false);
+let addNewsPostOpen = $state(false);
+let selectedPost: News | undefined = $state(undefined);
 </script>
 
 {#if adminOnly($userData, $adminMode)}
@@ -81,7 +58,7 @@ let selectedPost: News | undefined;
                 {#if adminOnly($userData, $adminMode)}
                     <Button
                         aria-label="Add a post"
-                        on:click={() => {
+                        onclick={() => {
                             if (!adminOnly($userData, $adminMode)) return;
                             selectedPost = post;
                             addNewsPostOpen = true;
@@ -104,7 +81,7 @@ let selectedPost: News | undefined;
                     {/each}
                 </ul>
             </div>
-            <AvatarBar user={post.owner} />
+            <AvatarBar user={post.owner as User} />
         </div>
     {/each}
 {:else}
@@ -121,13 +98,5 @@ let selectedPost: News | undefined;
     ul {
         margin-inline: 1rem;
         padding-inline: 1rem;
-    }
-
-    .main-feature-list-item {
-        list-style-type: disc;
-    }
-
-    .main-feature-list-item > ul {
-        list-style-type: circle;
     }
 </style>

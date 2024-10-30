@@ -3,7 +3,6 @@
 	$background: #2f3136;
 	$background-light: #161b22;
 	$background-contrast: #46484b;
-    color: white;
 
 	&.carta-editor {
 		background-color: $background;
@@ -79,7 +78,7 @@
 		min-width: 2rem;
 		height: 2rem;
 		font-size: 1.2rem;
-		line-height: 100%;
+		line-height: inherit;
 		text-align: center;
 		white-space: nowrap;
 	}
