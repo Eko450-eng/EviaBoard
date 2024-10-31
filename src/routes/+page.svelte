@@ -67,7 +67,7 @@ let selectedPost: News | undefined = $state(undefined);
                 {/if}
             </div>
             <div class="flex flex-col">
-                <p class="p-2 text-blue-200">
+                <p class="p-2 opacity-80">
                     <span class="flex items-center gap-2">
                         <Icon src={FaCalendarDays} size={15} />
                         {formatDate(post.date)}

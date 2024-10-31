@@ -133,7 +133,7 @@ onMount(async () => {
                 target="_blank"
             >
                 <p>{link.name}</p>
-                <p class="text-blue-200">{link.description}</p>
+                <p class="opacity-80">{link.description}</p>
             </Button>
             {#if $userData.id && link.owner.id == $userData.id}
                 <Button

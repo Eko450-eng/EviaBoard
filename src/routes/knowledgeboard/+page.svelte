@@ -14,6 +14,7 @@
     import Cartarender from "@/components/mycomp/cartarender.svelte";
     import { FaCalendarDays } from "svelte-icons-pack/fa";
     import { Icon } from "svelte-icons-pack";
+    import { formatDate } from "@/helpers/formating.js";
 
     let { data } = $props();
     let deleteDialog = $state(false);
@@ -95,8 +96,7 @@
                 {#if (showDeleted && post.deleted) || !post.deleted}
                     {#if selectedValue === "Kategorie" || post.topic === selectedValue.toLowerCase()}
                         <div class="hoverpointer w-full">
-                            <!-- <Card.Root class="my-2 w-[33%]"> -->
-                            <Card.Root class="">
+                            <Card.Root>
                                 <div
                                     class="hoverpointer"
                                     role="button"
@@ -134,12 +134,12 @@
                                 <Card.Footer class="flex justify-between">
                                     <Card.Description>
                                         <AvatarBar user={post.owner as User} />
-                                        <span class="flex items-center gap-2">
+                                        <span class="flex items-center gap-2 opacity-80">
                                             <Icon
                                                 src={FaCalendarDays}
                                                 size={15}
                                             />
-                                            <!-- {formatDate(post.created_at)} -->
+                                            {formatDate(post.created_at as Date)}
                                         </span>
                                     </Card.Description>
                                     {#if $userData.id}

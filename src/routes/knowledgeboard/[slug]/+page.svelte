@@ -3,6 +3,7 @@ import { goto } from '$app/navigation';
 import { env } from '$env/dynamic/public';
 import * as Alert from '$lib/components/ui/alert/index.js';
 import { Button } from '$lib/components/ui/button';
+import { Separator } from '$lib/components/ui/separator';
 import AvatarBar from '@/components/mycomp/avatar.svelte';
 import CartaRender from '@/components/mycomp/cartarender.svelte';
 import Idview from '@/components/mycomp/idview.svelte';
@@ -93,13 +94,14 @@ async function downloadPdf(onlySolution: boolean) {
             <div
                 class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6"
             >
-                <p class="text-sm text-blue-200">Beschreibung</p>
+                <p class="text-sm opacity-80">Beschreibung</p>
                 <CartaRender text={post.body} />
             </div>
+            <Separator />
             <div
                 class="flex flex-col justify-between my-5 [&:not(:first-child)]:mt-6"
             >
-                <p class="text-sm text-blue-200">Lösung</p>
+                <p class="text-sm opacity-80">Lösung</p>
                 {#if post.solution}
                     <CartaRender text={post.solution} />
                 {:else}
@@ -107,7 +109,7 @@ async function downloadPdf(onlySolution: boolean) {
                 {/if}
             </div>
             <div
-                class="flex flex-col justify-between my-5 border-t text-sm text-blue-200"
+                class="flex flex-col justify-between my-5 border-t text-sm opacity-80"
             >
                 <p>Kategorie: {post.topic}</p>
                 <AvatarBar user={post.owner as User} />
