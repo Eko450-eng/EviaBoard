@@ -1,6 +1,5 @@
 <script lang="ts">
 import { goto } from '$app/navigation';
-import { env } from '$env/dynamic/public';
 import * as Alert from '$lib/components/ui/alert/index.js';
 import { Button } from '$lib/components/ui/button';
 import { Separator } from '$lib/components/ui/separator';
@@ -14,47 +13,81 @@ import { FaSolidPencil } from 'svelte-icons-pack/fa';
 import { FiAlertTriangle } from 'svelte-icons-pack/fi';
 import { userData } from '../../store.js';
 import Comments from './comment-view.svelte';
+import * as pdfMake from 'pdfmake/build/pdfmake.js';
+import type { ImageDefinition, TDocumentDefinitions, TFontDictionary } from 'pdfmake/interfaces.js';
 
 const { data } = $props();
 
-async function downloadPdf(onlySolution: boolean) {
-	const formData = new URLSearchParams();
-	if (onlySolution) {
-		if (!data.posts) return;
-		formData.append('markdown', data.posts[0].solution);
-	} else {
-		formData.append(
-			'markdown',
-			`${data.posts?.[0].body} ${data.posts?.[0].solution}`,
-		);
-	}
+function splitTextAndUrls(input: string): TDocumentDefinitions {
+  // Regex to match URLs
+  const urlRegex=/(?<url>https.*?.png)/g;
+  const removeRegex=/(!.*?\()/g;
+  const removeRegexSizes=/(=\d*x\d*(.?))/g;
 
-	try {
-		const response = await fetch('https://md-to-pdf.fly.dev', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-			},
-			body: formData,
-		});
+  let text = input.replaceAll(removeRegex, "").replaceAll(removeRegexSizes, "")
+  
+  // Find all URLs in the text
+  const matches = text.match(urlRegex) || [];
+  
+  const result = [];
+  let images: Record<string, string | ImageDefinition>  = {};
+  let lastIndex = 0;
 
-		if (!response.ok) {
-			throw new Error('PDF konnte nicht generiert werden');
-		}
+  // Find and split URLs
+  matches.forEach((url: any, index) => {
+    const urlIndex = text.indexOf(url, lastIndex);
+    
+    // Add text before URL
+    if (urlIndex > lastIndex) {
+      result.push(text.slice(lastIndex, urlIndex));
+    }
+    
+    // Add URL
+    let r = {
+        [`image${index}`]: `${url}`,
+    } 
+    images = {
+        ...images,
+        ...r
+    }
+    result.push({
+        image: `image${index}`,
+        width: 100,
+        height: 100,
+    });
+    // Update last index
+    lastIndex = urlIndex + url.length;
+  });
 
-		const blob = await response.blob();
+  // Add remaining text after last URL
+  if (lastIndex < text.length) {
+    result.push(text.slice(lastIndex));
+  }
 
-		const url = URL.createObjectURL(blob);
+    let content: TDocumentDefinitions = {
+        images: images,
+        content: result
+    }
 
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${data.posts?.[0].title}.pdf`;
-		a.click();
+    console.log(content)
+  return content;
+}
 
-		URL.revokeObjectURL(url);
-	} catch (error) {
-		console.error('Error:', error);
-	}
+async function downloadPdf() {
+    const pdfmaker = pdfMake;
+
+    let font: TFontDictionary = {
+       Roboto: {
+         normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Regular.ttf',
+         bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Medium.ttf',
+         italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Italic.ttf',
+         bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-MediumItalic.ttf'
+       },
+    };
+
+    var docDefinition = splitTextAndUrls(data.posts![0].solution)
+
+    pdfmaker.createPdf(docDefinition, undefined, font).download()
 }
 </script>
 
@@ -75,8 +108,8 @@ async function downloadPdf(onlySolution: boolean) {
                 {/if}
                 <div class="flex items-center justify-between mr-5">
                     {post.title}
-                    <div class={env.PUBLIC_FEATURE_DOWNLOAD === "1" ? "w-min" : "soon w-min"}>
-                        <Button variant="outline" disabled={env.PUBLIC_FEATURE_DOWNLOAD === "0"} onclick={()=>downloadPdf(true)}>
+                    <div class="w-min">
+                        <Button variant="outline"  onclick={downloadPdf}>
                             Download als PDF
                         </Button>
                     </div>

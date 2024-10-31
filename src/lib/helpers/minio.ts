@@ -15,7 +15,7 @@ export const uploadFileGeneric = async (
 	if (!input) return null;
 
 	try {
-		uploadToMinio('eviaboard', input.name, input);
+		uploadToMinio('eviaboard', input.name.replaceAll(" ", "_"), input);
 		return `https://minio.eko450eng.org/eviaboard/${input.name} =100x100`;
 	} catch (error) {
 		console.error('Error uploading file:', error);
