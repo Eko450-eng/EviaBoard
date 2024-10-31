@@ -2,7 +2,6 @@ import { db, initDb } from '@/db';
 import type { News_newspost } from '@/types';
 
 export async function load() {
-  await initDb();
 	const query =
 		'SELECT *, owner.name, owner.image, -> news_post.out.* as newspost from news ORDER BY date desc';
 
