@@ -3,20 +3,21 @@ import {
 	Button,
 	buttonVariants,
 } from '../../lib/components/ui/button/index.js';
-import { db, getDb } from '$lib/db';
+import { getDb } from '$lib/db';
 import { onMount } from 'svelte';
 import * as Dialog from '$lib/components/ui/dialog/index.js';
 import Plus from 'svelte-radix/Plus.svelte';
 import Label from '@/components/ui/label/label.svelte';
 import Input from '@/components/ui/input/input.svelte';
 import { RecordId } from 'surrealdb';
-import { userData } from '../store.js';
-import type { Downloadlinks } from '@/types.js';
-import { editorOnly } from '@/helpers/admin.js';
+import type { Downloadlinks, User } from '@/types.js';
+import { checkOwner, editorOnly } from '@/helpers/admin.js';
+import { userStore } from '@/stores/user.store.js';
 
 let downloadlinks: Array<Downloadlinks> = [];
 
 async function getLinks() {
+	let db = await getDb();
 	let dl = await db?.select<Downloadlinks>('downloadlinks');
 	if (dl) {
 		downloadlinks = dl;
@@ -34,12 +35,14 @@ let postData: Downloadlinks = {
 };
 
 async function deleteLink(id: RecordId) {
+	let db = await getDb();
 	await db?.delete(id);
 }
 
-let user_id = $userData.id;
+let user_id = $userStore?.id;
 
 async function postLinks() {
+	let db = await getDb();
 	await db
 		?.query(
 			` CREATE downloadlinks CONTENT{
@@ -56,7 +59,7 @@ async function postLinks() {
 }
 
 onMount(async () => {
-	await getDb();
+	let db = await getDb();
 	if (db && db.ready) {
 		getLinks();
 		const queryUuid = await db?.live(
@@ -78,7 +81,7 @@ onMount(async () => {
 
 <div class="flex flex-wrap items-center justify-end">
     <Dialog.Root open={dialogOpen}>
-        {#if editorOnly($userData)}
+        {#if editorOnly()}
             <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
                 <Plus />
             </Dialog.Trigger>
@@ -135,7 +138,7 @@ onMount(async () => {
                 <p>{link.name}</p>
                 <p class="opacity-80">{link.description}</p>
             </Button>
-            {#if $userData.id && link.owner.id == $userData.id}
+            {#if $userStore?.id && checkOwner(link.owner as User)}
                 <Button
                     variant="destructive"
                     onclick={() => {

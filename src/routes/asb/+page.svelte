@@ -1,9 +1,9 @@
 <script lang="ts">
-import { db } from '@/db';
 import { onMount } from 'svelte';
 import { Button } from '$lib/components/ui/button';
-import { userData } from '../store';
-import { get, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
+import { getDb } from '@/db';
+import { userStore } from '@/stores/user.store';
 
 type ASBCheck = {
 	id: string;
@@ -14,6 +14,7 @@ let userNamesRaw: Array<ASBCheck> = [];
 let userNames = writable(userNamesRaw);
 
 async function queryPosts() {
+	let db = await getDb();
 	let data = await db?.select<ASBCheck>('ASBCheck');
 	if (!data) {
 		return;
@@ -27,16 +28,18 @@ async function queryPosts() {
 }
 
 async function meldenHandler() {
+	let db = await getDb();
 	db?.create('ASBCheck', {
-		name: $userData.email,
+		name: $userStore?.email,
 	}).then(async () => {
 		await queryPosts();
 	});
 }
 async function abmeldenHandler() {
+	let db = await getDb();
 	try {
 		await db
-			?.query(`DELETE ASBCheck WHERE name = '${get(userData).email}'`)
+			?.query(`DELETE ASBCheck WHERE name = '${$userStore?.email}'`)
 			.then(async () => {
 				await queryPosts();
 			});
@@ -64,14 +67,14 @@ onMount(async () => {
 
     <div class="flex gap-2 my-3">
         <p>Bist du drauf?</p>
-        {#if $userData.email}
+        {#if $userStore?.email}
             <Button
                 onclick={async () =>
-                    $userNames.some((obj) => obj.name == $userData.email)
+                    $userNames.some((obj) => obj.name == $userStore?.email)
                         ? abmeldenHandler()
                         : meldenHandler()}
             >
-                {$userNames.some((obj) => obj.name == $userData.email)
+                {$userNames.some((obj) => obj.name == $userStore?.email)
                     ? "Abmelden"
                     : "Melden"}</Button
             >

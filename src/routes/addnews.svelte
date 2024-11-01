@@ -1,23 +1,24 @@
 <script lang="ts">
 import * as Dialog from '$lib/components/ui/dialog/index.js';
-import { db } from '../lib/db';
 import { toast } from 'svelte-sonner';
 import { Button, buttonVariants } from '../lib/components/ui/button/index.js';
 import Plus from 'svelte-radix/Plus.svelte';
 import { Label } from '../lib/components/ui/label/index.js';
 import { Input } from '../lib/components/ui/input/index.js';
 import type { News } from '@/types';
-import { userData } from './store';
 import { sendPush } from '@/helpers/push';
+import { getDb } from '@/db';
+import { userStore } from '@/stores/user.store.js';
 
 export let addPostOpen: boolean;
 export let postData: News = {
 	title: '',
-	owner: $userData.id!,
+	owner: $userStore?.id!,
 	date: new Date(),
 };
 
 async function addPost() {
+	let db = await getDb();
 	try {
 		if (!postData) return;
 		await db?.create('news', postData).then(() => {

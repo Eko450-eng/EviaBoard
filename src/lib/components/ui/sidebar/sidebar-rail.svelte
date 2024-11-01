@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { cn } from "$lib/utils.js";
-	import type { WithElementRef } from "bits-ui";
-	import type { HTMLAttributes } from "svelte/elements";
-	import { useSidebar } from "./context.svelte.js";
+import { cn } from '$lib/utils.js';
+import type { WithElementRef } from 'bits-ui';
+import type { HTMLAttributes } from 'svelte/elements';
+import { useSidebar } from './context.svelte.js';
 
-	let {
-		ref = $bindable(null),
-		class: className,
-		children,
-		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLButtonElement>, HTMLButtonElement> = $props();
+let {
+	ref = $bindable(null),
+	class: className,
+	children,
+	...restProps
+}: WithElementRef<
+	HTMLAttributes<HTMLButtonElement>,
+	HTMLButtonElement
+> = $props();
 
-	const sidebar = useSidebar();
+const sidebar = useSidebar();
 </script>
 
 <button

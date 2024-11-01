@@ -1,38 +1,37 @@
 import { goto } from '$app/navigation';
 import { env } from '$env/dynamic/public';
-import { RecordId, Surreal } from 'surrealdb';
-import { DB, userData } from '../routes/store';
+import { Surreal } from 'surrealdb';
 import type { NotificationResult, User } from './types';
+import { checkUser, isLoggedIn, userStore } from './stores/user.store';
 
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB_KEY = env.PUBLIC_DB_DB;
 let guestpw = env.PUBLIC_DB_GUEST_PW;
 
-export let db: Surreal | undefined;
+let db: Surreal | undefined;
 
 export async function initDb(): Promise<Surreal | undefined> {
-	if (db) {
-		return db;
-	}
+	if (!db) {
+		db = new Surreal();
 
-	db = new Surreal();
-
-	try {
-		await db.connect(HOST, {
-			versionCheck: false,
-			auth: {
-				namespace: NS,
-				database: DB_KEY,
-				username: 'eviaguest',
-				password: guestpw,
-			},
-		});
-		return db;
-	} catch (err) {
-		console.error(err);
-		throw err;
+		try {
+			await db.connect(HOST, {
+				versionCheck: false,
+				auth: {
+					namespace: NS,
+					database: DB_KEY,
+					username: 'eviaguest',
+					password: guestpw,
+				},
+			});
+			return db;
+		} catch (err) {
+			console.error(err);
+			throw err;
+		}
 	}
+	return db;
 }
 
 export async function closeDb(): Promise<void> {
@@ -42,6 +41,9 @@ export async function closeDb(): Promise<void> {
 }
 
 export async function getDb(): Promise<Surreal | undefined> {
+	if (!db) {
+		return await initDb();
+	}
 	return db;
 }
 
@@ -51,7 +53,7 @@ export async function signIn(data: {
 	pass: string;
 	confirmPass: string;
 }): Promise<NotificationResult> {
-	if (!db || !NS || !DB_KEY)
+	if (!db)
 		return {
 			title: 'Dang',
 			desc: 'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
@@ -69,9 +71,9 @@ export async function signIn(data: {
 		});
 		if (token) {
 			localStorage.setItem('user_token', token);
-			DB.set(db);
 			let q = `SELECT name FROM user WHERE email = '${data.email}'`;
 			let [user] = await db.query<Array<Array<User>>>(q);
+			await checkUser(token);
 			return {
 				title: 'Willkommen zurück',
 				desc: `Wo warst du so lange ${user[0].name}`,
@@ -133,7 +135,7 @@ export async function signUp(data: {
 	});
 	if (token) {
 		localStorage.setItem('user_token', token);
-		DB.set(db);
+		await checkUser(token);
 		goto('/');
 	}
 
@@ -161,15 +163,9 @@ export async function signOut() {
 			throw err;
 		}
 	}
-	userData.set({
-		email: '',
-		id: new RecordId('user', 'tada'),
-		name: '',
-		password: '',
-		role: '',
-		created_at: new Date(),
-	});
 	goto('/');
+	userStore.set(undefined);
+	isLoggedIn.set(false);
 	return {
 		title: 'Bye',
 		desc: 'Bis dann',

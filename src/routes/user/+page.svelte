@@ -1,10 +1,4 @@
 <script lang="ts">
-import {
-	adminMode,
-	changeAdminMode,
-	checkIsLoggedIn,
-	userData,
-} from '../store';
 import { Label } from '$ui/label';
 import { Button } from '$ui/button';
 import { Input } from '$ui/input';
@@ -18,22 +12,24 @@ import { updateUser } from './functions';
 import type { User } from '@/types';
 import PushPage from './push-page.svelte';
 import { goto } from '$app/navigation';
+import { changeAdminMode, userStore } from '@/stores/user.store';
+import { adminOnly } from '@/helpers/admin';
 
 let user: User = {
-	id: $userData.id,
-	password: $userData.password,
-	role: $userData.role,
-	email: $userData.email,
-	name: $userData.name,
-	image: $userData.image,
+	id: $userStore?.id,
+	password: $userStore?.password ?? '',
+	role: $userStore?.role ?? '',
+	email: $userStore?.email ?? '',
+	name: $userStore?.name ?? '',
+	image: $userStore?.image ?? '',
 };
 
 onMount(async () => {
-	if (!$userData.email) goto('/');
+	if (!$userStore?.email) goto('/');
 });
 
 async function handleUpdateUser() {
-	await updateUser($userData, user).then(() => {
+	await updateUser($userStore as User, user).then(() => {
 		toast.success('Yey', {
 			description: 'User updated',
 		});
@@ -42,16 +38,16 @@ async function handleUpdateUser() {
 </script>
 
 <div class="flex flex-col my-5">
-    {#if $userData.role === "admin"}
+    {#if adminOnly()}
         <Button variant="outline" onclick={changeAdminMode}
-            >Adminmode: {$adminMode ? "Activated" : "Disabled"}</Button
+            >Adminmode: {adminOnly() ? "Activated" : "Disabled"}</Button
         >
     {/if}
 </div>
 
 <form on:submit={handleUpdateUser}>
     <div class="flex justify-between">
-        <h1 class="text-2xl">{$userData.name}</h1>
+        <h1 class="text-2xl">{$userStore?.name}</h1>
         <Button
             class="mx-4"
             onclick={async () => {
@@ -65,7 +61,6 @@ async function handleUpdateUser() {
                             description: res.desc,
                         });
                         goto("/");
-                        checkIsLoggedIn(true);
                     }
                 });
             }}
@@ -75,19 +70,19 @@ async function handleUpdateUser() {
             <Icon src={FaSolidArrowRightFromBracket} size={24} />
         </Button>
     </div>
-    <h3 class="text-xs mb-5">{$userData.role}</h3>
+    <h3 class="text-xs mb-5">{$userStore?.role}</h3>
     <Label for="email">E-Mail</Label>
     <Input
         type="text"
         name="email"
-        placeholder={$userData.email}
+        placeholder={$userStore?.email}
         bind:value={user.email}
     />
     <Label for="name">Username</Label>
     <Input
         type="text"
         name="name"
-        placeholder={$userData.name}
+        placeholder={$userStore?.name}
         bind:value={user.name}
     />
     <Label for="image">Image</Label>

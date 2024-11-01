@@ -2,12 +2,12 @@
 import DotsHorizontal from 'svelte-radix/DotsHorizontal.svelte';
 import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 import { Button } from '$lib/components/ui/button';
-import { db } from '@/db';
 import { RecordId } from 'surrealdb';
-import { userData } from '../store';
 import { toast } from 'svelte-sonner';
 import type { Report } from '@/types';
 import { editorOnly } from '@/helpers/admin';
+import { getDb } from '@/db';
+import { userStore } from '@/stores/user.store';
 
 export let id: string;
 type Votes = {
@@ -17,8 +17,9 @@ type Votes = {
 };
 
 async function upvote(id: string) {
+	let db = await getDb();
 	let recordId = new RecordId('bugreports', id);
-	let userId = new RecordId('user', $userData.id ? $userData.id.id : '');
+	let userId = $userStore?.id ?? new RecordId('', '');
 
 	let report = await db?.select<Report>(recordId);
 
@@ -58,6 +59,7 @@ async function upvote(id: string) {
 }
 
 async function setStatus(id: string, status: number) {
+	let db = await getDb();
 	let recordId = new RecordId('bugreports', id);
 	await db
 		?.patch(recordId, [
@@ -100,7 +102,7 @@ async function setStatus(id: string, status: number) {
         </DropdownMenu.Group>
         <DropdownMenu.Separator />
 
-        {#if editorOnly($userData)}
+        {#if editorOnly()}
             <DropdownMenu.Item onclick={() => setStatus(id, 0)}
                 >Open</DropdownMenu.Item
             >

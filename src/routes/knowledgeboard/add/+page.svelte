@@ -1,9 +1,7 @@
 <script lang="ts">
 import * as Select from '$lib/components/ui/select/index.js';
-import { db } from '$lib/db';
 import { toast } from 'svelte-sonner';
 import { Button } from '$lib/components/ui/button/index.js';
-import { userData } from '../../store.js';
 import { Label } from '$lib/components/ui/label/index.js';
 import { Input } from '$lib/components/ui/input/index.js';
 import type { Post, Topic } from '@/types.js';
@@ -11,6 +9,8 @@ import { sendPush } from '@/helpers/push.js';
 import { RecordId } from 'surrealdb';
 import carta from '@/helpers/carta.js';
 import { MarkdownEditor } from 'carta-md';
+import { getDb } from '@/db.js';
+import { userStore } from '@/stores/user.store.js';
 
 let { data } = $props();
 // eslint-disable-next-line
@@ -31,9 +31,10 @@ $effect(() => {
 });
 
 async function addPost() {
+	let db = await getDb();
 	let topic = new RecordId('topics', value);
 	postData.topic = topic;
-	postData.owner = $userData.id!;
+	postData.owner = $userStore?.id!;
 
 	if (!postData.topic || postData.topic === new RecordId('', '')) {
 		toast.error('Fehler', {
@@ -46,7 +47,7 @@ async function addPost() {
 		await db?.create<Post>('posts', postData).then(() => {
 			sendPush(
 				'New Posts',
-				`Es gab einen neuen Post von ${$userData.name} - ${postData.title}`,
+				`Es gab einen neuen Post von ${$userStore?.name} - ${postData.title}`,
 			);
 		});
 	} catch (e) {
@@ -57,7 +58,7 @@ async function addPost() {
 	}
 }
 const triggerContent = $derived(
-	data.topics!.find((f) => f.name === value)?.name ?? 'Kategorie',
+	data.topics!.find((f: Topic) => f.name === value)?.name ?? 'Kategorie',
 );
 </script>
 

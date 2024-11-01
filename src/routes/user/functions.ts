@@ -1,11 +1,12 @@
-import { db } from '@/db';
+import { getDb } from '@/db';
 import { generateAvatar } from '@/helpers/minio';
 import type { User } from '@/types';
 
-export async function updateUser(userData: User, user: User) {
-	await generateAvatar(userData);
+export async function updateUser(oldUser: User, user: User) {
+	let db = await getDb();
+	await generateAvatar(oldUser);
 
-	return await db?.patch(userData.id!, [
+	return await db?.patch(oldUser.id!, [
 		{
 			op: 'replace',
 			path: '/email',
@@ -19,7 +20,7 @@ export async function updateUser(userData: User, user: User) {
 		{
 			op: 'replace',
 			path: '/image',
-			value: `https://minio.eko450eng.org/eviaboard/${userData.id}.png`,
+			value: `https://minio.eko450eng.org/eviaboard/${oldUser.id}.png`,
 		},
 	]);
 }
@@ -113,6 +114,7 @@ export async function subscribeUser(
 
 export async function unsubscribe(isSubscribed: boolean, userData: User) {
 	if ('serviceWorker' in navigator) {
+		let db = await getDb();
 		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.getSubscription();
 		if (subscription) {

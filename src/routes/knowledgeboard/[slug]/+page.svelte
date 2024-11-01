@@ -7,87 +7,93 @@ import AvatarBar from '@/components/mycomp/avatar.svelte';
 import CartaRender from '@/components/mycomp/cartarender.svelte';
 import Idview from '@/components/mycomp/idview.svelte';
 import type { User } from '@/types.js';
-import { RecordId } from 'surrealdb';
 import { Icon } from 'svelte-icons-pack';
 import { FaSolidPencil } from 'svelte-icons-pack/fa';
 import { FiAlertTriangle } from 'svelte-icons-pack/fi';
-import { userData } from '../../store.js';
 import Comments from './comment-view.svelte';
 import * as pdfMake from 'pdfmake/build/pdfmake.js';
-import type { ImageDefinition, TDocumentDefinitions, TFontDictionary } from 'pdfmake/interfaces.js';
+import type {
+	ImageDefinition,
+	TDocumentDefinitions,
+	TFontDictionary,
+} from 'pdfmake/interfaces.js';
+import { checkOwner } from '@/helpers/admin';
 
 const { data } = $props();
 
 function splitTextAndUrls(input: string): TDocumentDefinitions {
-  // Regex to match URLs
-  const urlRegex=/(?<url>https.*?.png)/g;
-  const removeRegex=/(!.*?\()/g;
-  const removeRegexSizes=/(=\d*x\d*(.?))/g;
+	// Regex to match URLs
+	const urlRegex = /(?<url>https.*?.png)/g;
+	const removeRegex = /(!.*?\()/g;
+	const removeRegexSizes = /(=\d*x\d*(.?))/g;
 
-  let text = input.replaceAll(removeRegex, "").replaceAll(removeRegexSizes, "")
-  
-  // Find all URLs in the text
-  const matches = text.match(urlRegex) || [];
-  
-  const result = [];
-  let images: Record<string, string | ImageDefinition>  = {};
-  let lastIndex = 0;
+	let text = input.replaceAll(removeRegex, '').replaceAll(removeRegexSizes, '');
 
-  // Find and split URLs
-  matches.forEach((url: any, index) => {
-    const urlIndex = text.indexOf(url, lastIndex);
-    
-    // Add text before URL
-    if (urlIndex > lastIndex) {
-      result.push(text.slice(lastIndex, urlIndex));
-    }
-    
-    // Add URL
-    let r = {
-        [`image${index}`]: `${url}`,
-    } 
-    images = {
-        ...images,
-        ...r
-    }
-    result.push({
-        image: `image${index}`,
-        width: 100,
-        height: 100,
-    });
-    // Update last index
-    lastIndex = urlIndex + url.length;
-  });
+	// Find all URLs in the text
+	const matches = text.match(urlRegex) || [];
 
-  // Add remaining text after last URL
-  if (lastIndex < text.length) {
-    result.push(text.slice(lastIndex));
-  }
+	const result = [];
+	let images: Record<string, string | ImageDefinition> = {};
+	let lastIndex = 0;
 
-    let content: TDocumentDefinitions = {
-        images: images,
-        content: result
-    }
+	// Find and split URLs
+	matches.forEach((url: any, index) => {
+		const urlIndex = text.indexOf(url, lastIndex);
 
-    console.log(content)
-  return content;
+		// Add text before URL
+		if (urlIndex > lastIndex) {
+			result.push(text.slice(lastIndex, urlIndex));
+		}
+
+		// Add URL
+		let r = {
+			[`image${index}`]: `${url}`,
+		};
+		images = {
+			...images,
+			...r,
+		};
+		result.push({
+			image: `image${index}`,
+			width: 100,
+			height: 100,
+		});
+		// Update last index
+		lastIndex = urlIndex + url.length;
+	});
+
+	// Add remaining text after last URL
+	if (lastIndex < text.length) {
+		result.push(text.slice(lastIndex));
+	}
+
+	let content: TDocumentDefinitions = {
+		images: images,
+		content: result,
+	};
+
+	console.log(content);
+	return content;
 }
 
 async function downloadPdf() {
-    const pdfmaker = pdfMake;
+	let pdfmaker = pdfMake;
 
-    let font: TFontDictionary = {
-       Roboto: {
-         normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Regular.ttf',
-         bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Medium.ttf',
-         italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Italic.ttf',
-         bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-MediumItalic.ttf'
-       },
-    };
+	let font: TFontDictionary = {
+		Roboto: {
+			normal:
+				'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Regular.ttf',
+			bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Medium.ttf',
+			italics:
+				'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-Italic.ttf',
+			bolditalics:
+				'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.3.0-beta.1/fonts/Roboto/Roboto-MediumItalic.ttf',
+		},
+	};
 
-    var docDefinition = splitTextAndUrls(data.posts![0].solution)
+	var docDefinition = splitTextAndUrls(data.posts![0].solution);
 
-    pdfmaker.createPdf(docDefinition, undefined, font).download()
+	pdfmaker.createPdf(docDefinition, undefined, font).download();
 }
 </script>
 
@@ -97,7 +103,8 @@ async function downloadPdf() {
             <h1
                 class="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
             >
-                {#if $userData.id!.toString() === (post.owner.id as RecordId).toString()}
+                {checkOwner(post.owner)}
+                {#if checkOwner(post.owner)}
                     <Button
                         aria-label="Post bearbeiten"
                         variant="outline"

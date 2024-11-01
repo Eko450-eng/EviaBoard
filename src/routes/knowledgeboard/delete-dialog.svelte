@@ -1,10 +1,11 @@
 <script lang="ts">
 import * as Dialog from '$lib/components/ui/dialog/index.js';
-import { db } from '$lib/db';
 import { Button } from '$lib/components/ui/button/index.js';
 import type { Post } from '@/types';
+import { getDb } from '@/db';
 
 async function deletePost(data: Post) {
+	let db = await getDb();
 	let newData = data;
 	newData.deleted = true;
 	await db?.patch(data.id!, [

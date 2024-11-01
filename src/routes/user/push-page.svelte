@@ -11,13 +11,13 @@ import {
 import { RecordId } from 'surrealdb';
 import type { Channel, User } from '$lib/types';
 import { sendPush } from '@/helpers/push';
-import { db } from '@/db';
-import { adminMode, userData } from '../store';
 import { writable, type Writable } from 'svelte/store';
 import { onMount } from 'svelte';
 import { adminOnly } from '@/helpers/admin';
 import { channelHandler } from './notifyFunctions';
 import { toast } from 'svelte-sonner';
+import { getDb } from '@/db';
+import { userStore } from '@/stores/user.store';
 
 type ChannelSubsCheckable = {
 	channel: Channel;
@@ -30,16 +30,12 @@ let isSubscribed = false;
 
 onMount(async () => {
 	nottifPermGranted = Notification.permission === 'granted';
-	if ($userData.id?.toString() !== new RecordId('user', 'tada').toString()) {
+	if ($userStore?.id?.toString() !== new RecordId('user', 'tada').toString()) {
 		await getChannels();
-	} else {
-		userData.subscribe(async () => {
-			await getChannels();
-		});
 	}
 
-	if (nottifPermGranted) {
-		isSubscribed = await checkSubscriptionStatus($userData, isSubscribed);
+	if (nottifPermGranted && $userStore) {
+		isSubscribed = await checkSubscriptionStatus($userStore, isSubscribed);
 	}
 
 	await getChannels();
@@ -54,6 +50,7 @@ async function sendPushHandler() {
 }
 
 async function getChannels() {
+	let db = await getDb();
 	let subscription: PushSubscription | null;
 	if ('serviceWorker' in navigator) {
 		const registration = await navigator.serviceWorker.ready;
@@ -68,7 +65,7 @@ async function getChannels() {
 
 	let c: ChannelSubsCheckable[] = [];
 	channelsQuery[0].forEach(async (channel) => {
-		let q = `SELECT out.channelname as channelname, out.id as id, in.user.* as user from pushkey_channel WHERE in.user.id = ${$userData.id} AND out.id = ${channel.id} AND in.data.endpoint = '${subscription?.endpoint}'`;
+		let q = `SELECT out.channelname as channelname, out.id as id, in.user.* as user from pushkey_channel WHERE in.user.id = ${$userStore?.id} AND out.id = ${channel.id} AND in.data.endpoint = '${subscription?.endpoint}'`;
 		let isSubbed =
 			await db?.query<
 				Array<
@@ -140,16 +137,16 @@ async function getChannels() {
         >
     {:else}
         <p>Subscribed to push notifications: <b>{isSubscribed}</b></p>
-        {#if !isSubscribed}
+        {#if !isSubscribed && $userStore}
             <Button
                 variant="secondary"
                 onclick={async () => {
                     isSubscribed = await checkSubscriptionStatus(
-                        $userData,
+                        $userStore,
                         isSubscribed,
                     );
                     if (isSubscribed) return;
-                    subscribeUser(isSubscribed, $userData).then((subbed) => {
+                    subscribeUser(isSubscribed, $userStore).then((subbed) => {
                         if (subbed) {
                             toast.error("Nice", {
                                 description: "Spam incoming!",
@@ -164,14 +161,14 @@ async function getChannels() {
                 }}>Subscribe</Button
             >
         {/if}
-        {#if isSubscribed}
+        {#if isSubscribed && $userStore}
             <div>
                 <Button
                     class="button"
                     type="button"
                     variant="secondary"
                     onclick={() => {
-                        unsubscribe(isSubscribed, $userData);
+                        unsubscribe(isSubscribed, $userStore);
                         isSubscribed = false;
                     }}>Unsubscribe from everything</Button
                 >
@@ -180,7 +177,7 @@ async function getChannels() {
     {/if}
 </div>
 
-{#if adminOnly($userData, $adminMode)}
+{#if adminOnly()}
     <Button class="my-2" onclick={sendPushHandler} variant="secondary"
         >test</Button
     >

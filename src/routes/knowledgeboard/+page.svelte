@@ -1,55 +1,53 @@
 <script lang="ts">
-    import * as Select from "$ui/select";
-    import * as Card from "../../lib/components/ui/card/index.js";
-    import { onMount } from "svelte";
-    import { Button } from "../../lib/components/ui/button/index.js";
-    import { Toggle } from "../../lib/components/ui/toggle/index.js";
-    import { checkLoggedIn, DB, userData } from "../store.js";
-    import { goto, invalidateAll } from "$app/navigation";
-    import DeleteDialog from "./delete-dialog.svelte";
-    import RecoverDialog from "./recover-dialog.svelte";
-    import AvatarBar from "$lib/components/mycomp/avatar.svelte";
-    import type { Post, User } from "@/types.js";
-    import Plus from "svelte-radix/Plus.svelte";
-    import Cartarender from "@/components/mycomp/cartarender.svelte";
-    import { FaCalendarDays } from "svelte-icons-pack/fa";
-    import { Icon } from "svelte-icons-pack";
-    import { formatDate } from "@/helpers/formating.js";
+import * as Select from '$ui/select';
+import * as Card from '../../lib/components/ui/card/index.js';
+import { onMount } from 'svelte';
+import { Button } from '../../lib/components/ui/button/index.js';
+import { Toggle } from '../../lib/components/ui/toggle/index.js';
+import { goto, invalidateAll } from '$app/navigation';
+import DeleteDialog from './delete-dialog.svelte';
+import RecoverDialog from './recover-dialog.svelte';
+import AvatarBar from '$lib/components/mycomp/avatar.svelte';
+import type { Post, Topic, User } from '@/types.js';
+import Plus from 'svelte-radix/Plus.svelte';
+import Cartarender from '@/components/mycomp/cartarender.svelte';
+import { FaCalendarDays } from 'svelte-icons-pack/fa';
+import { Icon } from 'svelte-icons-pack';
+import { formatDate } from '@/helpers/formating.js';
+import { getDb } from '@/db.js';
+import { userStore } from '@/stores/user.store.js';
 
-    let { data } = $props();
-    let deleteDialog = $state(false);
-    let postToDelete: Post | undefined = $state(undefined);
-    
-    let recoverDialog = $state(false);
-    let postToRecover: Post | undefined = $state(undefined);
+let { data } = $props();
+let deleteDialog = $state(false);
+let postToDelete: Post | undefined = $state(undefined);
 
-    let showDeleted: boolean = $state(false);
-    // let open = false;
-    let selectedValue = $state("Kategorie");
+let recoverDialog = $state(false);
+let postToRecover: Post | undefined = $state(undefined);
 
-    onMount(async () => {
-        checkLoggedIn();
-        if (data.failed) goto("/");
+let showDeleted: boolean = $state(false);
+// let open = false;
+let selectedValue = $state('Kategorie');
 
-        // eslint-disable-next-line
-        const queryUuid = await $DB?.live("posts", (action, _result) => {
-            if (action === "CLOSE") return;
-        });
-        // eslint-disable-next-line
-        await $DB?.subscribeLive(queryUuid!, async (action, _result) => {
-            if (
-                action === "CREATE" ||
-                action === "UPDATE" ||
-                action === "DELETE"
-            ) {
-                await invalidateAll();
-            }
-        });
-    });
+onMount(async () => {
+	let db = await getDb();
+	if (data.failed) goto('/');
 
-    const triggerContent = $derived(
-        data.topics!.find((f)=>f.name === selectedValue)?.name ?? "Kategorie"
-    )
+	// eslint-disable-next-line
+	const queryUuid = await db?.live('posts', (action: any, _result: any) => {
+		if (action === 'CLOSE') return;
+	});
+	// eslint-disable-next-line
+	await db?.subscribeLive(queryUuid!, async (action: any, _result: any) => {
+		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
+			await invalidateAll();
+		}
+	});
+});
+
+const triggerContent = $derived(
+	data.topics!.find((f: Topic) => f.name === selectedValue)?.name ??
+		'Kategorie',
+);
 </script>
 
 <div class="flex flex-wrap p-4 items-center justify-between">
@@ -57,7 +55,7 @@
     <DeleteDialog bind:deleteDialog {postToDelete} />
     <RecoverDialog bind:recoverDialog {postToRecover} />
 
-    {#if $userData.email}
+    {#if $userStore?.email}
         <Toggle variant="outline" onclick={() => (showDeleted = !showDeleted)}>
             {showDeleted ? "Hide" : "Show"}
             your Deleted posts
@@ -142,8 +140,8 @@
                                             {formatDate(post.created_at as Date)}
                                         </span>
                                     </Card.Description>
-                                    {#if $userData.id}
-                                        {#if post.owner.id!.toString() === $userData.id.toString() && !post.deleted}
+                                    {#if $userStore?.id}
+                                        {#if post.owner.id!.toString() === $userStore?.id?.toString() && !post.deleted}
                                             <Button
                                                 variant="destructive"
                                                 onclick={() => {
@@ -151,7 +149,7 @@
                                                     postToDelete = post;
                                                 }}>Delete</Button
                                             >
-                                        {:else if post.owner.id!.toString() === $userData.id.toString() && post.deleted}
+                                        {:else if post.owner.id!.toString() === $userStore?.id?.toString() && post.deleted}
                                             <Button
                                                 variant="default"
                                                 onclick={() => {

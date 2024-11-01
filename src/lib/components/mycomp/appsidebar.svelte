@@ -10,9 +10,8 @@ import {
 	FaSolidUser,
 } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
-import { isLoggedIn } from '../../../routes/store';
 import { page } from '$app/stores';
-import { onMount } from 'svelte';
+import { isLoggedIn } from '@/stores/user.store';
 
 let authenticatedLinks = [
 	{

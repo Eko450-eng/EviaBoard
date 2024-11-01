@@ -15,7 +15,7 @@ export const uploadFileGeneric = async (
 	if (!input) return null;
 
 	try {
-		uploadToMinio('eviaboard', input.name.replaceAll(" ", "_"), input);
+		uploadToMinio('eviaboard', input.name.replaceAll(' ', '_'), input);
 		return `https://minio.eko450eng.org/eviaboard/${input.name} =100x100`;
 	} catch (error) {
 		console.error('Error uploading file:', error);
@@ -48,11 +48,11 @@ export const uploadFile = async (
 	}
 };
 
-export async function generateAvatar(userData: User) {
-	if (!userData.id) return;
+export async function generateAvatar(user: User) {
+	if (!user.id) return;
 
-	let userid = userData.id.toString();
+	let userid = user.id.toString();
 	if (!userid) return '';
 
-	await uploadFile(userData.id + '.png');
+	await uploadFile(user.id + '.png');
 }

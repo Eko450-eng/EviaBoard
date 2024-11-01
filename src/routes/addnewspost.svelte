@@ -1,22 +1,23 @@
 <script lang="ts">
 import * as Dialog from '../lib/components/ui/dialog/index.js';
-import { db } from '../lib/db';
+import { getDb } from '../lib/db';
 import { toast } from 'svelte-sonner';
 import { Button } from '../lib/components/ui/button/index.js';
 import { Label } from '../lib/components/ui/label/index.js';
 import { Input } from '../lib/components/ui/input/index.js';
-import { userData } from './store';
 import type { News, Newspost } from '@/types.js';
+import { userStore } from '@/stores/user.store.js';
 
 export let addPostOpen: boolean;
 export let post: News | undefined;
 export let postData: Newspost = {
 	name: '',
-	owner: $userData.id!,
+	owner: $userStore?.id!,
 };
 
 async function addPost() {
-	postData.owner = $userData.id!;
+	let db = await getDb();
+	postData.owner = $userStore?.id!;
 
 	try {
 		if (!postData) return;

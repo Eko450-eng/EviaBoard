@@ -2,30 +2,26 @@
 import AvatarBar from '$lib/components/mycomp/avatar.svelte';
 import { Button } from '$lib/components/ui/button/index';
 import { Skeleton } from '$ui/skeleton';
-import { db } from '@/db';
 import { adminOnly } from '@/helpers/admin';
 import { formatDate } from '@/helpers/formating';
-import type { News, News_newspost, User } from '@/types';
+import type { News, User } from '@/types';
 import type { Uuid } from 'surrealdb';
 import { onMount } from 'svelte';
 import { Icon } from 'svelte-icons-pack';
 import { FaCalendarDays } from 'svelte-icons-pack/fa';
 import Addnews from './addnews.svelte';
 import Addnewspost from './addnewspost.svelte';
-import { adminMode, userData } from './store';
 import { invalidateAll } from '$app/navigation';
+import { getDb } from '@/db';
+import { userStore } from '@/stores/user.store';
 
 let { data } = $props();
-let news: News_newspost[] | undefined = $state(data.data);
-
-$effect(() => {
-	news = data.data;
-});
 
 async function subscribeNews(queryUuid: Uuid | undefined) {
+	let db = await getDb();
 	if (!queryUuid) return;
 	// eslint-disable-next-line
-	await db?.subscribeLive(queryUuid!, async (action, _result) => {
+	await db?.subscribeLive(queryUuid!, async (action: any, _result: any) => {
 		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
 			await invalidateAll();
 		}
@@ -33,6 +29,7 @@ async function subscribeNews(queryUuid: Uuid | undefined) {
 }
 
 onMount(async () => {
+	let db = await getDb();
 	// eslint-disable-next-line
 	const queryUuidNews = await db?.live('news', (action, _result) => {
 		if (action === 'CLOSE') return;
@@ -45,21 +42,21 @@ let addNewsPostOpen = $state(false);
 let selectedPost: News | undefined = $state(undefined);
 </script>
 
-{#if adminOnly($userData, $adminMode)}
+{#if $userStore && adminOnly()}
     <Addnews bind:addPostOpen />
 {/if}
 <Addnewspost bind:addPostOpen={addNewsPostOpen} post={selectedPost} />
 
-{#if news}
-    {#each news as post}
+{#if data.data}
+    {#each data.data as post}
         <div class="border rounded my-2 py-2">
             <div class="flex justify-between">
                 <h2 class="text-2xl p-2">{post.title}</h2>
-                {#if adminOnly($userData, $adminMode)}
+                {#if adminOnly()}
                     <Button
                         aria-label="Add a post"
                         onclick={() => {
-                            if (!adminOnly($userData, $adminMode)) return;
+                            if (!adminOnly()) return;
                             selectedPost = post;
                             addNewsPostOpen = true;
                         }}>Add post</Button

@@ -14,7 +14,7 @@ import { addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
 import Button from '@/components/ui/button/button.svelte';
 import { Icon } from 'svelte-icons-pack';
 import { BsArrowDownUp } from 'svelte-icons-pack/bs';
-import { db, getDb } from '$lib/db';
+import { getDb } from '$lib/db';
 import { onMount } from 'svelte';
 import { env } from '$env/dynamic/public';
 import type { Report as OriginalReport } from '@/types.js';
@@ -69,7 +69,7 @@ async function getEJData() {
 }
 
 export async function updateTable() {
-	await getDb();
+	let db = await getDb();
 	if (db && db.ready) {
 		await db
 			?.query<Report[][]>(
@@ -101,7 +101,7 @@ export async function updateTable() {
 }
 
 onMount(async () => {
-	await getDb();
+	let db = await getDb();
 	updateTable();
 
 	// eslint-disable-next-line

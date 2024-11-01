@@ -1,6 +1,5 @@
 <script lang="ts">
 import DataTable from './bug-table.svelte';
-import { db } from '$lib/db';
 import { toast } from 'svelte-sonner';
 import * as Dialog from '$lib/components/ui/dialog/index.js';
 import Plus from 'svelte-radix/Plus.svelte';
@@ -9,11 +8,11 @@ import { Input } from '$lib/components/ui/input/index.js';
 import { Textarea } from '$lib/components/ui/textarea/index.js';
 import * as Select from '$lib/components/ui/select/index.js';
 import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-import { userData } from '../store';
-import { get } from 'svelte/store';
 import type { Report } from '@/types';
 import { sendPush } from '@/helpers/push';
 import { RecordId } from 'surrealdb';
+import { getDb } from '@/db';
+import { userStore } from '@/stores/user.store';
 
 let addPostOpen = false;
 
@@ -31,7 +30,8 @@ let postData: Report = {
 };
 
 async function addPost() {
-	let user = get(userData);
+	let db = await getDb();
+	let user = $userStore;
 	if (!user) return;
 	let category = 0;
 	switch (selectedTopic) {
