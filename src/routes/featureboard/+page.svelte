@@ -1,5 +1,5 @@
 <script lang="ts">
-import DataTable from './bug-table.svelte';
+// import DataTable from './bug-table.svelte';
 import { toast } from 'svelte-sonner';
 import * as Dialog from '$lib/components/ui/dialog/index.js';
 import Plus from 'svelte-radix/Plus.svelte';
@@ -13,8 +13,18 @@ import { sendPush } from '@/helpers/push';
 import { RecordId } from 'surrealdb';
 import { getDb } from '@/db';
 import { userStore } from '@/stores/user.store';
+import { columns } from './columns';
+import DataTable from './bug-table.svelte';
 
-let addPostOpen = false;
+let addPostOpen = $state(false);
+
+let {
+	data,
+}: {
+	data: {
+		data: Report[];
+	};
+} = $props();
 
 let topics: Array<string> | undefined = ['Bug', 'Feature', 'Question'];
 // eslint-disable-next-line
@@ -144,4 +154,4 @@ async function addPost() {
         </Dialog.Footer>
     </Dialog.Content>
 </Dialog.Root>
-<DataTable />
+<DataTable data={data.data} {columns} />

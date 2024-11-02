@@ -72,7 +72,6 @@ function splitTextAndUrls(input: string): TDocumentDefinitions {
 		content: result,
 	};
 
-	console.log(content);
 	return content;
 }
 

@@ -12,7 +12,6 @@
 	"formatter": {
 		"formatWithErrors": true,
 		"enabled": true,
-		"ignore": ["app.css", "*.json"],
 		"attributePosition": "auto",
 		"indentWidth": 2,
 		"lineWidth": 80,

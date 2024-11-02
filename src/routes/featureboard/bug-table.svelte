@@ -1,378 +1,262 @@
-<script lang="ts">
+<script lang="ts" generics="TData, TValue">
+// import { Input } from '$ui/input';
+import { Button } from '$ui/button';
+import { Separator } from '$ui/separator';
 import {
-	createTable,
-	Render,
-	Subscribe,
-	createRender,
-} from 'svelte-headless-table';
-import * as Dialog from '$lib/components/ui/dialog/index.js';
-import { writable } from 'svelte/store';
-import * as Table from '$lib/components/ui/table';
-import { Input } from '$lib/components/ui/input';
-import DataTableActions from './bug-table-actions.svelte';
-import { addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
-import Button from '@/components/ui/button/button.svelte';
-import { Icon } from 'svelte-icons-pack';
-import { BsArrowDownUp } from 'svelte-icons-pack/bs';
-import { getDb } from '$lib/db';
-import { onMount } from 'svelte';
-import { env } from '$env/dynamic/public';
-import type { Report as OriginalReport } from '@/types.js';
+	type ColumnDef,
+	// type ColumnFiltersState,
+	type FilterFn,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getSortedRowModel,
+	type SortingState,
+} from '@tanstack/table-core';
+import {
+	createSvelteTable,
+	FlexRender,
+} from '$lib/components/ui/data-table/index.js';
+import * as Table from '$lib/components/ui/table/index';
+import * as Sheet from '$lib/components/ui/sheet/index';
+import { rankItem } from '@tanstack/match-sorter-utils';
+import * as ContextMenu from '$ui/context-menu';
+import { adminOnly } from '@/helpers/admin';
+import { getDb } from '@/db';
+import { RecordId } from 'surrealdb';
+import { isLoggedIn, userStore } from '@/stores/user.store';
+import type { Report, Votes } from '@/types';
+import { toast } from 'svelte-sonner';
+import { getContext } from 'svelte';
+// let columnFilters = $state<ColumnFiltersState>([]);
 
-type Report = OriginalReport & {
-	// eslint-disable-next-line
-	value?: any;
-	// eslint-disable-next-line
-	original?: any;
-};
-
-export let data: Report[] = [];
-let cardOpen = false;
-let cardContent: Report;
-
-let dataNew = writable(data);
-let token = env.PUBLIC_EJ_TOKEN;
-
-async function getEJData() {
-	if (!token) return;
-	const ejParams = new URLSearchParams({
-		type: 'ekoapi',
-		token: token,
-		action: 'getReports',
-	}).toString();
-	const ejAPI = 'https://ejberichtsheft.de/';
-
-	const response = await fetch(`${ejAPI}?${ejParams}`, {}).then(
-		async (response) => {
-			// eslint-disable-next-line
-			let respon: Array<any> = await response.json();
-			let results: Report[] = [];
-			respon.forEach((res) => {
-				let result: Report = {
-					source: 'Typer',
-					id: res.report_key,
-					title: res.report_title,
-					body: res.report_description,
-					status: res.report_state,
-					category: res.report_type,
-					upvotes: 0,
-					owner: res.user_name,
-				};
-				results.push(result);
-			});
-			let oldSet = $dataNew;
-			oldSet = [...oldSet, ...results];
-			dataNew.set(oldSet);
-		},
-	);
-	return response;
+function categoryToText(value: number) {
+	switch (value) {
+		case 0:
+			return 'Bug';
+		case 1:
+			return 'Feature';
+		case 2:
+			return 'Question';
+		default:
+			return 'Bug';
+	}
+}
+function statusToText(value: number) {
+	switch (value) {
+		case 0:
+			return 'open';
+		case 1:
+			return 'WIP';
+		case 2:
+			return 'Accepted';
+		case 3:
+			return 'Denied';
+		case 4:
+			return 'Closed';
+		case 10:
+			return 'Archived';
+		default:
+			return 'Open';
+	}
 }
 
-export async function updateTable() {
+type DateTableProps<TData, TValue> = {
+	columns: ColumnDef<TData, TValue>[];
+	data: TData[];
+};
+
+let { data, columns }: DateTableProps<TData, TValue> = $props();
+let sorting = $state<SortingState>([]);
+
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta): any => {
+	const itemRank = rankItem(row.getValue(columnId), value);
+	addMeta({ itemRank });
+	return itemRank.passed;
+};
+
+async function upvote(id: string) {
 	let db = await getDb();
-	if (db && db.ready) {
+	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	let userId = $userStore?.id ?? new RecordId('', '');
+	let report = await db?.select<Report>(recordId);
+
+	let votes = await db?.query<Array<Array<Votes>>>(`SELECT * FROM votes WHERE
+                  voter = ${'user:' + userId.id}
+                  AND
+                  bugreport = ${id}
+                  `);
+
+	if (!report || !votes) return;
+	let newUpvotes = report?.upvotes;
+
+	if (votes[0]?.length >= 1) {
+		let v = votes[0][0];
+		await db?.delete(v.id!);
+		newUpvotes -= 1;
+	} else {
+		newUpvotes += 1;
 		await db
-			?.query<Report[][]>(
-				'select id, title, body, status, category, upvotes, owner.name as owner from bugreports WHERE status != 10',
-			)
-			.then((v) => {
-				let responses = v[0];
-				let results: Report[] = [];
-
-				responses.forEach((res) => {
-					let result: Report = {
-						source: 'Eviaboard',
-						id: res.id,
-						title: res.title,
-						body: res.body,
-						status: res.status,
-						category: res.category,
-						upvotes: res.upvotes,
-						owner: res.owner,
-					};
-					results.push(result);
-				});
-
-				dataNew.set(results);
-				getEJData();
-				return v;
+			?.create('votes', {
+				bugreport: recordId,
+				voter: userId,
+			})
+			.then(async (vote) => {
+				let q = `RELATE ${recordId} -> bug_vote -> ${vote![0].id}`;
+				await db?.query(q);
 			});
 	}
 }
 
-onMount(async () => {
+async function setStatus(id: string, status: number) {
 	let db = await getDb();
-	updateTable();
+	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	await db
+		?.patch(recordId, [
+			{
+				op: 'replace',
+				path: '/status',
+				value: status,
+			},
+		])
+		.then(() => {
+			toast.success('Yey', {
+				description: 'Status gändert',
+			});
+		});
+}
 
-	// eslint-disable-next-line
-	const queryUuid = await db?.live('bugreports', (action, _result) => {
-		if (action === 'CLOSE') return;
-	});
-	// eslint-disable-next-line
-	await db?.subscribeLive(queryUuid!, async (action, _result) => {
-		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
-			updateTable();
+let globalFilter = '';
+
+const table = createSvelteTable({
+	get data() {
+		return data;
+	},
+	columns,
+	getCoreRowModel: getCoreRowModel(),
+	getSortedRowModel: getSortedRowModel(),
+	onSortingChange: (updater) => {
+		if (typeof updater === 'function') {
+			sorting = updater(sorting);
+		} else {
+			sorting = updater;
 		}
-	});
+	},
+	filterFns: {
+		fuzzyFilter: fuzzyFilter,
+	},
+	groupedColumnMode: 'reorder',
+	manualFiltering: true,
+	getFilteredRowModel: getFilteredRowModel(),
+	enableGlobalFilter: true,
+	state: {
+		globalFilter,
+		get sorting() {
+			return sorting;
+		},
+	},
+	// onGlobalFilterChange: globalFilter,
 });
-
-let table = createTable(dataNew, {
-	sort: addSortBy(),
-	filter: addTableFilter({
-		fn: ({ filterValue, value }) => {
-			return value.toLowerCase().includes(filterValue.toLowerCase());
-		},
-	}),
-});
-
-const columns = table.createColumns([
-	table.column({
-		accessor: 'source',
-		header: 'App',
-		plugins: {
-			filter: {
-				getFilterValue(value) {
-					return 'app:' + value;
-				},
-			},
-			sort: {
-				disable: false,
-			},
-		},
-	}),
-	table.column({
-		accessor: 'title',
-		header: 'title',
-		plugins: {
-			sort: {
-				disable: false,
-			},
-		},
-	}),
-	table.column({
-		accessor: 'body',
-		header: 'body',
-		plugins: {
-			sort: {
-				disable: false,
-			},
-		},
-		cell: ({ value }) => {
-			if (value.length > 30) {
-				return `${value.substring(0, 30)}...`;
-			} else {
-				return value;
-			}
-		},
-	}),
-	table.column({
-		accessor: 'status',
-		header: 'status',
-		plugins: {
-			filter: {
-				getFilterValue(value) {
-					return 'status:' + value;
-				},
-			},
-			sort: {
-				disable: false,
-			},
-		},
-		cell: ({ value }) => {
-			switch (value) {
-				case 0:
-					return 'Open';
-				case 1:
-					return 'WIP';
-				case 2:
-					return 'Accepted';
-				case 3:
-					return 'Denied';
-				case 4:
-					return 'Closed';
-				case 10:
-					return 'Archived';
-				default:
-					return 'Open';
-			}
-		},
-	}),
-	table.column({
-		accessor: 'category',
-		header: 'category',
-		plugins: {
-			filter: {
-				getFilterValue(value) {
-					return 'category:' + value;
-				},
-			},
-			sort: {
-				disable: false,
-			},
-		},
-		cell: ({ value }) => {
-			switch (value) {
-				case 0:
-					return 'Bug';
-				case 1:
-					return 'Feature';
-				case 2:
-					return 'Question';
-				default:
-					return 'Bug';
-			}
-		},
-	}),
-	table.column({
-		accessor: 'upvotes',
-		header: 'upvotes',
-		plugins: {
-			sort: {
-				disable: false,
-			},
-		},
-	}),
-	table.column({
-		accessor: 'owner',
-		header: 'owner',
-		plugins: {
-			sort: {
-				disable: false,
-			},
-		},
-	}),
-	table.column({
-		accessor: 'id',
-		header: 'actions',
-		plugins: {
-			sort: {
-				disable: true,
-			},
-		},
-		// eslint-disable-next-line
-		cell: ({ value }: any) => {
-			return createRender(DataTableActions, { id: value.id });
-		},
-	}),
-]);
-
-const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-	table.createViewModel(columns);
-
-const { filterValue } = pluginStates.filter;
 </script>
-
-<div class="flex items-center py-4">
-    <Input
-        class="max-w-sm"
-        placeholder="Filter..."
-        type="text"
-        bind:value={$filterValue}
-    />
+<!-- <Input -->
+<!--       placeholder="Suche" -->
+<!--       value="" -->
+<!--       onchange={(e) => { -->
+<!--           table.setGlobalFilter(String(e.currentTarget.value)) -->
+<!--       }} -->
+<!--       oninput={(e) => { -->
+<!--           table.setGlobalFilter(String(e.currentTarget.value)) -->
+<!--       }} -->
+<!--       class="max-w-sm" -->
+<!--     /> -->
+ 
+<div class="rounded-md border">
+ <Table.Root>
+  <Table.Header>
+   {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+    <Table.Row>
+     {#each headerGroup.headers as header (header.id)}
+      <Table.Head>
+       {#if !header.isPlaceholder}
+        <FlexRender
+         content={header.column.columnDef.header}
+         context={header.getContext()}
+        />
+       {/if}
+      </Table.Head>
+     {/each}
+    </Table.Row>
+   {/each}
+  </Table.Header>
+  <Table.Body>
+   {#each table.getRowModel().rows as row (row.id)}
+    <Table.Row data-state={row.getIsSelected() && "selected"}>
+     {#each row.getVisibleCells() as cell (cell.id)}
+      <Table.Cell>
+        <Sheet.Root>
+            <Sheet.Trigger>
+                <ContextMenu.Root>
+                    <ContextMenu.Trigger>
+                        <FlexRender
+                            content={cell.column.columnDef.cell}
+                            context={cell.getContext()}
+                           />
+                    </ContextMenu.Trigger>
+                    <ContextMenu.Content>
+                    <ContextMenu.Item>
+                        {#if isLoggedIn}
+                            <Button variant="link" onclick={() => upvote(cell.getContext().row.getValue('id'))}>Upvote</Button>
+                        {/if}
+                    </ContextMenu.Item>
+                        {#if adminOnly()}
+                            <ContextMenu.Item>
+                                <Button variant="link" onclick={() => setStatus(cell.getContext().row.getValue('id'), 0)}>Open</Button>
+                            </ContextMenu.Item>
+                            <ContextMenu.Item>
+                                <Button variant="link" onclick={() => setStatus(cell.getContext().row.getValue('id'), 1)}>WIP</Button>
+                            </ContextMenu.Item>
+                            <ContextMenu.Item>
+                                <Button variant="link" onclick={() => setStatus(cell.getContext().row.getValue('id'), 2)}>Accepted</Button>
+                            </ContextMenu.Item>
+                            <ContextMenu.Item>
+                                <Button variant="link" onclick={() => setStatus(cell.getContext().row.getValue('id'), 3)}>Denied</Button>
+                            </ContextMenu.Item>
+                            <ContextMenu.Item>
+                                <Button variant="link" onclick={() => setStatus(cell.getContext().row.getValue('id'), 4)}>Closed</Button>
+                            </ContextMenu.Item>
+                            <ContextMenu.Item>
+                                <Button variant="link" onclick={() => setStatus(cell.getContext().row.getValue('id'), 10)}>Archived</Button>
+                            </ContextMenu.Item>
+                        {/if}
+                    </ContextMenu.Content>
+                </ContextMenu.Root>
+            </Sheet.Trigger>
+        <Sheet.Content>
+            <Sheet.Header>
+              <Sheet.Title>{cell.getContext().row.getValue("title")}</Sheet.Title>
+              <Sheet.Description>
+                <div class="mb-5">
+                    <p>{cell.getContext().row.getValue("body")}</p>
+                </div>
+                <Separator /> 
+                <div class="flex flex-row gap-2">
+                    <p class="border-r">Status: {statusToText(cell.getContext().row.getValue("status"))}</p>
+                    <p class="border-r">Kategorie: {categoryToText(cell.getContext().row.getValue("category"))}</p>
+                    <p class="border-r">Likes: {cell.getContext().row.getValue("upvotes")}</p>
+                    <p class="border-r">Author: {cell.getContext().row.getValue("owner")}</p>
+                </div>
+              </Sheet.Description>
+            </Sheet.Header>
+        </Sheet.Content>
+        </Sheet.Root>
+      </Table.Cell>
+     {/each}
+    </Table.Row>
+   {:else}
+    <Table.Row>
+     <Table.Cell colspan={columns.length} class="h-24 text-center">
+      No results.
+     </Table.Cell>
+    </Table.Row>
+   {/each}
+  </Table.Body>
+ </Table.Root>
 </div>
-
-<div class="w-full rounded-md border">
-    <Table.Root {...$tableAttrs}>
-        <Table.Header>
-            {#each $headerRows as headerRow}
-                <Subscribe rowAttrs={headerRow.attrs()}>
-                    <Table.Row>
-                        {#each headerRow.cells as cell (cell.id)}
-                            <Subscribe
-                                attrs={cell.attrs()}
-                                let:attrs
-                                props={cell.props()}
-                                let:props
-                            >
-                                <Table.Head {...attrs}>
-                                    {#if cell.id !== "id"}
-                                        <Button
-                                            variant="ghost"
-                                            onclick={props.sort.toggle}
-                                        >
-                                            <Render of={cell.render()} />
-                                            <Icon
-                                                src={BsArrowDownUp}
-                                                className="mx-2"
-                                            />
-                                        </Button>
-                                    {/if}
-                                </Table.Head>
-                            </Subscribe>
-                        {/each}
-                    </Table.Row>
-                </Subscribe>
-            {/each}
-        </Table.Header>
-        <Table.Body {...$tableBodyAttrs}>
-            {#each $pageRows as row (row.id)}
-                <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-                    <Table.Row {...rowAttrs}>
-                        {#each row.cells as cell (cell.id)}
-                            <Subscribe attrs={cell.attrs()} let:attrs>
-                                <Table.Cell
-                                    class={cell.id === "status"
-                                        ? cell.value === 0
-                                            ? "bg-blue-900 rounded-xl"
-                                            : cell.value === 1
-                                              ? "bg-teal-900 rounded-xl"
-                                              : cell.value === 2
-                                                ? "bg-purple-900 rounded-xl"
-                                                : cell.value === 3
-                                                  ? "bg-red-900 rounded-xl"
-                                                  : cell.value === 4
-                                                    ? "bg-green-900 rounded-xl"
-                                                    : ""
-                                        : ""}
-                                    onclick={() => {
-                                        if (cell.id !== "id") {
-                                            cardOpen = true;
-                                            cardContent = row.original;
-                                        }
-                                    }}
-                                    {...attrs}
-                                >
-                                    <Render of={cell.render()} />
-                                </Table.Cell>
-                            </Subscribe>
-                        {/each}
-                    </Table.Row>
-                </Subscribe>
-            {/each}
-        </Table.Body>
-    </Table.Root>
-</div>
-
-<Dialog.Root open={cardOpen} onOpenChange={() => (cardOpen = !cardOpen)}>
-    <Dialog.Content class="sm:max-w-[425px]">
-        <Dialog.Header>
-            <Dialog.Title>{cardContent.title}</Dialog.Title>
-        </Dialog.Header>
-
-        <Dialog.Description>
-            {cardContent.body}
-        </Dialog.Description>
-        <Dialog.Footer>
-            <p>Upvotes: {cardContent.upvotes}</p>
-            <p>Ersteller: {cardContent.owner}</p>
-            <p>
-                Status: {cardContent.status == 0
-                    ? "Open"
-                    : cardContent.status == 1
-                      ? "WIP"
-                      : cardContent.status == 2
-                        ? "Accepted"
-                        : cardContent.status == 3
-                          ? "Denied"
-                          : "Closed"}
-            </p>
-            <p>
-                Kategorie: {cardContent.category == 0
-                    ? "Bug"
-                    : cardContent.category == 1
-                      ? "Feature"
-                      : "Question"}
-            </p>
-        </Dialog.Footer>
-    </Dialog.Content>
-</Dialog.Root>
