@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8900:8900"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=8900
+    restart: unless-stopped
