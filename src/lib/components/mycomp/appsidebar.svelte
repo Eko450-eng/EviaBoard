@@ -7,6 +7,8 @@ import {
 	FaSolidDownload,
 	FaSolidGlobe,
 	FaSolidHouse,
+	FaSolidPlateWheat,
+	FaSolidTrain,
 	FaSolidUser,
 } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
@@ -29,6 +31,16 @@ let authenticatedLinks = [
 		name: 'ASB Online Checker',
 		value: '/asb',
 	},
+	{
+		icon: FaSolidPlateWheat,
+		name: 'Bestellnotifier',
+		value: '/essensbestellungen',
+	},
+	// {
+	// 	icon: FaSolidTrain,
+	// 	name: 'Bestellnotifier',
+	// 	value: '/dbjournal',
+	// },
 	{
 		icon: FaSolidUser,
 		name: 'Profile',
