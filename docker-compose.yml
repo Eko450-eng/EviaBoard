@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build:
@@ -9,8 +7,11 @@ services:
       - "8900:8900"
     env_file:
       - .env.local
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - HOST=0.0.0.0
       - PORT=8900
     restart: unless-stopped

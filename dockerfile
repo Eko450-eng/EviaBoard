@@ -14,6 +14,7 @@ RUN pnpm install --frozen-lockfile
 # Copy source files
 COPY . .
 
+RUN pnpm i -g vite
 # Build the application
 RUN pnpm build
 
@@ -29,6 +30,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY --from=builder /app/build build/
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/pnpm-lock.yaml ./
+COPY --from=builder /app/vite.config.ts ./
 
 # Install production dependencies only
 RUN pnpm install --prod --frozen-lockfile
