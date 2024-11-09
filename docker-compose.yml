@@ -7,11 +7,8 @@ services:
       - "8900:8900"
     env_file:
       - .env.local
-    volumes:
-      - .:/app
-      - /app/node_modules
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - ORIGIN=0.0.0.0
       - HOST=0.0.0.0
       - PORT=8900
