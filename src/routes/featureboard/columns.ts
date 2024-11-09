@@ -6,10 +6,6 @@ import { createRawSnippet } from 'svelte';
 
 export const columns: ColumnDef<Report>[] = [
 	{
-		accessorKey: 'id',
-		header: 'Id',
-	},
-	{
 		accessorKey: 'source',
 		header: ({ column }) =>
 			renderComponent(SortableHeader, {

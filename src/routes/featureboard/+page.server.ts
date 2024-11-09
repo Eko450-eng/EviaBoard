@@ -58,7 +58,7 @@ export async function load() {
 	if (db && db.ready) {
 		await db
 			?.query<Report[][]>(
-				'SELECT id, title, body, status, category, count(->bug_vote->votes)AS upvotes, owner.name as owner FROM bugreports WHERE status != 10',
+				'SELECT id, title, body, status, category, created_at, count(->bug_vote->votes)AS upvotes, owner.name as owner FROM bugreports WHERE status != 10 ORDER created_at DESC',
 			)
 			.then(async (v) => {
 				let responses = v[0];

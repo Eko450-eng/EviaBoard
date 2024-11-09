@@ -28,7 +28,7 @@ let {
 
 let topics: Array<string> | undefined = ['Bug', 'Feature', 'Question'];
 // eslint-disable-next-line
-let selectedTopic: any = '';
+let selectedTopic: any = $state('');
 
 let postData: Report = {
 	title: '',
@@ -126,13 +126,11 @@ async function addPost() {
             </div>
             <Select.Root
                 type="single"
+                name="topic" 
+                bind:value={selectedTopic}
             >
                 <Select.Trigger class="w-[180px]">
-                    <!-- <Select.Value -->
-                    <!--     placeholder={selectedTopic == "" -->
-                    <!--         ? "Kategorie" -->
-                    <!--         : selectedTopic} -->
-                    <!-- /> -->
+                    {selectedTopic === "" ? "Kategorie" : selectedTopic}
                 </Select.Trigger>
                 <Select.Content>
                     <Select.Group>
@@ -146,7 +144,6 @@ async function addPost() {
                         {/if}
                     </Select.Group>
                 </Select.Content>
-                <Select.Item value="selectedTopic" />
             </Select.Root>
         </div>
         <Dialog.Footer>
