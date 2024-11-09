@@ -4,6 +4,7 @@ import { toast } from 'svelte-sonner';
 import { Button } from '$lib/components/ui/button/index.js';
 import { Label } from '$lib/components/ui/label/index.js';
 import { Input } from '$lib/components/ui/input/index.js';
+import '$lib/themes/github.scss';
 import type { Post, Topic } from '@/types.js';
 import { goto } from '$app/navigation';
 import { RecordId } from 'surrealdb';
@@ -88,12 +89,13 @@ async function editPost() {
     <div>
         <Label for="body" class="text-right">Beschreibung</Label>
     </div>
+
     <MarkdownEditor
         mode="tabs"
-        theme="discord"
         {carta}
         bind:value={postData.body}
     />
+
     <div>
         <Label for="solution" class="text-right">Lösung</Label>
         <MarkdownEditor

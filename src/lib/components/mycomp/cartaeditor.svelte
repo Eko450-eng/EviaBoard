@@ -14,8 +14,6 @@ let { text = $bindable() }: { text: string } = $props();
 
 <div class="w-full">
     <MarkdownEditor
-        mode="tabs"
-        theme="discord"
         {carta}
         bind:value={text}
     />

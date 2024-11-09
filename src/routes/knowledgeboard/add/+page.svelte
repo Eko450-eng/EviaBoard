@@ -7,10 +7,10 @@ import { Input } from '$lib/components/ui/input/index.js';
 import type { Post, Topic } from '@/types.js';
 import { sendPush } from '@/helpers/push.js';
 import { RecordId } from 'surrealdb';
-import carta from '@/helpers/carta.js';
 import { MarkdownEditor } from 'carta-md';
 import { getDb } from '@/db.js';
 import { userStore } from '@/stores/user.store.js';
+import carta from '$lib/helpers/carta.js';
 
 let { data } = $props();
 // eslint-disable-next-line
@@ -71,18 +71,23 @@ const triggerContent = $derived(
     </div>
     <div>
         <Label for="body" class="text-right">Beschreibung</Label>
-        <MarkdownEditor
-            mode="tabs"
-            theme="discord"
-            {carta}
-            bind:value={postData.body}
-        />
+
+
+        <MarkdownEditor 
+        mode="tabs" 
+        theme="github" 
+        {carta} 
+        bind:value={postData.body} 
+        /> 
+
+
+
     </div>
     <div>
         <Label for="solution" class="text-right">Lösung</Label>
         <MarkdownEditor
             mode="tabs"
-            theme="discord"
+            theme="github" 
             {carta}
             bind:value={postData.solution}
         />

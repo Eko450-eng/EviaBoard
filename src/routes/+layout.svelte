@@ -70,4 +70,8 @@ let { children } = $props();
     /*     top: 1em; */
     /*     right: 1em; */
     /* } */
+    :global(textarea.carta-font-code, div.carta-font-code){
+        line-height: 1.2rem;
+        font-size: 0.9rem;
+    }
 </style>
