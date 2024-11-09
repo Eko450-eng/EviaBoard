@@ -1,5 +1,5 @@
 services:
-  web:
+  eviaboard:
     build:
       context: .
       dockerfile: Dockerfile
@@ -8,10 +8,11 @@ services:
     env_file:
       - .env.local
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - .:/app
+      - /app/node_modules
     environment:
       - NODE_ENV=development
+      - ORIGIN=0.0.0.0
       - HOST=0.0.0.0
       - PORT=8900
     restart: unless-stopped
