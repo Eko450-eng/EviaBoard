@@ -1,15 +1,9 @@
+version: "3.3"
 services:
   eviaboard:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: eviaboard
     ports:
       - "8900:8900"
     env_file:
       - .env.local
-    environment:
-      - NODE_ENV=production
-      - ORIGIN=0.0.0.0
-      - HOST=0.0.0.0
-      - PORT=8900
     restart: unless-stopped

@@ -38,7 +38,7 @@ COPY --from=builder /app/build ./build
 COPY --from=builder /app/package.json ./
 
 # Required for node to find the packages
-ENV PATH /app/node_modules/.bin:$PATH
+ENV PATH=/app/node_modules/.bin:$PATH
 ENV HOST=0.0.0.0
 ENV PORT=8900
 ENV NODE_ENV=production
