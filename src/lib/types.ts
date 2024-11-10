@@ -29,8 +29,20 @@ export type Pushkey_Channel = {
 	out: Channel;
 };
 
+export type Post_Vote = {
+	id?: RecordId;
+	in: Post;
+	out: User;
+};
+
 export type Votes = {
 	id?: RecordId;
+	voter: User;
+};
+
+export type PostVotes = {
+	id?: RecordId;
+	post: Post;
 	voter: User;
 };
 
@@ -103,6 +115,7 @@ export type Post = {
 	topic: RecordId | string;
 	deleted: boolean;
 	created_at?: Date;
+	upvotes?: number;
 };
 
 export type User = {
