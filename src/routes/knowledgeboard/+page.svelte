@@ -8,14 +8,15 @@ import { goto, invalidateAll } from '$app/navigation';
 import DeleteDialog from './delete-dialog.svelte';
 import RecoverDialog from './recover-dialog.svelte';
 import AvatarBar from '$lib/components/mycomp/avatar.svelte';
-import type { Post, Topic, User } from '@/types.js';
+import type { Post, PostVotes, Topic, User } from '@/types.js';
 import Plus from 'svelte-radix/Plus.svelte';
 import Cartarender from '@/components/mycomp/cartarender.svelte';
-import { FaCalendarDays } from 'svelte-icons-pack/fa';
+import { FaCalendarDays, FaSolidHeart } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
 import { formatDate } from '@/helpers/formating.js';
 import { getDb } from '@/db.js';
 import { userStore } from '@/stores/user.store.js';
+import { RecordId } from 'surrealdb';
 
 let { data } = $props();
 let deleteDialog = $state(false);
@@ -48,6 +49,37 @@ const triggerContent = $derived(
 	data.topics!.find((f: Topic) => f.name === selectedValue)?.name ??
 		'Kategorie',
 );
+
+async function upvote(recordId: RecordId) {
+	let db = await getDb();
+	let userId = $userStore?.id ?? new RecordId('', '');
+	let post = await db?.select<Post>(recordId);
+
+	let query = `SELECT * FROM postVote WHERE voter = ${'user:' + userId.id} AND post = ${recordId}`;
+	let votes = await db?.query<Array<Array<PostVotes>>>(query);
+
+	if (!post || !votes) return;
+	let newUpvotes = post?.upvotes ?? 0;
+
+	if (votes[0]?.length >= 1) {
+		let v = votes[0][0];
+		await db?.delete(v.id!);
+		newUpvotes -= 1;
+	} else {
+		newUpvotes += 1;
+		await db
+			?.create('postVote', {
+				post: recordId,
+				voter: userId,
+			})
+			.then(async (vote) => {
+				console.log(recordId, vote);
+				let q = `RELATE ${recordId} -> post_vote -> ${vote![0].id}`;
+				await db?.query(q);
+			});
+	}
+	invalidateAll();
+}
 </script>
 
 <div class="flex flex-wrap p-4 items-center justify-between">
@@ -132,13 +164,24 @@ const triggerContent = $derived(
                                 <Card.Footer class="flex justify-between">
                                     <Card.Description>
                                         <AvatarBar user={post.owner as User} />
-                                        <span class="flex items-center gap-2 opacity-80">
-                                            <Icon
-                                                src={FaCalendarDays}
-                                                size={15}
-                                            />
-                                            {post.created_at ? formatDate(post.created_at as Date) : "Older than this feature"}
-                                        </span>
+                                        <div class="flex justify-evenly gap-6 w-full">
+                                            <span class="flex items-center gap-2 opacity-80">
+                                                <Icon
+                                                    src={FaCalendarDays}
+                                                    size={15}
+                                                />
+                                                {post.created_at ? formatDate(post.created_at as Date) : "Older than this feature"}
+                                            </span>
+                                            <Button variant="link" class="flex items-center gap-2 opacity-80"
+                                                onclick={()=>upvote(post.id!)}
+                                            >
+                                                <Icon
+                                                    src={FaSolidHeart}
+                                                    size={15}
+                                                />
+                                                {post.upvotes}
+                                            </Button>
+                                        </div>
                                     </Card.Description>
                                     {#if $userStore?.id}
                                         {#if post.owner.id!.toString() === $userStore?.id?.toString() && !post.deleted}
