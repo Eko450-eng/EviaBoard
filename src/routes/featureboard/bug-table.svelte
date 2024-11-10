@@ -26,6 +26,7 @@ import { isLoggedIn, userStore } from '@/stores/user.store';
 import type { Report, Votes } from '@/types';
 import { toast } from 'svelte-sonner';
 import { categoryToText, statusToText } from './helpers';
+import { invalidateAll } from '$app/navigation';
 
 let selectedCell: any = $state(undefined);
 let sheetOpen = $state(false);
@@ -72,6 +73,7 @@ async function upvote(id: string) {
 				await db?.query(q);
 			});
 	}
+	invalidateAll();
 }
 
 async function setStatus(id: string, status: number) {
@@ -90,6 +92,7 @@ async function setStatus(id: string, status: number) {
 				description: 'Status gändert',
 			});
 		});
+	invalidateAll();
 }
 
 let globalFilter = $state('');

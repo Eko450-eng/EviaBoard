@@ -1,25 +1,29 @@
 import type { Channel, Pushkey } from '@/types';
 import type { RecordId } from 'surrealdb';
 import { getDb } from '@/db';
-import { userStore } from '../../lib/stores/user.store';
 
-export async function channelHandler(channel: Channel, isSubbed: boolean) {
+export async function channelHandler(
+	channel: Channel,
+	isSubbed: boolean,
+	userId: RecordId | undefined,
+) {
+	if (!userId) return;
 	if (!channel.id) return;
 	if (!isSubbed) {
-		unSubFromChannel(channel.id);
+		unSubFromChannel(channel.id, userId);
 	} else {
-		subToChannel(channel.id);
+		subToChannel(channel.id, userId);
 	}
 }
 
-export async function unSubFromChannel(channel: RecordId) {
+export async function unSubFromChannel(channel: RecordId, userId: RecordId) {
 	let db = await getDb();
 	if ('serviceWorker' in navigator) {
 		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.getSubscription();
 		const pushKey: Array<Array<Pushkey>> | undefined = await db?.query<
 			Array<Array<Pushkey>>
-		>(`SELECT * FROM pushkey WHERE user = ${userStore()?.id}`);
+		>(`SELECT * FROM pushkey WHERE user = ${userId}`);
 		if (!pushKey) return;
 
 		pushKey[0].forEach(async (key) => {
@@ -29,11 +33,11 @@ export async function unSubFromChannel(channel: RecordId) {
 	}
 }
 
-export async function subToChannel(channel: RecordId) {
+export async function subToChannel(channel: RecordId, userId: RecordId) {
 	let db = await getDb();
 	const pushKey: Array<Array<Pushkey>> | undefined = await db?.query<
 		Array<Array<Pushkey>>
-	>(`SELECT * FROM pushkey WHERE user = ${userStore()?.id}`);
+	>(`SELECT * FROM pushkey WHERE user = ${userId}`);
 	if (!pushKey) return;
 
 	pushKey[0].forEach(async (key) => {

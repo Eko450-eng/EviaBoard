@@ -108,7 +108,7 @@ async function getChannels() {
             <div class="items-top flex space-x-2">
                 <Checkbox
                     id={channel.channel.channelname}
-                    onCheckedChange={(v) => channelHandler(channel.channel, v as boolean)}
+                    onCheckedChange={(v) => channelHandler(channel.channel, v as boolean, $userStore?.id)}
                     bind:checked={channel.userIsSubbed}
                 />
                 <div class="grid gap-1.5 leading-none">

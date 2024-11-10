@@ -15,6 +15,7 @@ import { getDb } from '@/db';
 import { userStore } from '@/stores/user.store';
 import { columns } from './columns';
 import DataTable from './bug-table.svelte';
+import { invalidateAll } from '$app/navigation';
 
 let addPostOpen = $state(false);
 
@@ -30,14 +31,14 @@ let topics: Array<string> | undefined = ['Bug', 'Feature', 'Question'];
 // eslint-disable-next-line
 let selectedTopic: any = $state('');
 
-let postData: Report = {
+let postData: Report = $state({
 	title: '',
 	body: '',
 	status: 0,
 	category: 0,
 	upvotes: 0,
 	owner: new RecordId('', ''),
-};
+});
 
 async function addPost() {
 	let db = await getDb();
@@ -82,6 +83,15 @@ async function addPost() {
 			toast.success('Yey', {
 				description: 'Danke für dein Feedback!',
 			});
+			postData = {
+				title: '',
+				body: '',
+				status: 0,
+				category: 0,
+				upvotes: 0,
+				owner: $userStore?.id!,
+			};
+			invalidateAll();
 		});
 	} catch (e) {
 		toast.error('Fehler', {
