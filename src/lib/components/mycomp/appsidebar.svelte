@@ -85,7 +85,7 @@ $effect(() => {
         <Sidebar.SidebarGroupContent>
             <Sidebar.Menu>
                 {#each links as item}
-                    <Sidebar.MenuItem class="mx-auto">
+                    <Sidebar.MenuItem class="mx-auto" >
                         <Sidebar.MenuButton isActive={pathname === item.value}>
                             {#snippet child({props})}
                                 <a href={item.value} {...props}>
@@ -98,7 +98,7 @@ $effect(() => {
                 {/each}
                 {#if $isLoggedIn}
                     {#each authenticatedLinks as item}
-                        <Sidebar.MenuItem class="mx-auto">
+                        <Sidebar.MenuItem class="mx-auto" >
                             <Sidebar.MenuButton isActive={pathname === item.value}>
                                 {#snippet child({props})}
                                     <a href={item.value} {...props}>
@@ -111,7 +111,7 @@ $effect(() => {
                     {/each}
                     {:else}
                     {#each unauthenticatedLinks as item}
-                        <Sidebar.MenuItem class="mx-auto">
+                        <Sidebar.MenuItem class="mx-auto" >
                             <Sidebar.MenuButton isActive={pathname === item.value}>
                                 {#snippet child({props})}
                                     <a href={item.value} {...props}>

@@ -137,7 +137,7 @@ const triggerContent = $derived(
                                                 src={FaCalendarDays}
                                                 size={15}
                                             />
-                                            {formatDate(post.created_at as Date)}
+                                            {post.created_at ? formatDate(post.created_at as Date) : "Older than this feature"}
                                         </span>
                                     </Card.Description>
                                     {#if $userStore?.id}

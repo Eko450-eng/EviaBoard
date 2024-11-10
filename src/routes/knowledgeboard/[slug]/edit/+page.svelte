@@ -92,6 +92,7 @@ async function editPost() {
 
     <MarkdownEditor
         mode="tabs"
+        theme="github"
         {carta}
         bind:value={postData.body}
     />
@@ -100,7 +101,7 @@ async function editPost() {
         <Label for="solution" class="text-right">Lösung</Label>
         <MarkdownEditor
             mode="tabs"
-            theme="discord"
+            theme="github"
             {carta}
             bind:value={postData.solution}
         />

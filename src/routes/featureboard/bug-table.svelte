@@ -1,13 +1,11 @@
 <script lang="ts" generics="TData, TValue">
-// import { Input } from '$ui/input';
 import { Button } from '$ui/button';
 import { Input } from '$ui/input';
 import { Separator } from '$ui/separator';
 import {
 	type ColumnDef,
+	ColumnFiltering,
 	type ColumnFiltersState,
-	// type ColumnFiltersState,
-	type FilterFn,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getSortedRowModel,
@@ -18,8 +16,8 @@ import {
 	FlexRender,
 } from '$lib/components/ui/data-table/index.js';
 import * as Table from '$lib/components/ui/table/index';
+import * as Select from '$lib/components/ui/select/index';
 import * as Sheet from '$lib/components/ui/sheet/index';
-import { rankItem } from '@tanstack/match-sorter-utils';
 import * as ContextMenu from '$ui/context-menu';
 import { adminOnly } from '@/helpers/admin';
 import { getDb } from '@/db';
@@ -27,39 +25,11 @@ import { RecordId } from 'surrealdb';
 import { isLoggedIn, userStore } from '@/stores/user.store';
 import type { Report, Votes } from '@/types';
 import { toast } from 'svelte-sonner';
-import { getContext } from 'svelte';
-// let columnFilters = $state<ColumnFiltersState>([]);
+import { categoryToText, statusToText } from './helpers';
 
-function categoryToText(value: number) {
-	switch (value) {
-		case 0:
-			return 'Bug';
-		case 1:
-			return 'Feature';
-		case 2:
-			return 'Question';
-		default:
-			return 'Bug';
-	}
-}
-function statusToText(value: number) {
-	switch (value) {
-		case 0:
-			return 'open';
-		case 1:
-			return 'WIP';
-		case 2:
-			return 'Accepted';
-		case 3:
-			return 'Denied';
-		case 4:
-			return 'Closed';
-		case 10:
-			return 'Archived';
-		default:
-			return 'Open';
-	}
-}
+let selectedCell: any = $state(undefined);
+let sheetOpen = $state(false);
+let contextOpen = $state(false);
 
 type DateTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
@@ -67,6 +37,8 @@ type DateTableProps<TData, TValue> = {
 };
 
 let { data, columns }: DateTableProps<TData, TValue> = $props();
+
+// Sorting and filtering
 let sorting = $state<SortingState>([]);
 
 async function upvote(id: string) {
@@ -121,15 +93,7 @@ async function setStatus(id: string, status: number) {
 }
 
 let globalFilter = $state('');
-
-// fuzzyFilter
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-	const itemRank = rankItem(row.getValue(columnId), value);
-	addMeta({ itemRank });
-
-	return itemRank.passed;
-};
-let columnFilters = $state<ColumnFiltersState>([]);
+let columnFilter = $state<ColumnFiltersState>([]);
 
 const table = createSvelteTable({
 	get data() {
@@ -139,6 +103,7 @@ const table = createSvelteTable({
 	getCoreRowModel: getCoreRowModel(),
 	getSortedRowModel: getSortedRowModel(),
 	getFilteredRowModel: getFilteredRowModel(),
+	globalFilterFn: 'includesString',
 	onSortingChange: (updater) => {
 		if (typeof updater === 'function') {
 			sorting = updater(sorting);
@@ -153,67 +118,121 @@ const table = createSvelteTable({
 			globalFilter = updater;
 		}
 	},
-	filterFns: {
-		fuzzy: fuzzyFilter,
+	onColumnFiltersChange: (updater) => {
+		if (typeof updater === 'function') {
+			columnFilter = updater(columnFilter);
+		} else {
+			columnFilter = updater;
+		}
 	},
-	globalFilterFn: (row, columnId, filterValue) => {
-		const value = row.getValue(columnId);
-		if (value == null) return false;
-		return String(value)
-			.toLowerCase()
-			.includes(String(filterValue).toLowerCase());
-	},
-	groupedColumnMode: 'reorder',
+	groupedColumnMode: 'remove',
 	enableGlobalFilter: true,
 	state: {
+		columnVisibility: {
+			id: false,
+		},
 		get sorting() {
 			return sorting;
 		},
 		get globalFilter() {
-			return columnFilters;
+			return globalFilter;
+		},
+		get columnFilters() {
+			return columnFilter;
 		},
 	},
 });
+
+const statuses = [
+	{ label: 'Open', value: 0 },
+	{ label: 'WIP', value: 1 },
+	{ label: 'Accepted', value: 2 },
+	{ label: 'Denied', value: 3 },
+	{ label: 'Close', value: 4 },
+	{ label: 'Archived', value: 10 },
+];
+
+let statusFilter = $state(['0', '1', '2']);
+
+const statusFilterTrigger = $derived('Gefilterte Statuse');
+
+const categorys = [
+	{ label: 'Bug', value: 0 },
+	{ label: 'Feature', value: 1 },
+	{ label: 'Question', value: 2 },
+];
+
+let categoryFilter = $state(['0', '1', '2']);
+const categoryFilterTrigger = $derived('Gefilterte Kategorien');
 </script>
 
-<!-- <Input -->
-<!--     placeholder="Suche" -->
-<!--     bind:value={globalFilter} -->
-<!--     onchange={(e: any) => { -->
-<!--         table.setGlobalFilter(String(e.target.value)) -->
-<!--     }} -->
-<!--     oninput={(e: any) => { -->
-<!--         table.setGlobalFilter(String(e.target.value)) -->
-<!--     }} -->
-<!--     class="max-w-sm" -->
-<!-- /> -->
+<main class="w-full">
+    <div class="flex justify-evenly mb-3">
+        <Select.Root type="multiple" name="statuses" bind:value={statusFilter}>
+          <Select.Trigger class="w-[180px]">
+            {statusFilterTrigger}
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Group>
+              <Select.GroupHeading>Statuse</Select.GroupHeading>
+              {#each statuses as status}
+                <Select.Item value={status.value.toString()} label={status.label} />
+              {/each}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
 
-<div class="rounded-md border mt-3">
-    <Table.Root>
-        <Table.Header>
-            {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-                <Table.Row>
-                    {#each headerGroup.headers as header (header.id)}
-                        <Table.Head>
-                            {#if !header.isPlaceholder}
-                                <FlexRender
-                                    content={header.column.columnDef.header}
-                                    context={header.getContext()}
-                                />
-                            {/if}
-                        </Table.Head>
-                    {/each}
-                </Table.Row>
-            {/each}
-        </Table.Header>
-        <Table.Body>
-            {#each table.getRowModel().rows as row (row.id)}
-                <Table.Row data-state={row.getIsSelected() && "selected"}>
-                    {#each row.getVisibleCells() as cell (cell.id)}
-                        <Table.Cell>
-                            <Sheet.Root>
-                                <Sheet.Trigger>
-                                    <ContextMenu.Root>
+        <Select.Root type="multiple" name="categories" bind:value={categoryFilter}>
+          <Select.Trigger class="w-[180px]">
+            {categoryFilterTrigger}
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Group>
+              <Select.GroupHeading>Kategorien</Select.GroupHeading>
+              {#each categorys as categorie}
+                <Select.Item value={categorie.value.toString()} label={categorie.label} />
+              {/each}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+    </div>
+
+    <Input 
+        placeholder="Suche" 
+        class="w-full my-3" 
+        bind:value={globalFilter} 
+    /> 
+
+    <div class="rounded-md border w-100">
+        <Table.Root class="w-full">
+            <Table.Header>
+                {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+                    <Table.Row>
+                        {#each headerGroup.headers as header (header.id)}
+                            <Table.Head>
+                                {#if !header.isPlaceholder}
+                                    <FlexRender
+                                        content={header.column.columnDef.header}
+                                        context={header.getContext()}
+                                    />
+                                {/if}
+                            </Table.Head>
+                        {/each}
+                    </Table.Row>
+                {/each}
+            </Table.Header>
+            <Table.Body>
+                {#each table.getRowModel().rows as row (row.id)}
+                    {#if (statusFilter.includes(row.getValue("status")!.toString()) && categoryFilter.includes(row.getValue("category")!.toString())) }
+                        <Table.Row data-state={row.getIsSelected() && "selected"}>
+                            {#each row.getVisibleCells() as cell (cell.id)}
+                                <Table.Cell onclick={()=>{
+                                    if(contextOpen) return
+                                    selectedCell = cell
+                                    sheetOpen = true
+                                }}>
+                                <ContextMenu.Root onOpenChange={(v) => contextOpen = v}>
+                                    {#if adminOnly()}
                                         <ContextMenu.Trigger>
                                             <FlexRender
                                                 content={cell.column.columnDef
@@ -221,7 +240,14 @@ const table = createSvelteTable({
                                                 context={cell.getContext()}
                                             />
                                         </ContextMenu.Trigger>
-                                        <ContextMenu.Content>
+                                    {:else}
+                                        <FlexRender
+                                            content={cell.column.columnDef
+                                                .cell}
+                                            context={cell.getContext()}
+                                        />
+                                    {/if}
+                                        <ContextMenu.Content class="zindex">
                                             <ContextMenu.Item>
                                                 {#if isLoggedIn}
                                                     <Button
@@ -325,74 +351,90 @@ const table = createSvelteTable({
                                             {/if}
                                         </ContextMenu.Content>
                                     </ContextMenu.Root>
-                                </Sheet.Trigger>
-                                <Sheet.Content>
-                                    <Sheet.Header>
-                                        <Sheet.Title
-                                            >{cell
-                                                .getContext()
-                                                .row.getValue(
-                                                    "title",
-                                                )}</Sheet.Title
-                                        >
-                                        <Sheet.Description>
-                                            <div class="mb-5">
-                                                <p>
-                                                    {cell
-                                                        .getContext()
-                                                        .row.getValue("body")}
-                                                </p>
-                                            </div>
-                                            <Separator />
-                                            <div class="flex flex-row gap-2">
-                                                <p class="border-r">
-                                                    Status: {statusToText(
-                                                        cell
-                                                            .getContext()
-                                                            .row.getValue(
-                                                                "status",
-                                                            ),
-                                                    )}
-                                                </p>
-                                                <p class="border-r">
-                                                    Kategorie: {categoryToText(
-                                                        cell
-                                                            .getContext()
-                                                            .row.getValue(
-                                                                "category",
-                                                            ),
-                                                    )}
-                                                </p>
-                                                <p class="border-r">
-                                                    Likes: {cell
-                                                        .getContext()
-                                                        .row.getValue(
-                                                            "upvotes",
-                                                        )}
-                                                </p>
-                                                <p class="border-r">
-                                                    Author: {cell
-                                                        .getContext()
-                                                        .row.getValue("owner")}
-                                                </p>
-                                            </div>
-                                        </Sheet.Description>
-                                    </Sheet.Header>
-                                </Sheet.Content>
-                            </Sheet.Root>
+                                </Table.Cell>
+                            {/each}
+                        </Table.Row>
+                    {/if}
+                {:else}
+                    <Table.Row>
+                        <Table.Cell
+                            colspan={columns.length}
+                            class="h-24 text-center"
+                        >
+                            No results.
                         </Table.Cell>
-                    {/each}
-                </Table.Row>
-            {:else}
-                <Table.Row>
-                    <Table.Cell
-                        colspan={columns.length}
-                        class="h-24 text-center"
+                    </Table.Row>
+                {/each}
+            </Table.Body>
+        </Table.Root>
+
+        <!-- Sheet -->
+        <Sheet.Root bind:open={sheetOpen}>
+            <Sheet.Content>
+                <Sheet.Header>
+                    <Sheet.Title
+                        >{selectedCell
+                            .getContext()
+                            .row.getValue(
+                                "title",
+                            )}</Sheet.Title
                     >
-                        No results.
-                    </Table.Cell>
-                </Table.Row>
-            {/each}
-        </Table.Body>
-    </Table.Root>
-</div>
+                    <Sheet.Description>
+                        <div class="mb-5">
+                            <p>
+                                {selectedCell
+                                    .getContext()
+                                    .row.getValue("body")}
+                            </p>
+                        </div>
+                        <Separator />
+                        <div class="flex flex-row gap-2">
+                            <p class="border-r">
+                                Status: {statusToText(
+                                    selectedCell
+                                        .getContext()
+                                        .row.getValue(
+                                            "status",
+                                        ),
+                                )}
+                            </p>
+                            <p class="border-r">
+                                Kategorie: {categoryToText(
+                                    selectedCell
+                                        .getContext()
+                                        .row.getValue(
+                                            "category",
+                                        ),
+                                )}
+                            </p>
+                            <p class="border-r">
+                                Likes: {selectedCell
+                                    .getContext()
+                                    .row.getValue(
+                                        "upvotes",
+                                    )}
+                            </p>
+                            <p class="border-r">
+                                Author: {selectedCell
+                                    .getContext()
+                                    .row.getValue("owner")}
+                            </p>
+                        </div>
+                        <Button
+                            class="mt-5"
+                            variant="ghost"
+                            onclick={() =>
+                                upvote(
+                                    selectedCell
+                                        .getContext()
+                                        .row.getValue(
+                                            "id",
+                                        ),
+                                )}>Upvote</Button
+                        >
+                    </Sheet.Description>
+                </Sheet.Header>
+            </Sheet.Content>
+        </Sheet.Root>
+    </div>
+</main>

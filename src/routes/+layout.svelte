@@ -23,7 +23,6 @@ onMount(async () => {
 	if (!token) return;
 	await checkUser(token);
 });
-
 let { children } = $props();
 </script>
 
@@ -32,8 +31,8 @@ let { children } = $props();
 
 <main class="m-4">
     <Sidebar.Provider open={false}>
-      <Appsidebar />
-      <main>
+      <Appsidebar  />
+      <main class="w-full">
         <Sidebar.Trigger />
         <Button
             aria-label="go to last page"

@@ -91,64 +91,66 @@ async function addPost() {
 }
 </script>
 
-<h1>Bugs and Requests</h1>
+<main class="w-full">
+    <h1>Bugs and Requests</h1>
 
-<Dialog.Root
-    open={addPostOpen}
-    onOpenChange={() => (addPostOpen = !addPostOpen)}
->
-    <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
-        <Plus />
-    </Dialog.Trigger>
-    <Dialog.Content class="sm:max-w-[425px]">
-        <Dialog.Header>
-            <Dialog.Title>Add post</Dialog.Title>
-            <Dialog.Description>
-                Trage zur Knowledgebase bei!
-            </Dialog.Description>
-        </Dialog.Header>
-        <div class="grid gap-4 py-4">
-            <div class="grid grid-cols-4 items-center gap-4">
-                <Label for="title" class="text-right">Titel</Label>
-                <Input
-                    id="title"
-                    bind:value={postData.title}
-                    class="col-span-3"
-                />
+    <Dialog.Root
+        open={addPostOpen}
+        onOpenChange={() => (addPostOpen = !addPostOpen)}
+    >
+        <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
+            <Plus />
+        </Dialog.Trigger>
+        <Dialog.Content class="sm:max-w-[425px]">
+            <Dialog.Header>
+                <Dialog.Title>Add post</Dialog.Title>
+                <Dialog.Description>
+                    Trage zur Knowledgebase bei!
+                </Dialog.Description>
+            </Dialog.Header>
+            <div class="grid gap-4 py-4">
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <Label for="title" class="text-right">Titel</Label>
+                    <Input
+                        id="title"
+                        bind:value={postData.title}
+                        class="col-span-3"
+                    />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <Label for="body" class="text-right">Beschreibung</Label>
+                    <Textarea
+                        id="body"
+                        bind:value={postData.body as string}
+                        class="col-span-3"
+                    />
+                </div>
+                <Select.Root
+                    type="single"
+                    name="topic" 
+                    bind:value={selectedTopic}
+                >
+                    <Select.Trigger class="w-[180px]">
+                        {selectedTopic === "" ? "Kategorie" : selectedTopic}
+                    </Select.Trigger>
+                    <Select.Content>
+                        <Select.Group>
+                            <Select.GroupHeading>Themen</Select.GroupHeading>
+                            {#if topics}
+                                {#each topics as topic}
+                                    <Select.Item value={topic} label={topic}
+                                        >{topic}</Select.Item
+                                    >
+                                {/each}
+                            {/if}
+                        </Select.Group>
+                    </Select.Content>
+                </Select.Root>
             </div>
-            <div class="grid grid-cols-4 items-center gap-4">
-                <Label for="body" class="text-right">Beschreibung</Label>
-                <Textarea
-                    id="body"
-                    bind:value={postData.body as string}
-                    class="col-span-3"
-                />
-            </div>
-            <Select.Root
-                type="single"
-                name="topic" 
-                bind:value={selectedTopic}
-            >
-                <Select.Trigger class="w-[180px]">
-                    {selectedTopic === "" ? "Kategorie" : selectedTopic}
-                </Select.Trigger>
-                <Select.Content>
-                    <Select.Group>
-                        <Select.GroupHeading>Themen</Select.GroupHeading>
-                        {#if topics}
-                            {#each topics as topic}
-                                <Select.Item value={topic} label={topic}
-                                    >{topic}</Select.Item
-                                >
-                            {/each}
-                        {/if}
-                    </Select.Group>
-                </Select.Content>
-            </Select.Root>
-        </div>
-        <Dialog.Footer>
-            <Button type="submit" onclick={addPost}>Posten</Button>
-        </Dialog.Footer>
-    </Dialog.Content>
-</Dialog.Root>
-<DataTable data={data.data} {columns} />
+            <Dialog.Footer>
+                <Button type="submit" onclick={addPost}>Posten</Button>
+            </Dialog.Footer>
+        </Dialog.Content>
+    </Dialog.Root>
+    <DataTable data={data.data} {columns} />
+</main>
