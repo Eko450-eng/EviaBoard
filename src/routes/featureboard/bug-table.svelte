@@ -155,18 +155,26 @@ const statuses = [
 	{ label: 'Archived', value: 10 },
 ];
 
-let statusFilter = $state(['0', '1', '2']);
+let statusFilter = $state(
+	localStorage.getItem('statusFilter')?.split('-') ?? ['0', '1', '2'],
+);
+let categoryFilter = $state(
+	localStorage.getItem('categoryFilter')?.split('-') ?? ['0', '1', '2'],
+);
+
+$effect(() => {
+	localStorage.setItem('statusFilter', statusFilter.join('-'));
+	localStorage.setItem('categoryFilter', categoryFilter.join('-'));
+});
 
 const statusFilterTrigger = $derived('Gefilterte Statuse');
+const categoryFilterTrigger = $derived('Gefilterte Kategorien');
 
 const categorys = [
 	{ label: 'Bug', value: 0 },
 	{ label: 'Feature', value: 1 },
 	{ label: 'Question', value: 2 },
 ];
-
-let categoryFilter = $state(['0', '1', '2']);
-const categoryFilterTrigger = $derived('Gefilterte Kategorien');
 </script>
 
 <main class="w-full">

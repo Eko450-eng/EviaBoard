@@ -28,8 +28,7 @@ let {
 } = $props();
 
 let topics: Array<string> | undefined = ['Bug', 'Feature', 'Question'];
-// eslint-disable-next-line
-let selectedTopic: any = $state('');
+let selectedTopic = $state<string>('');
 
 let postData: Report = $state({
 	title: '',
