@@ -1,5 +1,13 @@
 import type { RecordId } from 'surrealdb';
 
+export type Notes = {
+	title: string;
+	note: string;
+	owner: User | RecordId;
+	tag: string[];
+	created_at?: Date;
+};
+
 export type NotificationResult = {
 	title: string;
 	desc: string;
