@@ -10,7 +10,7 @@ let user = $state($userStore?.name);
 async function sendPushHandler() {
 	try {
 		await sendPush(
-			'pizza',
+			'Essensbestellung',
 			`${user} will ${food} bestellen, wenn du auch was willst meld dich bei ${user}`,
 		);
 	} catch (e) {
