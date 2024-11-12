@@ -51,7 +51,8 @@ async function getEJData(data: ReportString[]): Promise<ReportString[]> {
 	return response;
 }
 
-export async function load() {
+export async function load({ parent }: any) {
+	await parent();
 	let db = await getDb();
 	let preData: ReportString[] = [];
 	let data: ReportString[] = [];

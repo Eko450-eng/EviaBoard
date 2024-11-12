@@ -26,6 +26,10 @@ export async function unSubFromChannel(channel: RecordId, userId: RecordId) {
 		>(`SELECT * FROM pushkey WHERE user = ${userId}`);
 		if (!pushKey) return;
 
+		await db?.query(
+			`DELETE FROM user_channels WHERE out = ${channel} AND in = ${userId}`,
+		);
+
 		pushKey[0].forEach(async (key) => {
 			const query = `DELETE FROM pushkey_channel WHERE in = ${key.id} AND out = ${channel} AND in.data.endpoint = '${subscription?.endpoint}'`;
 			await db?.query(query);
@@ -41,6 +45,7 @@ export async function subToChannel(channel: RecordId, userId: RecordId) {
 	if (!pushKey) return;
 
 	pushKey[0].forEach(async (key) => {
+		await db?.query(`RELATE  ${userId} -> user_channels -> ${channel}`);
 		await db?.query(`RELATE  ${key.id} -> pushkey_channel -> ${channel}`);
 	});
 }

@@ -138,5 +138,5 @@ export type Downloadlinks = {
 	name: string;
 	description: string;
 	link: string;
-	owner: User | { name: string; id: string; tb: string };
+	owner: User | RecordId;
 };
