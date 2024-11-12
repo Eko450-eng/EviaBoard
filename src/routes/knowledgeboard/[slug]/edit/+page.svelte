@@ -8,14 +8,48 @@ import '$lib/themes/github.scss';
 import type { Post, Topic } from '@/types.js';
 import { goto } from '$app/navigation';
 import { RecordId } from 'surrealdb';
-import carta from '@/helpers/carta.js';
-import { MarkdownEditor } from 'carta-md';
+import { Carta, MarkdownEditor } from 'carta-md';
 import { getDb } from '@/db.js';
+import { code } from '@cartamd/plugin-code';
+import { attachment } from '@cartamd/plugin-attachment';
+import { anchor } from '@cartamd/plugin-anchor';
+import { imsize } from 'carta-plugin-imsize';
+import DOMPurify from 'isomorphic-dompurify';
+import { uploadFileGeneric } from '@/helpers/minio.js';
+import '$lib/themes/github.scss';
 
 let { data } = $props();
 // eslint-disable-next-line
 let selectedTopic = $state<string>('');
 let topics: Topic[] = $state([]);
+
+const cartaBody = new Carta({
+	sanitizer: DOMPurify.sanitize,
+	extensions: [
+		anchor(),
+		code(),
+		imsize(),
+		attachment({
+			upload(file) {
+				return uploadFileGeneric(file);
+			},
+		}),
+	],
+});
+
+const cartaSolution = new Carta({
+	sanitizer: DOMPurify.sanitize,
+	extensions: [
+		anchor(),
+		code(),
+		imsize(),
+		attachment({
+			upload(file) {
+				return uploadFileGeneric(file);
+			},
+		}),
+	],
+});
 
 async function getPost() {
 	let db = await getDb();
@@ -93,7 +127,7 @@ async function editPost() {
     <MarkdownEditor
         mode="tabs"
         theme="github"
-        {carta}
+        carta={cartaBody}
         bind:value={postData.body}
     />
 
@@ -102,7 +136,7 @@ async function editPost() {
         <MarkdownEditor
             mode="tabs"
             theme="github"
-            {carta}
+            carta={cartaSolution}
             bind:value={postData.solution}
         />
     </div>

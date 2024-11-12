@@ -225,7 +225,7 @@ const categorys = [
             <Table.Body>
                 {#each table.getRowModel().rows as row (row.id)}
                     {#if (statusFilter.includes(row.getValue("status")!.toString()) && categoryFilter.includes(row.getValue("category")!.toString())) }
-                        <Table.Row data-state={row.getIsSelected() && "selected"}>
+                        <Table.Row data-state={row.getIsSelected() && "selected"} style="cursor: pointer">
                             {#each row.getVisibleCells() as cell (cell.id)}
                                 <Table.Cell onclick={()=>{
                                     if(contextOpen) return
@@ -421,18 +421,25 @@ const categorys = [
                                     .row.getValue("owner")}
                             </p>
                         </div>
-                        <Button
-                            class="mt-5"
-                            variant="ghost"
-                            onclick={() =>
-                                upvote(
-                                    selectedCell
-                                        .getContext()
-                                        .row.getValue(
-                                            "id",
-                                        ),
-                                )}>Upvote</Button
-                        >
+                        <div class="flex justify-between">
+                            <Button
+                                class="mt-5"
+                                variant="outline"
+                                onclick={() =>
+                                    upvote(
+                                        selectedCell
+                                            .getContext()
+                                            .row.getValue(
+                                                "id",
+                                            ),
+                                    )}>Upvote</Button
+                            >
+                            <Button
+                                class="mt-5"
+                                variant="outline"
+                                onclick={() => navigator.clipboard.writeText(selectedCell.getContext().row.getValue("id").toString()) }>{selectedCell.getContext().row.getValue("id").replace("bugreports:", "").substring(0, 20)}</Button
+                            >
+                        </div>
                     </Sheet.Description>
                 </Sheet.Header>
             </Sheet.Content>

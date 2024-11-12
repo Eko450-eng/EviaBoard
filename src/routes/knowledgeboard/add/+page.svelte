@@ -10,7 +10,44 @@ import { RecordId } from 'surrealdb';
 import { MarkdownEditor } from 'carta-md';
 import { getDb } from '@/db.js';
 import { userStore } from '@/stores/user.store.js';
-import carta from '$lib/helpers/carta.js';
+import { Carta } from 'carta-md';
+import { code } from '@cartamd/plugin-code';
+import { attachment } from '@cartamd/plugin-attachment';
+import { anchor } from '@cartamd/plugin-anchor';
+import { imsize } from 'carta-plugin-imsize';
+import DOMPurify from 'isomorphic-dompurify';
+import { uploadFileGeneric } from '@/helpers/minio.js';
+import '$lib/themes/github.scss';
+import { goto, replaceState } from '$app/navigation';
+import { Toaster } from '@/components/ui/sonner/index.js';
+
+const cartaBody = new Carta({
+	sanitizer: DOMPurify.sanitize,
+	extensions: [
+		anchor(),
+		code(),
+		imsize(),
+		attachment({
+			upload(file) {
+				return uploadFileGeneric(file);
+			},
+		}),
+	],
+});
+
+const cartaSolution = new Carta({
+	sanitizer: DOMPurify.sanitize,
+	extensions: [
+		anchor(),
+		code(),
+		imsize(),
+		attachment({
+			upload(file) {
+				return uploadFileGeneric(file);
+			},
+		}),
+	],
+});
 
 let { data } = $props();
 // eslint-disable-next-line
@@ -45,11 +82,20 @@ async function addPost() {
 	}
 	try {
 		if (!postData) return;
-		await db?.create<Post>('posts', postData).then(() => {
+		console.log('Creating');
+		await db?.create<Post>('posts', postData).then(async () => {
+			console.log('created');
+
+			toast.success('Posted', {
+				description: 'Dein Beitrag wurde gepostet',
+			});
 			sendPush(
 				'New Posts',
 				`Es gab einen neuen Post von ${$userStore?.name} - ${postData.title}`,
-			);
+			).then(async () => {
+				let r = await goto('/knowledgeboard', { replaceState: true });
+				console.log(r);
+			});
 		});
 	} catch (e) {
 		console.error(e);
@@ -77,7 +123,7 @@ const triggerContent = $derived(
         <MarkdownEditor 
         mode="tabs" 
         theme="github" 
-        {carta} 
+        carta={cartaBody} 
         bind:value={postData.body} 
         /> 
 
@@ -89,7 +135,7 @@ const triggerContent = $derived(
         <MarkdownEditor
             mode="tabs"
             theme="github" 
-            {carta}
+            carta={cartaSolution}
             bind:value={postData.solution}
         />
     </div>
