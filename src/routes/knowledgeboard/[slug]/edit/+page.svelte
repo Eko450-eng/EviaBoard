@@ -14,7 +14,7 @@ import { getDb } from '@/db.js';
 
 let { data } = $props();
 // eslint-disable-next-line
-let selectedTopic: any = $state();
+let selectedTopic = $state<string>('');
 let topics: Topic[] = $state([]);
 
 async function getPost() {
@@ -24,7 +24,7 @@ async function getPost() {
 		let posts_raw = await db?.query<Array<Array<Post>>>(query);
 		if (!posts_raw) return;
 		postData = posts_raw[0][0];
-		selectedTopic = postData.topic;
+		selectedTopic = postData.topic as string;
 	}
 }
 

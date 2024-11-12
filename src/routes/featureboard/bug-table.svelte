@@ -4,7 +4,6 @@ import { Input } from '$ui/input';
 import { Separator } from '$ui/separator';
 import {
 	type ColumnDef,
-	ColumnFiltering,
 	type ColumnFiltersState,
 	getCoreRowModel,
 	getFilteredRowModel,
@@ -156,17 +155,16 @@ const statuses = [
 ];
 
 let statusFilter = $state(['0', '1', '2']);
+let categoryFilter = $state(['0', '1', '2']);
 
 const statusFilterTrigger = $derived('Gefilterte Statuse');
+const categoryFilterTrigger = $derived('Gefilterte Kategorien');
 
 const categorys = [
 	{ label: 'Bug', value: 0 },
 	{ label: 'Feature', value: 1 },
 	{ label: 'Question', value: 2 },
 ];
-
-let categoryFilter = $state(['0', '1', '2']);
-const categoryFilterTrigger = $derived('Gefilterte Kategorien');
 </script>
 
 <main class="w-full">

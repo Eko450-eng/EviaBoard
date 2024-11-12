@@ -31,7 +31,7 @@ let postData: Downloadlinks = {
 	name: 'Name',
 	description: 'Kurze Beschreibung!',
 	link: 'https://....',
-	owner: { id: '', name: '', tb: '' },
+	owner: $userStore!,
 };
 
 async function deleteLink(id: RecordId) {

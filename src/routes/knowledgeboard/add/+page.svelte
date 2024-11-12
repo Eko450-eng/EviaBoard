@@ -24,6 +24,7 @@ let postData: Post = $state({
 	solution: '',
 	owner: new RecordId('', ''),
 	topic: new RecordId('', ''),
+	created_at: new Date(),
 });
 
 $effect(() => {

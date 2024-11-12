@@ -73,7 +73,6 @@ async function upvote(recordId: RecordId) {
 				voter: userId,
 			})
 			.then(async (vote) => {
-				console.log(recordId, vote);
 				let q = `RELATE ${recordId} -> post_vote -> ${vote![0].id}`;
 				await db?.query(q);
 			});
