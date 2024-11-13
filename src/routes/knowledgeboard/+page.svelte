@@ -19,6 +19,7 @@ import { userStore } from '@/stores/user.store.js';
 import { RecordId } from 'surrealdb';
 
 let { data } = $props();
+
 let deleteDialog = $state(false);
 let postToDelete: Post | undefined = $state(undefined);
 
@@ -31,6 +32,7 @@ let selectedValue = $state('Kategorie');
 
 onMount(async () => {
 	let db = await getDb();
+	if (!userStore) data = { posts: [], topics: [], failed: true };
 	if (data.failed) goto('/');
 
 	// eslint-disable-next-line
@@ -81,135 +83,139 @@ async function upvote(recordId: RecordId) {
 }
 </script>
 
-<div class="flex flex-wrap p-4 items-center justify-between">
-    <h1>Knowledgebase</h1>
-    <DeleteDialog bind:deleteDialog {postToDelete} />
-    <RecoverDialog bind:recoverDialog {postToRecover} />
+{#if !$userStore || $userStore.role <= 0}
+    <h1>You don't have the correct permissions</h1>
+    {:else}
+    <div class="flex flex-wrap p-4 items-center justify-between">
+        <h1>Knowledgebase</h1>
+        <DeleteDialog bind:deleteDialog {postToDelete} />
+        <RecoverDialog bind:recoverDialog {postToRecover} />
 
-    {#if $userStore?.email}
-        <Toggle variant="outline" onclick={() => (showDeleted = !showDeleted)}>
-            {showDeleted ? "Hide" : "Show"}
-            your Deleted posts
-        </Toggle>
-    {/if}
+        {#if $userStore?.email}
+            <Toggle variant="outline" onclick={() => (showDeleted = !showDeleted)}>
+                {showDeleted ? "Hide" : "Show"}
+                your Deleted posts
+            </Toggle>
+        {/if}
 
-    <Button
-        aria-label="Select a topic from a dropdown menu"
-        variant="outline"
-        onclick={() => goto("/knowledgeboard/add")}
-    >
-        <Plus />
-    </Button>
-</div>
-
-<Select.Root type="single" name="topic" bind:value={selectedValue}>
-  <Select.Trigger class="w-[180px]">
-    {triggerContent}
-  </Select.Trigger>
-  <Select.Content>
-    <Select.Group>
-      <Select.GroupHeading>Kategorie</Select.GroupHeading>
-      {#each data.topics! as topic}
-        <Select.Item value={topic.name} label={topic.name}
-          >{topic.name}</Select.Item
+        <Button
+            aria-label="Select a topic from a dropdown menu"
+            variant="outline"
+            onclick={() => goto("/knowledgeboard/add")}
         >
-      {/each}
-    </Select.Group>
-  </Select.Content>
-</Select.Root>
+            <Plus />
+        </Button>
+    </div>
 
-<div class="p-4">
-    {#if data.posts}
-        <div class="flex flex-wrap gap-2">
-            {#each data.posts as post}
-                {#if (showDeleted && post.deleted) || !post.deleted}
-                    {#if selectedValue === "Kategorie" || post.topic === selectedValue.toLowerCase()}
-                        <div class="hoverpointer w-full">
-                            <Card.Root>
-                                <div
-                                    class="hoverpointer"
-                                    role="button"
-                                    tabindex="0"
-                                    aria-label="Go to Post"
-                                    onkeydown={() => console.info("Clicked")}
-                                    onclick={() =>
-                                        goto(`/knowledgeboard/${post.id}`)}
-                                >
-                                    <Card.Header>
-                                        <Card.Title>{post.title}</Card.Title>
-                                        <Card.Description
-                                            >{post.topic}</Card.Description
-                                        >
-                                    </Card.Header>
-                                    <Card.Content>
-                                        <div
-                                            class={post.deleted
-                                                ? "grid w-full items-center gap-4 deleted"
-                                                : "grid w-full items-center gap-4"}
-                                        >
+    <Select.Root type="single" name="topic" bind:value={selectedValue}>
+      <Select.Trigger class="w-[180px]">
+        {triggerContent}
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Group>
+          <Select.GroupHeading>Kategorie</Select.GroupHeading>
+          {#each data.topics! as topic}
+            <Select.Item value={topic.name} label={topic.name}
+              >{topic.name}</Select.Item
+            >
+          {/each}
+        </Select.Group>
+      </Select.Content>
+    </Select.Root>
+
+    <div class="p-4">
+        {#if data.posts}
+            <div class="flex flex-wrap gap-2">
+                {#each data.posts as post}
+                    {#if (showDeleted && post.deleted) || !post.deleted}
+                        {#if selectedValue === "Kategorie" || post.topic === selectedValue.toLowerCase()}
+                            <div class="hoverpointer w-full">
+                                <Card.Root>
+                                    <div
+                                        class="hoverpointer"
+                                        role="button"
+                                        tabindex="0"
+                                        aria-label="Go to Post"
+                                        onkeydown={() => console.info("Clicked")}
+                                        onclick={() =>
+                                            goto(`/knowledgeboard/${post.id}`)}
+                                    >
+                                        <Card.Header>
+                                            <Card.Title>{post.title}</Card.Title>
+                                            <Card.Description
+                                                >{post.topic}</Card.Description
+                                            >
+                                        </Card.Header>
+                                        <Card.Content>
                                             <div
-                                                class="flex flex-col space-y-1.5"
+                                                class={post.deleted
+                                                    ? "grid w-full items-center gap-4 deleted"
+                                                    : "grid w-full items-center gap-4"}
                                             >
-                                                <Cartarender
-                                                    text={post.body.substring(
-                                                        0,
-                                                        30,
-                                                    ) + "..."}
-                                                />
+                                                <div
+                                                    class="flex flex-col space-y-1.5"
+                                                >
+                                                    <Cartarender
+                                                        text={post.body.substring(
+                                                            0,
+                                                            30,
+                                                        ) + "..."}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                    </Card.Content>
-                                </div>
-                                <Card.Footer class="flex justify-between">
-                                    <Card.Description>
-                                        <AvatarBar user={post.owner as User} />
-                                        <div class="flex justify-evenly gap-6 w-full">
-                                            <span class="flex items-center gap-2 opacity-80">
-                                                <Icon
-                                                    src={FaCalendarDays}
-                                                    size={15}
-                                                />
-                                                {post.created_at ? formatDate(post.created_at as Date) : "Older than this feature"}
-                                            </span>
-                                            <Button variant="link" class="flex items-center gap-2 opacity-80"
-                                                onclick={()=>upvote(post.id!)}
-                                            >
-                                                <Icon
-                                                    src={FaSolidHeart}
-                                                    size={15}
-                                                />
-                                                {post.upvotes}
-                                            </Button>
-                                        </div>
-                                    </Card.Description>
-                                    {#if $userStore?.id}
-                                        {#if post.owner.id!.toString() === $userStore?.id?.toString() && !post.deleted}
-                                            <Button
-                                                variant="destructive"
-                                                onclick={() => {
-                                                    deleteDialog = true;
-                                                    postToDelete = post;
-                                                }}>Delete</Button
-                                            >
-                                        {:else if post.owner.id!.toString() === $userStore?.id?.toString() && post.deleted}
-                                            <Button
-                                                variant="default"
-                                                onclick={() => {
-                                                    recoverDialog = true;
-                                                    postToRecover = post;
-                                                }}>Recover</Button
-                                            >
+                                        </Card.Content>
+                                    </div>
+                                    <Card.Footer class="flex justify-between">
+                                        <Card.Description>
+                                            <AvatarBar user={post.owner as User} />
+                                            <div class="flex justify-evenly gap-6 w-full">
+                                                <span class="flex items-center gap-2 opacity-80">
+                                                    <Icon
+                                                        src={FaCalendarDays}
+                                                        size={15}
+                                                    />
+                                                    {post.created_at ? formatDate(post.created_at as Date) : "Older than this feature"}
+                                                </span>
+                                                <Button variant="link" class="flex items-center gap-2 opacity-80"
+                                                    onclick={()=>upvote(post.id!)}
+                                                >
+                                                    <Icon
+                                                        src={FaSolidHeart}
+                                                        size={15}
+                                                    />
+                                                    {post.upvotes}
+                                                </Button>
+                                            </div>
+                                        </Card.Description>
+                                        {#if $userStore?.id}
+                                            {#if post.owner.id!.toString() === $userStore?.id?.toString() && !post.deleted}
+                                                <Button
+                                                    variant="destructive"
+                                                    onclick={() => {
+                                                        deleteDialog = true;
+                                                        postToDelete = post;
+                                                    }}>Delete</Button
+                                                >
+                                            {:else if post.owner.id!.toString() === $userStore?.id?.toString() && post.deleted}
+                                                <Button
+                                                    variant="default"
+                                                    onclick={() => {
+                                                        recoverDialog = true;
+                                                        postToRecover = post;
+                                                    }}>Recover</Button
+                                                >
+                                            {/if}
                                         {/if}
-                                    {/if}
-                                </Card.Footer>
-                            </Card.Root>
-                        </div>
+                                    </Card.Footer>
+                                </Card.Root>
+                            </div>
+                        {/if}
                     {/if}
-                {/if}
-            {/each}
-        </div>
-    {/if}
-</div>
+                {/each}
+            </div>
+        {/if}
+    </div>
+{/if}
 
 <style>
     :global(.carta-font-code) {

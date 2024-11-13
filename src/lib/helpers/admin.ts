@@ -6,7 +6,7 @@ import { get } from 'svelte/store';
 export function editorOnly() {
 	let user = get(userStore);
 	if (!user) return false;
-	if (user.role === 'editor' || user.role === 'admin') {
+	if (user.role >= 2) {
 		return true;
 	} else {
 		return false;
@@ -17,7 +17,7 @@ export function adminOnly() {
 	let user = get(userStore);
 	let adminMode = get(adminModeVal);
 	if (!user) return false;
-	if (user.role === 'admin' && adminMode) {
+	if (user.role >= 10 && adminMode) {
 		return true;
 	} else {
 		return false;

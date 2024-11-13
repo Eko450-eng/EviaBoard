@@ -132,7 +132,7 @@ export type User = {
 	email: string;
 	name: string;
 	password: string;
-	role: string;
+	role: number;
 	created_at?: Date;
 };
 

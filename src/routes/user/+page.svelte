@@ -79,7 +79,7 @@ async function sendPushHandler() {
 let user: User = {
 	id: $userStore?.id,
 	password: $userStore?.password ?? '',
-	role: $userStore?.role ?? '',
+	role: $userStore?.role ?? 0,
 	email: $userStore?.email ?? '',
 	name: $userStore?.name ?? '',
 	image: $userStore?.image ?? '',
@@ -107,7 +107,7 @@ async function handleUpdateUser() {
 </script>
 
 <div class="flex flex-col my-5">
-    {#if $userStore?.role == "admin"}
+    {#if $userStore && $userStore.role >= 10}
         <Button variant="outline" onclick={changeAdminMode}
             >Adminmode: {adminOnly() ? "Activated" : "Disabled"}</Button
         >
@@ -143,7 +143,6 @@ async function handleUpdateUser() {
                         <Icon src={FaSolidArrowRightFromBracket} size={24} />
                     </Button>
                 </div>
-                <h3 class="text-xs mb-5">{$userStore?.role}</h3>
                 <div class="flex flex-col gap-2">
                     <Label for="email" class="mb-1">E-Mail</Label>
                     <div class="flex items-center mb-5 gap-2">
