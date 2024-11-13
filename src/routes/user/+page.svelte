@@ -240,7 +240,6 @@ async function handleUpdateUser() {
                                     isSubscribed = false;
                                 }}>Unsubscribe from everything</Button
                             >
-                            hello
                         </div>
                     {/if}
                 {/if}
