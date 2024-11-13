@@ -1,12 +1,14 @@
 import { getDb } from '@/db';
+import { userStore } from '@/stores/user.store';
 import type { Post, Topic } from '@/types';
+import { get } from 'svelte/store';
 
 async function queryPosts() {
 	let db = await getDb();
-	let query =
-		'select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted, created_at, count(->post_vote) AS upvotes from posts WHERE  !deleted OR deleted AND owner = $auth.id ORDER created_at DESC';
+	let query = `select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted, created_at, count(->post_vote) AS upvoteCount, (SELECT out.voter.name as name FROM post_vote WHERE in.id == $parent.id) as voter from posts WHERE  !deleted OR deleted AND owner = $auth.id ORDER created_at DESC`;
 	let posts_raw = await db?.query<Array<Array<Post>>>(query);
 	if (!posts_raw) return;
+	console.log(posts_raw[0][0].voter);
 	return posts_raw[0];
 }
 

@@ -123,7 +123,12 @@ export type Post = {
 	topic: RecordId | string;
 	deleted: boolean;
 	created_at?: Date;
-	upvotes?: number;
+	upvoteCount?: number;
+	voter?: [
+		{
+			name: string;
+		},
+	];
 };
 
 export type User = {

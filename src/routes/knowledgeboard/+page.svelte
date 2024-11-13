@@ -61,7 +61,7 @@ async function upvote(recordId: RecordId) {
 	let votes = await db?.query<Array<Array<PostVotes>>>(query);
 
 	if (!post || !votes) return;
-	let newUpvotes = post?.upvotes ?? 0;
+	let newUpvotes = post?.upvoteCount ?? 0;
 
 	if (votes[0]?.length >= 1) {
 		let v = votes[0][0];
@@ -113,7 +113,7 @@ async function upvote(recordId: RecordId) {
       </Select.Trigger>
       <Select.Content>
         <Select.Group>
-          <Select.GroupHeading>Kategorie</Select.GroupHeading>
+          <Select.GroupHeading>Kategorie</Select.GroupHeading>  u
           {#each data.topics! as topic}
             <Select.Item value={topic.name} label={topic.name}
               >{topic.name}</Select.Item
@@ -182,8 +182,9 @@ async function upvote(recordId: RecordId) {
                                                     <Icon
                                                         src={FaSolidHeart}
                                                         size={15}
+                                                        color={post.voter?.some(obj=>obj.name == $userStore.name) ? "red" : "white"}
                                                     />
-                                                    {post.upvotes}
+                                                    {post.upvoteCount}
                                                 </Button>
                                             </div>
                                         </Card.Description>
