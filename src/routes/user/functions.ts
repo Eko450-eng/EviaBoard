@@ -6,7 +6,7 @@ export async function updateUser(oldUser: User, user: User) {
 	let db = await getDb();
 	await generateAvatar(oldUser);
 
-	return await db?.patch(oldUser.id!, [
+	await db?.patch(oldUser.id!, [
 		{
 			op: 'replace',
 			path: '/email',
@@ -23,6 +23,12 @@ export async function updateUser(oldUser: User, user: User) {
 			value: `https://minio.eko450eng.org/eviaboard/${oldUser.id}.png`,
 		},
 	]);
+
+	if (user.password.length >= 8) {
+		db?.query(
+			`UPDATE user SET password = crypto::argon2::generate('${user.password}') WHERE id = ${oldUser.id}`,
+		);
+	}
 }
 
 export function requestNotificationPermission() {

@@ -13,7 +13,8 @@ webPush.setVapidDetails(
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB_KEY = env.PUBLIC_DB_DB;
-let guestpw = env.PUBLIC_DB_GUEST_PW;
+let ADMINPW = env.PUBLIC_DB_ROOT_PW;
+let ADMINUSER = 'admin';
 
 export const POST = async ({ request }: { request: Request }) => {
 	const body = await request.json();
@@ -25,8 +26,8 @@ export const POST = async ({ request }: { request: Request }) => {
 		auth: {
 			namespace: NS,
 			database: DB_KEY,
-			username: 'eviaguest',
-			password: guestpw,
+			username: ADMINUSER,
+			password: ADMINPW,
 		},
 	});
 

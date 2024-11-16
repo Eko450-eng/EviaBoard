@@ -1,5 +1,4 @@
 <script lang="ts">
-// import DataTable from './bug-table.svelte';
 import { toast } from 'svelte-sonner';
 import * as Dialog from '$lib/components/ui/dialog/index.js';
 import Plus from 'svelte-radix/Plus.svelte';
@@ -29,6 +28,7 @@ let {
 
 let topics: Array<string> | undefined = ['Bug', 'Feature', 'Question'];
 let selectedTopic = $state<string>('');
+let selectedPriority = $state<string>('');
 
 let postData: Report = $state({
 	title: '',
@@ -37,6 +37,7 @@ let postData: Report = $state({
 	category: 0,
 	upvotes: 0,
 	owner: new RecordId('', ''),
+	priority: 0,
 });
 
 async function addPost() {
@@ -63,6 +64,7 @@ async function addPost() {
 			...postData,
 			category: category,
 			owner: user.id!,
+			priority: parseInt(selectedPriority),
 		};
 		await db?.create('bugreports', data).then(() => {
 			addPostOpen = false;
@@ -89,6 +91,7 @@ async function addPost() {
 				category: 0,
 				upvotes: 0,
 				owner: $userStore?.id!,
+				priority: 0,
 			};
 			invalidateAll();
 		});
@@ -152,6 +155,35 @@ async function addPost() {
                                     >
                                 {/each}
                             {/if}
+                        </Select.Group>
+                    </Select.Content>
+                </Select.Root>
+                <Select.Root
+                    type="single"
+                    name="priority" 
+                    bind:value={selectedPriority}
+                >
+                    <Select.Trigger class="w-[180px]">
+                        {selectedPriority ? `Priorität: ${selectedPriority}` : "Priorität"}
+                    </Select.Trigger>
+                    <Select.Content>
+                        <Select.Group>
+                            <Select.GroupHeading>Themen</Select.GroupHeading>
+                            <Select.Item 
+                                value="0" 
+                                label="0" 
+                                >Leicht</Select.Item
+                            >
+                            <Select.Item 
+                                value="1" 
+                                label="1"
+                                >Mittel</Select.Item
+                            >
+                            <Select.Item 
+                                value="2" 
+                                label="2"
+                                >Schwer</Select.Item
+                            >
                         </Select.Group>
                     </Select.Content>
                 </Select.Root>

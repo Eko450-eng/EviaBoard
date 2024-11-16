@@ -12,6 +12,7 @@ import {
 	FaSolidArrowRightFromBracket,
 	FaSolidEnvelope,
 	FaSolidFireFlameCurved,
+	FaSolidKey,
 	FaSolidUser,
 } from 'svelte-icons-pack/fa';
 import {
@@ -63,9 +64,7 @@ async function getSubState() {
 }
 
 $effect(() => {
-	if (nottifPermGranted && $userStore) {
-		getSubState();
-	}
+	if (nottifPermGranted && $userStore) getSubState();
 });
 
 async function sendPushHandler() {
@@ -76,14 +75,16 @@ async function sendPushHandler() {
 	}
 }
 
-let user: User = {
+let user: User = $state({
 	id: $userStore?.id,
-	password: $userStore?.password ?? '',
+	password: '',
 	role: $userStore?.role ?? 0,
 	email: $userStore?.email ?? '',
 	name: $userStore?.name ?? '',
 	image: $userStore?.image ?? '',
-};
+});
+
+let confirmPassword = $state('');
 
 let { data }: { data: { channel: ChannelSubsCheckable[] } } = $props();
 let channels = $state(data.channel);
@@ -98,9 +99,22 @@ $effect(() => {
 });
 
 async function handleUpdateUser() {
+	if (confirmPassword != user.password) {
+		toast.error('Woops', {
+			description: 'Die Passwörter stimmen nicht überein',
+		});
+		return;
+	}
+	if (user.email.length < 3 || user.name.length < 3) {
+		toast.error('Woops', {
+			description:
+				'Überprüfe bitte deine E-Mail und deinen Usernamen, dein Username muss mindestens 3 Zeichen lang sein',
+		});
+		return;
+	}
 	await updateUser($userStore as User, user).then(() => {
 		toast.success('Yey', {
-			description: 'User updated',
+			description: 'Profil geupdated',
 		});
 	});
 }
@@ -130,10 +144,10 @@ async function handleUpdateUser() {
                                         description: res.desc,
                                     });
                                 } else {
+                                    goto("/", { replaceState: true });
                                     toast.success(res.title, {
                                         description: res.desc,
                                     });
-                                    goto("/");
                                 }
                             });
                         }}
@@ -174,6 +188,27 @@ async function handleUpdateUser() {
                         <div class="flex gap-2 w-full">
                             <Input type="file" onchange={fileUploadHandler} />
                         </div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <Label for="name">Password</Label>
+                    <div class="flex items-center mb-5 gap-2">
+                        <Icon src={FaSolidKey} />
+                        <Input
+                            type="password"
+                            name="name"
+                            placeholder="Neues Passwort"
+                            bind:value={user.password}
+                        />
+                    </div>
+                    <div class="flex items-center mb-5 gap-2">
+                        <Icon src={FaSolidKey} />
+                        <Input
+                            type="password"
+                            name="name"
+                            placeholder="Passwort bestätigen"
+                            bind:value={confirmPassword}
+                        />
                     </div>
                 </div>
                 <Button class="my-4" type="submit" variant="secondary">Speichern</Button>

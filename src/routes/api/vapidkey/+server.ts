@@ -6,7 +6,8 @@ import Surreal, { RecordId } from 'surrealdb';
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB_KEY = env.PUBLIC_DB_DB;
-let guestpw = env.PUBLIC_DB_GUEST_PW;
+let ADMINPW = env.PUBLIC_DB_ROOT_PW;
+let ADMINUSER = 'admin';
 
 const VAPID_PUBLIC_KEY = env.PUBLIC_VAPID_PUBLIC;
 export const GET = (() => {
@@ -32,8 +33,8 @@ export const POST = (async ({ request }) => {
 			auth: {
 				namespace: NS,
 				database: DB_KEY,
-				username: 'eviaguest',
-				password: guestpw,
+				username: ADMINUSER,
+				password: ADMINPW,
 			},
 		});
 

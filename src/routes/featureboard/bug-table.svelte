@@ -94,6 +94,44 @@ async function setStatus(id: string, status: number) {
 	invalidateAll();
 }
 
+async function setCategory(id: string, category: number) {
+	let db = await getDb();
+	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	await db
+		?.patch(recordId, [
+			{
+				op: 'replace',
+				path: '/category',
+				value: category,
+			},
+		])
+		.then(() => {
+			toast.success('Yey', {
+				description: 'Kategorie gändert',
+			});
+		});
+	invalidateAll();
+}
+
+async function setPrio(id: string, prio: number) {
+	let db = await getDb();
+	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	await db
+		?.patch(recordId, [
+			{
+				op: 'replace',
+				path: '/priority',
+				value: prio,
+			},
+		])
+		.then(() => {
+			toast.success('Yey', {
+				description: 'Priorität gändert',
+			});
+		});
+	invalidateAll();
+}
+
 let globalFilter = $state('');
 let columnFilter = $state<ColumnFiltersState>([]);
 
@@ -264,91 +302,200 @@ const categorys = [
                                                     >
                                                 {/if}
                                             </ContextMenu.Item>
+                                            <Separator />
                                             {#if adminOnly()}
-                                                <ContextMenu.Item>
-                                                    <Button
-                                                        variant="link"
-                                                        onclick={() =>
-                                                            setStatus(
-                                                                cell
-                                                                    .getContext()
-                                                                    .row.getValue(
-                                                                        "id",
-                                                                    ),
-                                                                0,
-                                                            )}>Open</Button
-                                                    >
-                                                </ContextMenu.Item>
-                                                <ContextMenu.Item>
-                                                    <Button
-                                                        variant="link"
-                                                        onclick={() =>
-                                                            setStatus(
-                                                                cell
-                                                                    .getContext()
-                                                                    .row.getValue(
-                                                                        "id",
-                                                                    ),
-                                                                1,
-                                                            )}>WIP</Button
-                                                    >
-                                                </ContextMenu.Item>
-                                                <ContextMenu.Item>
-                                                    <Button
-                                                        variant="link"
-                                                        onclick={() =>
-                                                            setStatus(
-                                                                cell
-                                                                    .getContext()
-                                                                    .row.getValue(
-                                                                        "id",
-                                                                    ),
-                                                                2,
-                                                            )}>Accepted</Button
-                                                    >
-                                                </ContextMenu.Item>
-                                                <ContextMenu.Item>
-                                                    <Button
-                                                        variant="link"
-                                                        onclick={() =>
-                                                            setStatus(
-                                                                cell
-                                                                    .getContext()
-                                                                    .row.getValue(
-                                                                        "id",
-                                                                    ),
-                                                                3,
-                                                            )}>Denied</Button
-                                                    >
-                                                </ContextMenu.Item>
-                                                <ContextMenu.Item>
-                                                    <Button
-                                                        variant="link"
-                                                        onclick={() =>
-                                                            setStatus(
-                                                                cell
-                                                                    .getContext()
-                                                                    .row.getValue(
-                                                                        "id",
-                                                                    ),
-                                                                4,
-                                                            )}>Closed</Button
-                                                    >
-                                                </ContextMenu.Item>
-                                                <ContextMenu.Item>
-                                                    <Button
-                                                        variant="link"
-                                                        onclick={() =>
-                                                            setStatus(
-                                                                cell
-                                                                    .getContext()
-                                                                    .row.getValue(
-                                                                        "id",
-                                                                    ),
-                                                                10,
-                                                            )}>Archived</Button
-                                                    >
-                                                </ContextMenu.Item>
+                                                <div class="flex">
+                                                    <div class="flex flex-col">
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setStatus(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        0,
+                                                                    )}>Open</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setStatus(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        1,
+                                                                    )}>WIP</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setStatus(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        2,
+                                                                    )}>Accepted</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setStatus(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        3,
+                                                                    )}>Denied</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setStatus(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        4,
+                                                                    )}>Closed</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setStatus(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        10,
+                                                                    )}>Archived</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                    </div>
+                                                    <Separator orientation="vertical" />
+                                                    <div class="flex flex-col">
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setPrio(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        0,
+                                                                    )}>Leicht</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setPrio(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        1,
+                                                                    )}>Mittel</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setPrio(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        2,
+                                                                    )}>Schwer</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setPrio(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        3,
+                                                                    )}>INSTANTTLYFIX</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                    </div>
+                                                    <Separator orientation="vertical" />
+                                                    <div class="flex flex-col">
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setCategory(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        0,
+                                                                    )}>Bug</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setCategory(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        1,
+                                                                    )}>Feature</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                        <ContextMenu.Item>
+                                                            <Button
+                                                                variant="link"
+                                                                onclick={() =>
+                                                                    setCategory(
+                                                                        cell
+                                                                            .getContext()
+                                                                            .row.getValue(
+                                                                                "id",
+                                                                            ),
+                                                                        2,
+                                                                    )}>Question</Button
+                                                            >
+                                                        </ContextMenu.Item>
+                                                    </div>
+                                                </div>
                                             {/if}
                                         </ContextMenu.Content>
                                     </ContextMenu.Root>

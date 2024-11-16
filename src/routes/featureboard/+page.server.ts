@@ -15,6 +15,7 @@ type ReportString = {
 	owner: User | RecordId;
 	created_at?: Date;
 	id: string;
+	priority: number;
 };
 
 async function getEJData(data: ReportString[]): Promise<ReportString[]> {
@@ -41,6 +42,7 @@ async function getEJData(data: ReportString[]): Promise<ReportString[]> {
 					category: res.report_type,
 					upvotes: 0,
 					owner: res.user_name,
+					priority: 0,
 				};
 				results.push(result);
 			});
@@ -59,7 +61,7 @@ export async function load({ parent }: any) {
 	if (db && db.ready) {
 		await db
 			?.query<Report[][]>(
-				'SELECT id, title, body, status, category, created_at, count(->bug_vote->votes)AS upvotes, owner.name as owner FROM bugreports WHERE status != 10 ORDER created_at DESC',
+				'SELECT id, title, body, status, category, priority, created_at, count(->bug_vote->votes)AS upvotes, owner.name as owner FROM bugreports WHERE status != 10 ORDER created_at DESC',
 			)
 			.then(async (v) => {
 				let responses = v[0];
@@ -74,6 +76,7 @@ export async function load({ parent }: any) {
 						category: res.category,
 						upvotes: res.upvotes,
 						owner: res.owner,
+						priority: res.priority,
 					};
 					preData.push(result);
 				});

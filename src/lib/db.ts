@@ -7,11 +7,13 @@ import { checkUser, isLoggedIn, userStore } from './stores/user.store';
 let HOST = env.PUBLIC_DB_HOST;
 let NS = env.PUBLIC_DB_NS;
 let DB_KEY = env.PUBLIC_DB_DB;
-let guestpw = env.PUBLIC_DB_GUEST_PW;
+let ADMINPW = env.PUBLIC_DB_ROOT_PW;
+let ADMINUSER = 'admin';
 
 let db: Surreal | undefined;
 
 export async function initDb(): Promise<Surreal | undefined> {
+	console.log('Started connecting');
 	if (!db) {
 		db = new Surreal();
 
@@ -21,10 +23,11 @@ export async function initDb(): Promise<Surreal | undefined> {
 				auth: {
 					namespace: NS,
 					database: DB_KEY,
-					username: 'eviaguest',
-					password: guestpw,
+					username: ADMINUSER,
+					password: ADMINPW,
 				},
 			});
+			console.log('connected');
 			return db;
 		} catch (err) {
 			console.error(err);
@@ -47,12 +50,9 @@ export async function getDb(): Promise<Surreal | undefined> {
 	return db;
 }
 
-export async function signIn(data: {
-	username: string;
-	email: string;
-	pass: string;
-	confirmPass: string;
-}): Promise<NotificationResult> {
+export async function signIn(data: User): Promise<NotificationResult> {
+	db = await getDb();
+
 	if (!db)
 		return {
 			title: 'Dang',
@@ -66,7 +66,7 @@ export async function signIn(data: {
 			access: 'user',
 			variables: {
 				email: data.email,
-				password: data.pass,
+				password: data.password,
 			},
 		});
 		if (token) {
@@ -95,20 +95,20 @@ export async function signIn(data: {
 	};
 }
 
-export async function signUp(data: {
-	username: string;
-	email: string;
-	pass: string;
-	confirmPass: string;
-}): Promise<NotificationResult> {
-	if (data.pass !== data.confirmPass) {
+export async function signUp(
+	data: User,
+	confirmPass: string,
+): Promise<NotificationResult> {
+	db = await getDb();
+	if (data.password !== confirmPass) {
 		return {
 			title: 'Oops',
 			desc: 'Versuch mal in beiden Feldern dasselbe Passwort',
 			error: true,
 		};
 	}
-	if (data.pass.length < 8) {
+
+	if (data.password.length < 8) {
 		return {
 			title: 'Oops',
 			desc: 'Passwort zu kurz',
@@ -116,27 +116,31 @@ export async function signUp(data: {
 		};
 	}
 
-	if (!db || !NS || !DB_KEY)
+	if (!db || !NS || !DB_KEY) {
 		return {
 			title: 'Dang',
 			desc: 'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
 			error: true,
 		};
+	}
 
-	const token = await db.signup({
+	const token = await db?.signup({
 		namespace: NS,
 		database: DB_KEY,
 		access: 'user',
 		variables: {
-			user: data.username,
 			email: data.email,
-			password: data.pass,
+			image: '',
+			user: data.name,
+			password: data.password,
+			role: 0,
 		},
 	});
+
 	if (token) {
 		localStorage.setItem('user_token', token);
 		await checkUser(token);
-		goto('/');
+		goto('/', { replaceState: true });
 	}
 
 	return {
@@ -154,8 +158,8 @@ export async function signOut() {
 				auth: {
 					namespace: NS,
 					database: DB_KEY,
-					username: 'eviaguest',
-					password: guestpw,
+					username: ADMINUSER,
+					password: ADMINPW,
 				},
 			});
 		} catch (err) {
@@ -163,9 +167,10 @@ export async function signOut() {
 			throw err;
 		}
 	}
-	goto('/');
+	goto('/', { replaceState: true });
 	userStore.set(undefined);
 	isLoggedIn.set(false);
+	goto('/', { replaceState: true });
 	return {
 		title: 'Bye',
 		desc: 'Bis dann',

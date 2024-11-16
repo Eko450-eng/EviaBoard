@@ -7,40 +7,44 @@ import Label from '@/components/ui/label/label.svelte';
 import { signIn, signUp } from '$lib/db';
 import { goto } from '$app/navigation';
 import { toast } from 'svelte-sonner';
+import type { User } from '@/types';
 
-let data = {
-	username: '',
+let userData: User = {
+	name: '',
 	email: '',
-	pass: '',
-	confirmPass: '',
+	password: '',
+	role: 0,
+	created_at: new Date(),
 };
 
+let confirmPass = $state('');
+
 async function signInHandler() {
-	await signIn(data).then((res) => {
+	await signIn(userData).then((res) => {
 		if (res.error) {
 			toast.error(res.title, {
 				description: res.desc,
 			});
 		} else {
+			goto('/', { replaceState: true });
 			toast.success(res.title, {
 				description: res.desc,
 			});
-			goto('/');
 		}
 	});
 }
 
 async function signUpHandler() {
-	signUp(data).then((res) => {
+	signUp(userData, confirmPass).then((res) => {
 		if (res.error) {
 			toast.error(res.title, {
 				description: res.desc,
 			});
 		} else {
+			goto('/', { replaceState: true });
 			toast.success(res.title, {
 				description: res.desc,
 			});
-			goto('/');
 		}
 	});
 }
@@ -65,7 +69,7 @@ async function signUpHandler() {
                             <Input
                                 type="text"
                                 id="Username"
-                                bind:value={data.username}
+                                bind:value={userData.name}
                                 placeholder="Username"
                                 required
                             />
@@ -73,7 +77,7 @@ async function signUpHandler() {
                             <Input
                                 type="text"
                                 id="email"
-                                bind:value={data.email}
+                                bind:value={userData.email}
                                 placeholder="E-Mail"
                                 required
                             />
@@ -83,14 +87,14 @@ async function signUpHandler() {
                             <Input
                                 type="password"
                                 id="password"
-                                bind:value={data.pass}
+                                bind:value={userData.password}
                                 placeholder="Passwort"
                                 required
                             />
                             <Input
                                 type="password"
                                 id="cpassword"
-                                bind:value={data.confirmPass}
+                                bind:value={confirmPass}
                                 placeholder="Passwort bestätigen"
                                 required
                             />
@@ -118,7 +122,7 @@ async function signUpHandler() {
                             <Input
                                 type="text"
                                 id="email"
-                                bind:value={data.email}
+                                bind:value={userData.email}
                                 placeholder="E-Mail"
                                 required
                             />
@@ -128,7 +132,7 @@ async function signUpHandler() {
                             <Input
                                 type="password"
                                 id="password"
-                                bind:value={data.pass}
+                                bind:value={userData.password}
                                 placeholder="Passwort"
                                 required
                             />

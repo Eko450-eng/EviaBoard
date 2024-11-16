@@ -23,7 +23,9 @@ export async function unSubFromChannel(channel: RecordId, userId: RecordId) {
 		const subscription = await registration.pushManager.getSubscription();
 		const pushKey: Array<Array<Pushkey>> | undefined = await db?.query<
 			Array<Array<Pushkey>>
-		>(`SELECT * FROM pushkey WHERE user = ${userId}`);
+		>(
+			`SELECT * FROM pushkey WHERE user = ${userId} AND data.endpoint = "${subscription?.endpoint}"`,
+		);
 		if (!pushKey) return;
 
 		await db?.query(
@@ -39,13 +41,20 @@ export async function unSubFromChannel(channel: RecordId, userId: RecordId) {
 
 export async function subToChannel(channel: RecordId, userId: RecordId) {
 	let db = await getDb();
-	const pushKey: Array<Array<Pushkey>> | undefined = await db?.query<
-		Array<Array<Pushkey>>
-	>(`SELECT * FROM pushkey WHERE user = ${userId}`);
-	if (!pushKey) return;
+	if ('serviceWorker' in navigator) {
+		const registration = await navigator.serviceWorker.ready;
+		const subscription = await registration.pushManager.getSubscription();
 
-	pushKey[0].forEach(async (key) => {
-		await db?.query(`RELATE  ${userId} -> user_channels -> ${channel}`);
-		await db?.query(`RELATE  ${key.id} -> pushkey_channel -> ${channel}`);
-	});
+		const pushKey: Array<Array<Pushkey>> | undefined = await db?.query<
+			Array<Array<Pushkey>>
+		>(
+			`SELECT * FROM pushkey WHERE user = ${userId} AND data.endpoint = "${subscription?.endpoint}"`,
+		);
+		if (!pushKey) return;
+
+		pushKey[0].forEach(async (key) => {
+			await db?.query(`RELATE  ${userId} -> user_channels -> ${channel}`);
+			await db?.query(`RELATE  ${key.id} -> pushkey_channel -> ${channel}`);
+		});
+	}
 }

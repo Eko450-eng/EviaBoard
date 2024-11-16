@@ -6,6 +6,14 @@ import { createRawSnippet } from 'svelte';
 
 export const columns: ColumnDef<Report>[] = [
 	{
+		accessorKey: 'priority',
+		header: ({ column }) =>
+			renderComponent(SortableHeader, {
+				text: 'priority',
+				onclick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+			}),
+	},
+	{
 		accessorKey: 'id',
 		header: 'Id',
 	},

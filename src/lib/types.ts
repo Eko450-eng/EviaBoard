@@ -112,6 +112,7 @@ export type Report = {
 	upvotes: number;
 	owner: User | RecordId;
 	created_at?: Date;
+	priority: number;
 };
 
 export type Post = {
