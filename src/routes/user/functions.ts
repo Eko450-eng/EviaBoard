@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb } from '@/server/db';
 import { generateAvatar } from '@/helpers/minio';
 import type { User } from '@/types';
 

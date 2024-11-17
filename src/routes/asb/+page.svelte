@@ -2,7 +2,6 @@
 import { onMount } from 'svelte';
 import { Button } from '$lib/components/ui/button';
 import { writable } from 'svelte/store';
-import { getDb } from '@/db';
 import { userStore } from '@/stores/user.store';
 
 type ASBCheck = {
@@ -14,38 +13,38 @@ let userNamesRaw: Array<ASBCheck> = [];
 let userNames = writable(userNamesRaw);
 
 async function queryPosts() {
-	let db = await getDb();
-	let data = await db?.select<ASBCheck>('ASBCheck');
-	if (!data) {
-		return;
-	}
-
-	data.forEach((u) => {
-		userNamesRaw.push(u);
-	});
-
-	userNames.set(userNamesRaw);
+	// let db = await getDb();
+	// let data = await db?.select<ASBCheck>('ASBCheck');
+	// if (!data) {
+	// 	return;
+	// }
+	//
+	// data.forEach((u) => {
+	// 	userNamesRaw.push(u);
+	// });
+	//
+	// userNames.set(userNamesRaw);
 }
 
 async function meldenHandler() {
-	let db = await getDb();
-	db?.create('ASBCheck', {
-		name: $userStore?.email,
-	}).then(async () => {
-		await queryPosts();
-	});
+	// let db = await getDb();
+	// db?.create('ASBCheck', {
+	// 	name: $userStore?.email,
+	// }).then(async () => {
+	// 	await queryPosts();
+	// });
 }
 async function abmeldenHandler() {
-	let db = await getDb();
-	try {
-		await db
-			?.query(`DELETE ASBCheck WHERE name = '${$userStore?.email}'`)
-			.then(async () => {
-				await queryPosts();
-			});
-	} catch (e) {
-		console.error(e);
-	}
+	// let db = await getDb();
+	// try {
+	// 	await db
+	// 		?.query(`DELETE ASBCheck WHERE name = '${$userStore?.email}'`)
+	// 		.then(async () => {
+	// 			await queryPosts();
+	// 		});
+	// } catch (e) {
+	// 	console.error(e);
+	// }
 }
 
 onMount(async () => {

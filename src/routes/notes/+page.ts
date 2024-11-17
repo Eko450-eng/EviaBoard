@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb } from '@/server/db';
 import type { Notes } from '@/types';
 
 export async function load() {

@@ -1,13 +1,14 @@
 import { goto } from '$app/navigation';
-import { env } from '$env/dynamic/public';
 import { Surreal } from 'surrealdb';
-import type { NotificationResult, User } from './types';
-import { checkUser, isLoggedIn, userStore } from './stores/user.store';
+import type { NotificationResult, User } from '../types';
+import { checkUser, isLoggedIn, userStore } from '../stores/user.store';
+import { DB_DB, DB_NS, DB_ROOT_PW } from '$env/static/private';
+import { PUBLIC_DB_HOST } from '$env/static/public';
 
-let HOST = env.PUBLIC_DB_HOST;
-let NS = env.PUBLIC_DB_NS;
-let DB_KEY = env.PUBLIC_DB_DB;
-let ADMINPW = env.PUBLIC_DB_ROOT_PW;
+let HOST = PUBLIC_DB_HOST;
+let NS = DB_NS;
+let DB_KEY = DB_DB;
+let ADMINPW = DB_ROOT_PW;
 let ADMINUSER = 'admin';
 
 let db: Surreal | undefined;
@@ -17,7 +18,7 @@ export async function initDb(): Promise<Surreal | undefined> {
 		db = new Surreal();
 
 		try {
-			await db.connect(HOST, {
+			await db.connect(HOST!, {
 				versionCheck: false,
 				auth: {
 					namespace: NS,

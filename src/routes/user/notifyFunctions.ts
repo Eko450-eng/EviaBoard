@@ -1,6 +1,6 @@
 import type { Channel, Pushkey } from '@/types';
 import type { RecordId } from 'surrealdb';
-import { getDb } from '@/db';
+import { getDb } from '@/server/db';
 
 export async function channelHandler(
 	channel: Channel,

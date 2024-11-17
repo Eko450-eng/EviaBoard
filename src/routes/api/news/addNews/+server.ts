@@ -1,10 +1,10 @@
 import { getDb } from '@/db';
 import { sendPush } from '@/helpers/push';
-import type { News, Newspost } from '@/types';
+import type { News } from '@/types';
 import { json } from '@sveltejs/kit';
 import { RecordId } from 'surrealdb';
 
-export async function POST({ request, cookies }: any) {
+export async function POST({ request }: any) {
 	let { postData, token }: { postData: News; token: string } =
 		await request.json();
 	let db = await getDb();

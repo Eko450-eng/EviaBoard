@@ -4,11 +4,12 @@ import { Button } from '$lib/components/ui/button/index.js';
 import type { Post } from '@/types';
 import * as cookies from 'js-cookie';
 import { invalidateAll } from '$app/navigation';
+import { PUBLIC_HOST } from '$env/static/public';
 
 async function recoverPost(data: Post) {
 	const token = cookies.default.get('jwt');
 
-	await fetch('https://kestra.eko450eng.org/api/knowledgebase', {
+	await fetch(`${PUBLIC_HOST}/api/knowledgebase`, {
 		method: 'PATCh',
 		headers: {
 			Authorization: `Bearer ${token}`,

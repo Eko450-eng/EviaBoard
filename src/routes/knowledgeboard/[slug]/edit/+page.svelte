@@ -9,7 +9,6 @@ import type { Post, Topic } from '@/types.js';
 import { goto } from '$app/navigation';
 import { RecordId } from 'surrealdb';
 import { Carta, MarkdownEditor } from 'carta-md';
-import { getDb } from '@/db.js';
 import { code } from '@cartamd/plugin-code';
 import { attachment } from '@cartamd/plugin-attachment';
 import { anchor } from '@cartamd/plugin-anchor';
@@ -52,14 +51,14 @@ const cartaSolution = new Carta({
 });
 
 async function getPost() {
-	let db = await getDb();
-	if (data.params.slug) {
-		let query = `select id, body, title, solution, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE id=${data.params.slug}`;
-		let posts_raw = await db?.query<Array<Array<Post>>>(query);
-		if (!posts_raw) return;
-		postData = posts_raw[0][0];
-		selectedTopic = postData.topic as string;
-	}
+	// let db = await getDb();
+	// if (data.params.slug) {
+	// 	let query = `select id, body, title, solution, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE id=${data.params.slug}`;
+	// 	let posts_raw = await db?.query<Array<Array<Post>>>(query);
+	// 	if (!posts_raw) return;
+	// 	postData = posts_raw[0][0];
+	// 	selectedTopic = postData.topic as string;
+	// }
 }
 
 $effect(() => {
@@ -80,36 +79,36 @@ $effect(() => {
 });
 
 async function editPost() {
-	let db = await getDb();
-	try {
-		if (!postData.id) return;
-		await db
-			?.patch(postData.id, [
-				{
-					op: 'replace',
-					path: '/deleted',
-					value: postData.deleted,
-				},
-				{ op: 'replace', path: '/title', value: postData.title },
-				{ op: 'replace', path: '/body', value: postData.body },
-				{
-					op: 'replace',
-					path: '/solution',
-					value: postData.solution,
-				},
-			])
-			.then(() => {
-				toast.success('Geupdated', {
-					description: `Update hochgeladen`,
-				});
-				goto(`/knowledgeboard`);
-			});
-	} catch (e) {
-		console.error(e);
-		toast.error('Fehler', {
-			description: `This failed due to: ${e}, probably not my fault`,
-		});
-	}
+	// let db = await getDb();
+	// try {
+	// 	if (!postData.id) return;
+	// 	await db
+	// 		?.patch(postData.id, [
+	// 			{
+	// 				op: 'replace',
+	// 				path: '/deleted',
+	// 				value: postData.deleted,
+	// 			},
+	// 			{ op: 'replace', path: '/title', value: postData.title },
+	// 			{ op: 'replace', path: '/body', value: postData.body },
+	// 			{
+	// 				op: 'replace',
+	// 				path: '/solution',
+	// 				value: postData.solution,
+	// 			},
+	// 		])
+	// 		.then(() => {
+	// 			toast.success('Geupdated', {
+	// 				description: `Update hochgeladen`,
+	// 			});
+	// 			goto(`/knowledgeboard`);
+	// 		});
+	// } catch (e) {
+	// 	console.error(e);
+	// 	toast.error('Fehler', {
+	// 		description: `This failed due to: ${e}, probably not my fault`,
+	// 	});
+	// }
 }
 </script>
 

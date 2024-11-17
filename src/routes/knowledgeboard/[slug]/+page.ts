@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb } from '@/server/db';
 import type { Post, Topic } from '@/types';
 
 export let ssr = false;

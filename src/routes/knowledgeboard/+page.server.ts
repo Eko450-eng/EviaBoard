@@ -1,3 +1,4 @@
+import { PUBLIC_HOST } from '$env/static/public';
 import type { PageServerLoad } from './$types';
 
 export let ssr = false;
@@ -8,7 +9,7 @@ export const load: PageServerLoad = async ({ parent, cookies }) => {
 	await parent();
 	const token = cookies.get('jwt');
 
-	let resPosts = await fetch('https://kestra.eko450eng.org/api/knowledgebase', {
+	let resPosts = await fetch(`${PUBLIC_HOST}/api/knowledgebase`, {
 		headers: {
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',

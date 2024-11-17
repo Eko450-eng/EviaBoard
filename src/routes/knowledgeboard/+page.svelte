@@ -13,15 +13,10 @@ import Cartarender from '@/components/mycomp/cartarender.svelte';
 import { FaCalendarDays, FaSolidHeart } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
 import { formatDate } from '@/helpers/formating.js';
-import { getDb } from '@/db.js';
 import { userStore } from '@/stores/user.store.js';
 import { RecordId } from 'surrealdb';
 
 let { data } = $props();
-
-$effect(() => {
-	console.log(data);
-});
 
 let deleteDialog = $state(false);
 let postToDelete: Post | undefined = $state(undefined);
@@ -39,33 +34,33 @@ const triggerContent = $derived(
 );
 
 async function upvote(recordId: RecordId) {
-	let db = await getDb();
-	let userId = $userStore?.id ?? new RecordId('', '');
-	let post = await db?.select<Post>(recordId);
-
-	let query = `SELECT * FROM postVote WHERE voter = ${'user:' + userId.id} AND post = ${recordId}`;
-	let votes = await db?.query<Array<Array<PostVotes>>>(query);
-
-	if (!post || !votes) return;
-	let newUpvotes = post?.upvoteCount ?? 0;
-
-	if (votes[0]?.length >= 1) {
-		let v = votes[0][0];
-		await db?.delete(v.id!);
-		newUpvotes -= 1;
-	} else {
-		newUpvotes += 1;
-		await db
-			?.create('postVote', {
-				post: recordId,
-				voter: userId,
-			})
-			.then(async (vote) => {
-				let q = `RELATE ${recordId} -> post_vote -> ${vote![0].id}`;
-				await db?.query(q);
-			});
-	}
-	invalidateAll();
+	// let db = await getDb();
+	// let userId = $userStore?.id ?? new RecordId('', '');
+	// let post = await db?.select<Post>(recordId);
+	//
+	// let query = `SELECT * FROM postVote WHERE voter = ${'user:' + userId.id} AND post = ${recordId}`;
+	// let votes = await db?.query<Array<Array<PostVotes>>>(query);
+	//
+	// if (!post || !votes) return;
+	// let newUpvotes = post?.upvoteCount ?? 0;
+	//
+	// if (votes[0]?.length >= 1) {
+	// 	let v = votes[0][0];
+	// 	await db?.delete(v.id!);
+	// 	newUpvotes -= 1;
+	// } else {
+	// 	newUpvotes += 1;
+	// 	await db
+	// 		?.create('postVote', {
+	// 			post: recordId,
+	// 			voter: userId,
+	// 		})
+	// 		.then(async (vote) => {
+	// 			let q = `RELATE ${recordId} -> post_vote -> ${vote![0].id}`;
+	// 			await db?.query(q);
+	// 		});
+	// }
+	// invalidateAll();
 }
 </script>
 

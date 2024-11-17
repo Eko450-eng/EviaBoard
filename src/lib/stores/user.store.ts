@@ -1,4 +1,3 @@
-import { getDb } from '@/db';
 import type { User } from '@/types';
 import { writable, type Writable } from 'svelte/store';
 import * as cookies from 'js-cookie';
@@ -12,19 +11,19 @@ export async function checkUser(token: string | undefined | null) {
 	cookies.default.set('jwt', token, {
 		sameSite: 'lax',
 	});
-	let db = await getDb();
-	db?.authenticate(token).then(async () => {
-		db?.authenticate(token);
-		let user = await db?.query<Array<Array<User>>>(
-			'SELECT * FROM user WHERE id = $auth.id',
-		);
-		if (!user) return;
-		let u = user[0][0];
-		userStore.set(u);
-		isLoggedIn.set(true);
-	});
-	isLoggedIn.set(false);
-	return true;
+	// let db = await getDb();
+	// db?.authenticate(token).then(async () => {
+	// 	db?.authenticate(token);
+	// 	let user = await db?.query<Array<Array<User>>>(
+	// 		'SELECT * FROM user WHERE id = $auth.id',
+	// 	);
+	// 	if (!user) return;
+	// 	let u = user[0][0];
+	// 	userStore.set(u);
+	// 	isLoggedIn.set(true);
+	// });
+	// isLoggedIn.set(false);
+	// return true;
 }
 
 export function setUserData(user: User) {

@@ -4,7 +4,6 @@ import { Button } from '$lib/components/ui/button';
 import * as Tabs from '$ui/tabs';
 import * as Card from '$ui/card';
 import Label from '@/components/ui/label/label.svelte';
-import { signIn, signUp } from '$lib/db';
 import { goto } from '$app/navigation';
 import { toast } from 'svelte-sonner';
 import type { User } from '@/types';
@@ -20,33 +19,33 @@ let userData: User = {
 let confirmPass = $state('');
 
 async function signInHandler() {
-	await signIn(userData).then((res) => {
-		if (res.error) {
-			toast.error(res.title, {
-				description: res.desc,
-			});
-		} else {
-			goto('/', { replaceState: true });
-			toast.success(res.title, {
-				description: res.desc,
-			});
-		}
-	});
+	// await signIn(userData).then((res) => {
+	// 	if (res.error) {
+	// 		toast.error(res.title, {
+	// 			description: res.desc,
+	// 		});
+	// 	} else {
+	// 		goto('/', { replaceState: true });
+	// 		toast.success(res.title, {
+	// 			description: res.desc,
+	// 		});
+	// 	}
+	// });
 }
 
 async function signUpHandler() {
-	signUp(userData, confirmPass).then((res) => {
-		if (res.error) {
-			toast.error(res.title, {
-				description: res.desc,
-			});
-		} else {
-			goto('/', { replaceState: true });
-			toast.success(res.title, {
-				description: res.desc,
-			});
-		}
-	});
+	// signUp(userData, confirmPass).then((res) => {
+	// 	if (res.error) {
+	// 		toast.error(res.title, {
+	// 			description: res.desc,
+	// 		});
+	// 	} else {
+	// 		goto('/', { replaceState: true });
+	// 		toast.success(res.title, {
+	// 			description: res.desc,
+	// 		});
+	// 	}
+	// });
 }
 </script>
 

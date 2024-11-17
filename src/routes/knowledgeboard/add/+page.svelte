@@ -6,9 +6,8 @@ import { Label } from '$lib/components/ui/label/index.js';
 import { Input } from '$lib/components/ui/input/index.js';
 import type { Post, Topic } from '@/types.js';
 import { sendPush } from '@/helpers/push.js';
-import { RecordId, StringRecordId } from 'surrealdb';
+import { RecordId } from 'surrealdb';
 import { MarkdownEditor } from 'carta-md';
-import { getDb } from '@/db.js';
 import { userStore } from '@/stores/user.store.js';
 import { Carta } from 'carta-md';
 import { code } from '@cartamd/plugin-code';
@@ -53,7 +52,6 @@ const cartaSolution = new Carta({
 // let { data } = $props();
 // eslint-disable-next-line
 let value: any = $state();
-let topics: Topic[] = $state([]);
 
 let postData: Post = $state({
 	deleted: false,

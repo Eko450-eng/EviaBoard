@@ -1,9 +1,9 @@
-import { env } from '$env/dynamic/public';
-import { getDb } from '@/db';
+import { PUBLIC_EJ_TOKEN } from '$env/static/public';
+import { getDb } from '@/server/db';
 import type { Report, User } from '@/types';
 import type { RecordId } from 'surrealdb';
 
-let token = env.PUBLIC_EJ_TOKEN;
+let token = PUBLIC_EJ_TOKEN;
 
 type ReportString = {
 	source?: string;

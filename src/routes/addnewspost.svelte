@@ -1,6 +1,5 @@
 <script lang="ts">
 import * as Dialog from '../lib/components/ui/dialog/index.js';
-import { getDb } from '../lib/db';
 import { toast } from 'svelte-sonner';
 import { Button } from '../lib/components/ui/button/index.js';
 import { Label } from '../lib/components/ui/label/index.js';
@@ -16,25 +15,25 @@ export let postData: Newspost = {
 };
 
 async function addPost() {
-	let db = await getDb();
-	postData.owner = $userStore?.id!;
-
-	try {
-		if (!postData) return;
-		await db?.create('newspost', postData).then(async (data) => {
-			let newPost = data;
-			await db?.insert_relation('news_post', {
-				in: post?.id,
-				out: newPost[0].id,
-			});
-			addPostOpen = false;
-		});
-	} catch (e) {
-		console.error(e);
-		toast.error('Fehler', {
-			description: `This failed due to: ${e}, probably not my fault`,
-		});
-	}
+	// let db = await getDb();
+	// postData.owner = $userStore?.id!;
+	//
+	// try {
+	// 	if (!postData) return;
+	// 	await db?.create('newspost', postData).then(async (data) => {
+	// 		let newPost = data;
+	// 		await db?.insert_relation('news_post', {
+	// 			in: post?.id,
+	// 			out: newPost[0].id,
+	// 		});
+	// 		addPostOpen = false;
+	// 	});
+	// } catch (e) {
+	// 	console.error(e);
+	// 	toast.error('Fehler', {
+	// 		description: `This failed due to: ${e}, probably not my fault`,
+	// 	});
+	// }
 }
 </script>
 

@@ -5,14 +5,10 @@ import { Skeleton } from '$ui/skeleton';
 import { adminOnly } from '@/helpers/admin';
 import { formatDate } from '@/helpers/formating';
 import type { News, User } from '@/types';
-import type { Uuid } from 'surrealdb';
-import { onMount } from 'svelte';
 import { Icon } from 'svelte-icons-pack';
 import { FaCalendarDays } from 'svelte-icons-pack/fa';
 import Addnews from './addnews.svelte';
 import Addnewspost from './addnewspost.svelte';
-import { invalidateAll } from '$app/navigation';
-import { getDb } from '@/db';
 import { userStore } from '@/stores/user.store';
 
 let { data } = $props();

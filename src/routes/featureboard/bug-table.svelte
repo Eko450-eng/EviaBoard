@@ -19,7 +19,7 @@ import * as Select from '$lib/components/ui/select/index';
 import * as Sheet from '$lib/components/ui/sheet/index';
 import * as ContextMenu from '$ui/context-menu';
 import { adminOnly } from '@/helpers/admin';
-import { getDb } from '@/db';
+// import { getDb } from '@/db';
 import { RecordId } from 'surrealdb';
 import { isLoggedIn, userStore } from '@/stores/user.store';
 import type { Report, Votes } from '@/types';
@@ -42,94 +42,93 @@ let { data, columns }: DateTableProps<TData, TValue> = $props();
 let sorting = $state<SortingState>([]);
 
 async function upvote(id: string) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	let userId = $userStore?.id ?? new RecordId('', '');
-	let report = await db?.select<Report>(recordId);
-
-	let votes = await db?.query<Array<Array<Votes>>>(`SELECT * FROM votes WHERE
-                  voter = ${'user:' + userId.id}
-                  AND
-                  bugreport = ${id}
-                  `);
-
-	if (!report || !votes) return;
-	let newUpvotes = report?.upvotes;
-
-	if (votes[0]?.length >= 1) {
-		let v = votes[0][0];
-		await db?.delete(v.id!);
-		newUpvotes -= 1;
-	} else {
-		newUpvotes += 1;
-		await db
-			?.create('votes', {
-				bugreport: recordId,
-				voter: userId,
-			})
-			.then(async (vote) => {
-				let q = `RELATE ${recordId} -> bug_vote -> ${vote![0].id}`;
-				await db?.query(q);
-			});
-	}
-	invalidateAll();
+	// let db = await getDb();
+	// let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	// let userId = $userStore?.id ?? new RecordId('', '');
+	// let report = await db?.select<Report>(recordId);
+	//
+	// let votes = await db?.query<Array<Array<Votes>>>(`SELECT * FROM votes WHERE
+	//                  voter = ${'user:' + userId.id}
+	//                  AND
+	//                  bugreport = ${id}
+	//                  `);
+	//
+	// if (!report || !votes) return;
+	// let newUpvotes = report?.upvotes;
+	//
+	// if (votes[0]?.length >= 1) {
+	// 	let v = votes[0][0];
+	// 	await db?.delete(v.id!);
+	// 	newUpvotes -= 1;
+	// } else {
+	// 	newUpvotes += 1;
+	// 	await db?.create('votes', {
+	// 		bugreport: recordId,
+	// 		voter: userId,
+	// 	});
+	// 	// .then(async (vote) => {
+	// 	// 	let q = `RELATE ${recordId} -> bug_vote -> ${vote![0].id}`;
+	// 	// 	await db?.query(q);
+	// 	// });
+	// }
+	// invalidateAll();
 }
 
 async function setStatus(id: string, status: number) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	await db
-		?.patch(recordId, [
-			{
-				op: 'replace',
-				path: '/status',
-				value: status,
-			},
-		])
-		.then(() => {
-			toast.success('Yey', {
-				description: 'Status gändert',
-			});
-		});
-	invalidateAll();
+	// let db = await getDb();
+	// let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	// await db
+	// 	?.patch(recordId, [
+	// 		{
+	// 			op: 'replace',
+	// 			path: '/status',
+	// 			value: status,
+	// 		},
+	// 	])
+	// 	.then(() => {
+	// 		toast.success('Yey', {
+	// 			description: 'Status gändert',
+	// 		});
+	// 	});
+	// invalidateAll();
 }
 
 async function setCategory(id: string, category: number) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	await db
-		?.patch(recordId, [
-			{
-				op: 'replace',
-				path: '/category',
-				value: category,
-			},
-		])
-		.then(() => {
-			toast.success('Yey', {
-				description: 'Kategorie gändert',
-			});
-		});
-	invalidateAll();
+	// let db = await getDb();
+	// let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	// await db
+	// 	?.patch(recordId, [
+	// 		{
+	// 			op: 'replace',
+	// 			path: '/category',
+	// 			value: category,
+	// 		},
+	// 	])
+	// 	.then(() => {
+	// 		toast.success('Yey', {
+	// 			description: 'Kategorie gändert',
+	// 		});
+	// 	});
+	// invalidateAll();
 }
 
 async function setPrio(id: string, prio: number) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	await db
-		?.patch(recordId, [
-			{
-				op: 'replace',
-				path: '/priority',
-				value: prio,
-			},
-		])
-		.then(() => {
-			toast.success('Yey', {
-				description: 'Priorität gändert',
-			});
-		});
-	invalidateAll();
+	// let db = await getDb();
+	// let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
+	// await db
+	// 	?.patch(recordId, [
+	// 		{
+	// 			op: 'replace',
+	// 			path: '/priority',
+	// 			value: prio,
+	// 		},
+	// 	])
+	// 	.then(() => {
+	// 		toast.success('Yey', {
+	// 			description: 'Priorität gändert',
+	// 		});
+	// 	});
+	// invalidateAll();
 }
 
 let globalFilter = $state('');

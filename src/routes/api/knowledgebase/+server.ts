@@ -1,5 +1,5 @@
-import { getDb } from '@/db';
-import type { Post, Topic, User } from '@/types';
+import { getDb } from '@/server/db';
+import type { Post, Topic } from '@/types';
 import { json } from '@sveltejs/kit';
 import { RecordId } from 'surrealdb';
 
@@ -32,7 +32,6 @@ export async function PATCH({ request }: { request: Request }) {
 		await request.json();
 
 	try {
-		console.log('id ist: ', id);
 		await db
 			?.query(`UPDATE posts SET deleted = ${state} WHERE id = ${id}`)
 			.then(() => {
@@ -49,12 +48,10 @@ export async function POST({ request }: { request: Request }) {
 	let db = await getDb();
 
 	let { postData } = await request.json();
-	console.log(postData.owner);
 	try {
 		if (!postData) return;
-		await db
-			?.query(
-				`CREATE posts 
+		await db?.query(
+			`CREATE posts 
         SET 
 				deleted = false,
 				title = "${postData.title}",
@@ -63,23 +60,13 @@ export async function POST({ request }: { request: Request }) {
 				owner = ${postData.owner},
 				topic = ${postData.topic}
 `,
-			)
-			.then(async (res) => {
-				console.log(res);
-				return json(
-					{
-						title: 'Posted',
-						description: 'Dein Beitrag wurde gepostet',
-					},
-					{ status: 200 },
-				);
-			});
+		);
 		return json(
 			{
-				title: 'Not posted',
-				description: 'Dein Beitrag wurde nicht gepostet',
+				title: 'Posted',
+				description: 'Dein Beitrag wurde gepostet',
 			},
-			{ status: 500 },
+			{ status: 200 },
 		);
 	} catch (e) {
 		console.error(e);

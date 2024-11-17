@@ -1,4 +1,4 @@
-import { initDb } from '@/db';
+import { initDb } from '@/server/db';
 import type { News_newspost } from '@/types';
 
 export async function load() {
