@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb } from '@/server/db';
 import { sendPush } from '@/helpers/push';
 import type { News } from '@/types';
 import { json } from '@sveltejs/kit';

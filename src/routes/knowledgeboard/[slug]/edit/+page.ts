@@ -1,4 +1,4 @@
-import { getDb } from '@/db';
+import { getDb } from '@/server/db';
 import type { Topic } from '@/types';
 
 async function queryTopics() {
