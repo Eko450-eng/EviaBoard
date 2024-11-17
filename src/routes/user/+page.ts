@@ -17,8 +17,6 @@ export async function load({ parent }: any) {
 	let query = `SELECT * FROM channels`;
 	if (!user) return;
 
-	console.log(navigator.serviceWorker.ready);
-
 	// try {
 	// 	if ('serviceWorker' in navigator) {
 	// 		const registration = await navigator.serviceWorker.ready;
@@ -32,8 +30,6 @@ export async function load({ parent }: any) {
 
 	let channelsQuery = await db?.query<Array<Array<Channel>>>(query);
 	if (!channelsQuery) return;
-	console.log(query);
-	console.log(channelsQuery);
 
 	let channel = channelsQuery[0];
 	return { channel };

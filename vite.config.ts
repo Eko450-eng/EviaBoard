@@ -9,6 +9,17 @@ export default defineConfig({
 	//     ? '"production"'
 	//     : '"development"'
 	// },
+	// server: {
+	// 	origin: 'http://kestra.eko450eng.org',
+	// 	host: '0.0.0.0',
+	// 	port: 8900,
+	// 	proxy: {
+	// 		'/api': {
+	// 			target: 'http://kestra.eko450eng.org',
+	// 			changeOrigin: true,
+	// 		},
+	// 	},
+	// },
 	plugins: [
 		sveltekit(),
 		VitePWA({

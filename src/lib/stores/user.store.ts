@@ -1,6 +1,7 @@
 import { getDb } from '@/db';
 import type { User } from '@/types';
 import { writable, type Writable } from 'svelte/store';
+import * as cookies from 'js-cookie';
 
 export let userStore: Writable<User | undefined> = writable(undefined);
 export let isLoggedIn: Writable<boolean> = writable(false);
@@ -8,6 +9,9 @@ export let adminModeVal: Writable<boolean> = writable(true);
 
 export async function checkUser(token: string | undefined | null) {
 	if (!token) return false;
+	cookies.default.set('jwt', token, {
+		sameSite: 'lax',
+	});
 	let db = await getDb();
 	db?.authenticate(token).then(async () => {
 		db?.authenticate(token);

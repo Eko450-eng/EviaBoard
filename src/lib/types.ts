@@ -78,7 +78,7 @@ export type News_newspost = {
 	id?: RecordId;
 	owner: User | RecordId;
 	title: string;
-	date: Date;
+	date?: Date;
 	newspost: Newspost[];
 };
 
@@ -92,7 +92,7 @@ export type News = {
 	id?: RecordId;
 	owner: User | RecordId;
 	title: string;
-	date: Date;
+	date?: Date | string;
 };
 
 export type Newspost = {

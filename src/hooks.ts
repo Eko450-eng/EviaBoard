@@ -1,8 +1,9 @@
 /** @type {import('@sveltejs/kit').Handle} */
-import { initDb } from '$lib/db';
+import type { Handle } from '@sveltejs/kit';
 
-export async function handle({ event, resolve }: any) {
-	await initDb().catch(console.error);
+export const handle: Handle = async ({ event, resolve }) => {
+	let session = event.cookies.get('jwt');
+	console.log(session);
 	const response = await resolve(event);
 	return response;
-}
+};

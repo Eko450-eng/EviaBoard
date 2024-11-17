@@ -6,35 +6,39 @@ import Plus from 'svelte-radix/Plus.svelte';
 import { Label } from '../lib/components/ui/label/index.js';
 import { Input } from '../lib/components/ui/input/index.js';
 import type { News } from '@/types';
-import { sendPush } from '@/helpers/push';
-import { getDb } from '@/db';
 import { userStore } from '@/stores/user.store.js';
+import { invalidateAll } from '$app/navigation';
+import { getToken } from '@/helpers/gettoken.js';
 
 export let addPostOpen: boolean;
 export let postData: News = {
 	title: '',
 	owner: $userStore?.id!,
-	date: new Date(),
 };
 
 async function addPost() {
-	let db = await getDb();
-	try {
-		if (!postData) return;
-		await db?.create('news', postData).then(() => {
+	if (!postData) return;
+	let token = getToken();
+	await fetch('/api/news/addNews', {
+		method: 'POST',
+		body: JSON.stringify({ postData, token }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
 			addPostOpen = false;
-			try {
-				sendPush('New News', `Brand neu! - ${postData.title}`);
-			} catch (e) {
-				console.error(e);
-			}
-		});
-	} catch (e) {
-		console.error(e);
-		toast.error('Fehler', {
-			description: `This failed due to: ${e}, probably not my fault`,
-		});
-	}
+			toast.success(await response.title, {
+				description: response.description,
+			});
+			invalidateAll();
+		} else {
+			toast.error(await response.title, {
+				description: response.description,
+			});
+		}
+	});
 }
 </script>
 

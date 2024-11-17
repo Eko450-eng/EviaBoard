@@ -13,7 +13,6 @@ let ADMINUSER = 'admin';
 let db: Surreal | undefined;
 
 export async function initDb(): Promise<Surreal | undefined> {
-	console.log('Started connecting');
 	if (!db) {
 		db = new Surreal();
 
@@ -27,7 +26,6 @@ export async function initDb(): Promise<Surreal | undefined> {
 					password: ADMINPW,
 				},
 			});
-			console.log('connected');
 			return db;
 		} catch (err) {
 			console.error(err);
@@ -71,6 +69,7 @@ export async function signIn(data: User): Promise<NotificationResult> {
 		});
 		if (token) {
 			localStorage.setItem('user_token', token);
+
 			let q = `SELECT name FROM user WHERE email = '${data.email}'`;
 			let [user] = await db.query<Array<Array<User>>>(q);
 			await checkUser(token);
@@ -139,6 +138,7 @@ export async function signUp(
 
 	if (token) {
 		localStorage.setItem('user_token', token);
+
 		await checkUser(token);
 		goto('/', { replaceState: true });
 	}

@@ -17,26 +17,6 @@ import { userStore } from '@/stores/user.store';
 
 let { data } = $props();
 
-async function subscribeNews(queryUuid: Uuid | undefined) {
-	let db = await getDb();
-	if (!queryUuid) return;
-	// eslint-disable-next-line
-	await db?.subscribeLive(queryUuid!, async (action: any, _result: any) => {
-		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
-			await invalidateAll();
-		}
-	});
-}
-
-onMount(async () => {
-	let db = await getDb();
-	// eslint-disable-next-line
-	const queryUuidNews = await db?.live('news', (action, _result) => {
-		if (action === 'CLOSE') return;
-	});
-	subscribeNews(queryUuidNews);
-});
-
 let addPostOpen = $state(false);
 let addNewsPostOpen = $state(false);
 let selectedPost: News | undefined = $state(undefined);

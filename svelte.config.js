@@ -7,6 +7,9 @@ const config = {
 	// for more information about preprocessors
 	preprocess: vitePreprocess(),
 	kit: {
+		csrf: {
+			checkOrigin: false,
+		},
 		alias: {
 			'@/*': './src/lib/*',
 			$lib: './src/lib',

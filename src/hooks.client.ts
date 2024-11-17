@@ -1,11 +1,8 @@
 /** @type {import('@sveltejs/kit').Handle} */
-import { getDb } from '@/db';
-import { checkUser } from '@/stores/user.store';
+import { initDb } from '@/db';
 
 export async function handle({ event, resolve }: any) {
-	let token = localStorage.getItem('user_token');
-	await getDb();
-	await checkUser(token);
+	await initDb();
 	const response = await resolve(event);
 	return response;
 }

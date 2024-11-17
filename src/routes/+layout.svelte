@@ -1,6 +1,6 @@
 <script lang="ts">
 import * as Sidebar from '@/components/ui/sidebar';
-import { ModeWatcher } from 'mode-watcher';
+import { ModeWatcher, setMode } from 'mode-watcher';
 import '../app.css';
 import { afterNavigate, goto } from '$app/navigation';
 import { Toaster } from '$lib/components/ui/sonner';
@@ -19,6 +19,7 @@ afterNavigate(({ from }) => {
 });
 
 onMount(async () => {
+	setMode('dark');
 	let token = localStorage.getItem('user_token');
 	if (!token) return;
 	await checkUser(token);

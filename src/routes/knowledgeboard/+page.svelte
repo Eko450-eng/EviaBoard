@@ -1,7 +1,6 @@
 <script lang="ts">
 import * as Select from '$ui/select';
 import * as Card from '../../lib/components/ui/card/index.js';
-import { onMount } from 'svelte';
 import { Button } from '../../lib/components/ui/button/index.js';
 import { Toggle } from '../../lib/components/ui/toggle/index.js';
 import { goto, invalidateAll } from '$app/navigation';
@@ -20,6 +19,10 @@ import { RecordId } from 'surrealdb';
 
 let { data } = $props();
 
+$effect(() => {
+	console.log(data);
+});
+
 let deleteDialog = $state(false);
 let postToDelete: Post | undefined = $state(undefined);
 
@@ -29,23 +32,6 @@ let postToRecover: Post | undefined = $state(undefined);
 let showDeleted: boolean = $state(false);
 // let open = false;
 let selectedValue = $state('Kategorie');
-
-onMount(async () => {
-	let db = await getDb();
-	if (!userStore) data = { posts: [], topics: [], failed: true };
-	if (data.failed) goto('/');
-
-	// eslint-disable-next-line
-	const queryUuid = await db?.live('posts', (action: any, _result: any) => {
-		if (action === 'CLOSE') return;
-	});
-	// eslint-disable-next-line
-	await db?.subscribeLive(queryUuid!, async (action: any, _result: any) => {
-		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
-			await invalidateAll();
-		}
-	});
-});
 
 const triggerContent = $derived(
 	data.topics!.find((f: Topic) => f.name === selectedValue)?.name ??
@@ -113,7 +99,7 @@ async function upvote(recordId: RecordId) {
       </Select.Trigger>
       <Select.Content>
         <Select.Group>
-          <Select.GroupHeading>Kategorie</Select.GroupHeading>  u
+          <Select.GroupHeading>Kategorie</Select.GroupHeading>
           {#each data.topics! as topic}
             <Select.Item value={topic.name} label={topic.name}
               >{topic.name}</Select.Item
@@ -174,7 +160,7 @@ async function upvote(recordId: RecordId) {
                                                         src={FaCalendarDays}
                                                         size={15}
                                                     />
-                                                    {post.created_at ? formatDate(post.created_at as Date) : "Older than this feature"}
+                                                    {post.created_at ? formatDate(post.created_at) : "Older than this feature"}
                                                 </span>
                                                 <Button variant="link" class="flex items-center gap-2 opacity-80"
                                                     onclick={()=>upvote(post.id!)}
@@ -182,7 +168,7 @@ async function upvote(recordId: RecordId) {
                                                     <Icon
                                                         src={FaSolidHeart}
                                                         size={15}
-                                                        color={post.voter?.some(obj=>obj.name == $userStore.name) ? "red" : "white"}
+                                                        color={post.voter?.some((obj: any)=>obj.name == $userStore.name) ? "red" : "white"}
                                                     />
                                                     {post.upvoteCount}
                                                 </Button>
