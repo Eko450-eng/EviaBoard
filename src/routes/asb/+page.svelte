@@ -9,21 +9,14 @@ type ASBCheck = {
 	name: string;
 };
 
-let userNamesRaw: Array<ASBCheck> = [];
-let userNames = writable(userNamesRaw);
+let userNames = $state<ASBCheck[]>([]);
 
 async function queryPosts() {
-	// let db = await getDb();
-	// let data = await db?.select<ASBCheck>('ASBCheck');
-	// if (!data) {
-	// 	return;
-	// }
-	//
-	// data.forEach((u) => {
-	// 	userNamesRaw.push(u);
-	// });
-	//
-	// userNames.set(userNamesRaw);
+	await fetch('/api/downloadlinks', {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
 }
 
 async function meldenHandler() {
@@ -54,8 +47,8 @@ onMount(async () => {
 
 <div>
     <p>Aktuell ist auf ASB:</p>
-    {#if $userNames.length > 0}
-        {#each $userNames as u}
+    {#if userNames.length > 0}
+        {#each userNames as u}
             <div class="border-solid border-2 border-sky-500 rounded-md p-1">
                 {u.name}
             </div>
@@ -69,11 +62,11 @@ onMount(async () => {
         {#if $userStore?.email}
             <Button
                 onclick={async () =>
-                    $userNames.some((obj) => obj.name == $userStore?.email)
+                    userNames.some((obj) => obj.name == $userStore?.email)
                         ? abmeldenHandler()
                         : meldenHandler()}
             >
-                {$userNames.some((obj) => obj.name == $userStore?.email)
+                {userNames.some((obj) => obj.name == $userStore?.email)
                     ? "Abmelden"
                     : "Melden"}</Button
             >

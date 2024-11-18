@@ -52,6 +52,7 @@ const cartaSolution = new Carta({
 // let { data } = $props();
 // eslint-disable-next-line
 let value: any = $state();
+let topics: Topic[] = $state([]);
 
 let postData: Post = $state({
 	deleted: false,

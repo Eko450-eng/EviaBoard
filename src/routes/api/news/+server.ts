@@ -10,7 +10,6 @@ export async function GET() {
 	const res = await db?.query<Array<Array<News_newspost>>>(query);
 
 	if (!res || !res[0]) return;
-	let data = res[0];
 
-	return json(data);
+	return json({ data: res[0] }, { status: 200 });
 }

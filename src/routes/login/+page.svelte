@@ -8,7 +8,7 @@ import { goto } from '$app/navigation';
 import { toast } from 'svelte-sonner';
 import type { User } from '@/types';
 
-let userData: User = {
+let data: User = {
 	name: '',
 	email: '',
 	password: '',
@@ -19,33 +19,47 @@ let userData: User = {
 let confirmPass = $state('');
 
 async function signInHandler() {
-	// await signIn(userData).then((res) => {
-	// 	if (res.error) {
-	// 		toast.error(res.title, {
-	// 			description: res.desc,
-	// 		});
-	// 	} else {
-	// 		goto('/', { replaceState: true });
-	// 		toast.success(res.title, {
-	// 			description: res.desc,
-	// 		});
-	// 	}
-	// });
+	await fetch(`/api/login`, {
+		method: 'POST',
+		body: JSON.stringify({ data }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let { title, desc } = await res.json();
+		if (res.status === 200) {
+			goto('/', { replaceState: true });
+			toast.success(title, {
+				description: desc,
+			});
+		} else {
+			toast.error(title, {
+				description: desc,
+			});
+		}
+	});
 }
 
 async function signUpHandler() {
-	// signUp(userData, confirmPass).then((res) => {
-	// 	if (res.error) {
-	// 		toast.error(res.title, {
-	// 			description: res.desc,
-	// 		});
-	// 	} else {
-	// 		goto('/', { replaceState: true });
-	// 		toast.success(res.title, {
-	// 			description: res.desc,
-	// 		});
-	// 	}
-	// });
+	await fetch(`/api/signup`, {
+		method: 'POST',
+		body: JSON.stringify({ data, confirmPass }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let { title, desc } = await res.json();
+		if (res.status === 200) {
+			goto('/', { replaceState: true });
+			toast.success(title, {
+				description: desc,
+			});
+		} else {
+			toast.error(title, {
+				description: desc,
+			});
+		}
+	});
 }
 </script>
 
@@ -68,7 +82,7 @@ async function signUpHandler() {
                             <Input
                                 type="text"
                                 id="Username"
-                                bind:value={userData.name}
+                                bind:value={data.name}
                                 placeholder="Username"
                                 required
                             />
@@ -76,7 +90,7 @@ async function signUpHandler() {
                             <Input
                                 type="text"
                                 id="email"
-                                bind:value={userData.email}
+                                bind:value={data.email}
                                 placeholder="E-Mail"
                                 required
                             />
@@ -86,7 +100,7 @@ async function signUpHandler() {
                             <Input
                                 type="password"
                                 id="password"
-                                bind:value={userData.password}
+                                bind:value={data.password}
                                 placeholder="Passwort"
                                 required
                             />
@@ -121,7 +135,7 @@ async function signUpHandler() {
                             <Input
                                 type="text"
                                 id="email"
-                                bind:value={userData.email}
+                                bind:value={data.email}
                                 placeholder="E-Mail"
                                 required
                             />
@@ -131,7 +145,7 @@ async function signUpHandler() {
                             <Input
                                 type="password"
                                 id="password"
-                                bind:value={userData.password}
+                                bind:value={data.password}
                                 placeholder="Passwort"
                                 required
                             />

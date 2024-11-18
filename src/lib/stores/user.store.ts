@@ -11,19 +11,17 @@ export async function checkUser(token: string | undefined | null) {
 	cookies.default.set('jwt', token, {
 		sameSite: 'lax',
 	});
-	// let db = await getDb();
-	// db?.authenticate(token).then(async () => {
-	// 	db?.authenticate(token);
-	// 	let user = await db?.query<Array<Array<User>>>(
-	// 		'SELECT * FROM user WHERE id = $auth.id',
-	// 	);
-	// 	if (!user) return;
-	// 	let u = user[0][0];
-	// 	userStore.set(u);
-	// 	isLoggedIn.set(true);
-	// });
-	// isLoggedIn.set(false);
-	// return true;
+	await fetch('/api/getuser', {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let { isValid, user } = await res.json();
+		if (!isValid) return;
+		userStore.set(user);
+		isLoggedIn.set(isValid);
+	});
+	return true;
 }
 
 export function setUserData(user: User) {
