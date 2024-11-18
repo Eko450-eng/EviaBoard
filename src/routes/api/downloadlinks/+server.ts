@@ -1,16 +1,20 @@
 import { getDb } from '@/server/db';
-import type { ASBCheck } from '@/types';
-import { json } from '@sveltejs/kit';
+import type { Downloadlinks } from '@/types';
+import { json, type RequestHandler } from '@sveltejs/kit';
 
-export async function GET() {
+export const GET: RequestHandler = async ({ locals }) => {
+	let token = locals.jwt;
 	let db = await getDb();
-	let data = await db?.select<ASBCheck>('ASBCheck');
-	if (!data) {
-		return json({ status: 200 });
+	if (token) {
+		db?.authenticate(token);
+		let downloadlinks = await db?.select<Downloadlinks>('downloadlinks');
+		if (!downloadlinks) {
+			return json({ status: 200 });
+		}
+		return json({ downloadlinks }, { status: 200 });
 	}
-
-	return json({ data }, { status: 200 });
-}
+	return json({ status: 500 });
+};
 
 export async function PATCH({ request }: { request: Request }) {}
 

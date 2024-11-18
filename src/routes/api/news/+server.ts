@@ -1,9 +1,10 @@
 import { getDb } from '@/server/db';
 import type { News_newspost } from '@/types';
-import { json } from '@sveltejs/kit';
+import { json, type RequestHandler } from '@sveltejs/kit';
 
-export async function GET() {
+export const GET: RequestHandler = async ({ cookies }) => {
 	let db = await getDb();
+
 	const query =
 		'SELECT *, owner.name, owner.image, -> news_post.out.* as newspost from news ORDER BY date desc';
 
@@ -12,4 +13,4 @@ export async function GET() {
 	if (!res || !res[0]) return;
 
 	return json({ data: res[0] }, { status: 200 });
-}
+};

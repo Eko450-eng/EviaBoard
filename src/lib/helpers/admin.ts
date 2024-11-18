@@ -1,4 +1,4 @@
-import { adminModeVal, userStore } from '@/stores/user.store';
+import { userStore, adminModeVal } from '@/stores/userstore';
 import type { User } from '@/types';
 import type { RecordId } from 'surrealdb';
 import { get } from 'svelte/store';

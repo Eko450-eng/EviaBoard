@@ -6,7 +6,7 @@ import Plus from 'svelte-radix/Plus.svelte';
 import { Label } from '../lib/components/ui/label/index.js';
 import { Input } from '../lib/components/ui/input/index.js';
 import type { News } from '@/types';
-import { userStore } from '@/stores/user.store.js';
+import { userStore } from '@/stores/userstore';
 import { invalidateAll } from '$app/navigation';
 import { getToken } from '@/helpers/gettoken.js';
 

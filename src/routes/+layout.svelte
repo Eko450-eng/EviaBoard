@@ -9,7 +9,6 @@ import { Icon } from 'svelte-icons-pack';
 import { FaSolidArrowLeft } from 'svelte-icons-pack/fa';
 import Appsidebar from '@/components/mycomp/appsidebar.svelte';
 import { onMount } from 'svelte';
-import { checkUser } from '@/stores/user.store';
 
 let previousPage = $state('/');
 
@@ -20,10 +19,8 @@ afterNavigate(({ from }) => {
 
 onMount(async () => {
 	setMode('dark');
-	let token = localStorage.getItem('user_token');
-	if (!token) return;
-	await checkUser(token);
 });
+
 let { children } = $props();
 </script>
 

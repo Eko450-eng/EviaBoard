@@ -3,7 +3,7 @@ import { Input } from '$ui/input';
 import { Button } from '$ui/button';
 import { MarkdownEditor } from 'carta-md';
 import type { Notes } from '@/types';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 import carta from '$lib/helpers/carta.js';
 import '$lib/themes/github.scss';
 import { RecordId } from 'surrealdb';

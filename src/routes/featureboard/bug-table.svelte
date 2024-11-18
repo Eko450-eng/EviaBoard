@@ -21,7 +21,7 @@ import * as ContextMenu from '$ui/context-menu';
 import { adminOnly } from '@/helpers/admin';
 // import { getDb } from '@/db';
 import { RecordId } from 'surrealdb';
-import { isLoggedIn, userStore } from '@/stores/user.store';
+import { isLoggedIn, userStore } from '@/stores/userstore';
 import type { Report, Votes } from '@/types';
 import { toast } from 'svelte-sonner';
 import { categoryToText, statusToText } from './helpers';

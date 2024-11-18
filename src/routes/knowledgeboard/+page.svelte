@@ -13,7 +13,7 @@ import Cartarender from '@/components/mycomp/cartarender.svelte';
 import { FaCalendarDays, FaSolidHeart } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
 import { formatDate } from '@/helpers/formating.js';
-import { userStore } from '@/stores/user.store.js';
+import { userStore } from '@/stores/userstore';
 import { RecordId } from 'surrealdb';
 
 let { data } = $props();

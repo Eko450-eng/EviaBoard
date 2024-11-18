@@ -8,7 +8,7 @@ import type { Post, Topic } from '@/types.js';
 import { sendPush } from '@/helpers/push.js';
 import { RecordId } from 'surrealdb';
 import { MarkdownEditor } from 'carta-md';
-import { userStore } from '@/stores/user.store.js';
+import { userStore } from '@/stores/userstore.js';
 import { Carta } from 'carta-md';
 import { code } from '@cartamd/plugin-code';
 import { attachment } from '@cartamd/plugin-attachment';

@@ -1,34 +1,33 @@
-import { getDb } from '@/server/db';
 import { generateAvatar } from '@/helpers/minio';
 import type { User } from '@/types';
 
 export async function updateUser(oldUser: User, user: User) {
-	let db = await getDb();
 	await generateAvatar(oldUser);
-
-	await db?.patch(oldUser.id!, [
-		{
-			op: 'replace',
-			path: '/email',
-			value: user.email,
-		},
-		{
-			op: 'replace',
-			path: '/name',
-			value: user.name,
-		},
-		{
-			op: 'replace',
-			path: '/image',
-			value: `https://minio.eko450eng.org/eviaboard/${oldUser.id}.png`,
-		},
-	]);
-
-	if (user.password.length >= 8) {
-		db?.query(
-			`UPDATE user SET password = crypto::argon2::generate('${user.password}') WHERE id = ${oldUser.id}`,
-		);
-	}
+	// TODO: Fixup
+	//
+	// await db?.patch(oldUser.id!, [
+	// 	{
+	// 		op: 'replace',
+	// 		path: '/email',
+	// 		value: user.email,
+	// 	},
+	// 	{
+	// 		op: 'replace',
+	// 		path: '/name',
+	// 		value: user.name,
+	// 	},
+	// 	{
+	// 		op: 'replace',
+	// 		path: '/image',
+	// 		value: `https://minio.eko450eng.org/eviaboard/${oldUser.id}.png`,
+	// 	},
+	// ]);
+	//
+	// if (user.password.length >= 8) {
+	// 	db?.query(
+	// 		`UPDATE user SET password = crypto::argon2::generate('${user.password}') WHERE id = ${oldUser.id}`,
+	// 	);
+	// }
 }
 
 export function requestNotificationPermission() {
@@ -119,15 +118,16 @@ export async function subscribeUser(
 }
 
 export async function unsubscribe(isSubscribed: boolean, userData: User) {
-	if ('serviceWorker' in navigator) {
-		let db = await getDb();
-		const registration = await navigator.serviceWorker.ready;
-		const subscription = await registration.pushManager.getSubscription();
-		if (subscription) {
-			await subscription.unsubscribe();
-			const query = `DELETE FROM pushkey WHERE user = ${userData.id} AND data.endpoint = '${subscription.endpoint}'`;
-			await db?.query(query);
-			isSubscribed = false;
-		}
-	}
+	// TODO: Fixup
+	// if ('serviceWorker' in navigator) {
+	// 	let db = await getDb();
+	// 	const registration = await navigator.serviceWorker.ready;
+	// 	const subscription = await registration.pushManager.getSubscription();
+	// 	if (subscription) {
+	// 		await subscription.unsubscribe();
+	// 		const query = `DELETE FROM pushkey WHERE user = ${userData.id} AND data.endpoint = '${subscription.endpoint}'`;
+	// 		await db?.query(query);
+	// 		isSubscribed = false;
+	// 	}
+	// }
 }

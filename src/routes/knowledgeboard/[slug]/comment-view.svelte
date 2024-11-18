@@ -9,7 +9,7 @@ import { onMount } from 'svelte';
 import { formatDate } from '@/helpers/formating';
 import type { RecordId, Uuid } from 'surrealdb';
 import AvatarBar from '$lib/components/mycomp/avatar.svelte';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 
 let comments: Comments[] = [];
 let message: string = '';

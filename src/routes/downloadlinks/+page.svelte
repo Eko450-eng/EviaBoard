@@ -11,17 +11,9 @@ import Input from '@/components/ui/input/input.svelte';
 import { RecordId } from 'surrealdb';
 import type { Downloadlinks, User } from '@/types.js';
 import { checkOwner, editorOnly } from '@/helpers/admin.js';
-import { userStore } from '@/stores/user.store.js';
+import { userStore } from '@/stores/userstore.js';
 
-let downloadlinks: Array<Downloadlinks> = [];
-
-async function getLinks() {
-	// let db = await getDb();
-	// let dl = await db?.select<Downloadlinks>('downloadlinks');
-	// if (dl) {
-	// 	downloadlinks = dl;
-	// }
-}
+let { data }: { data: { data: Downloadlinks[] } } = $props();
 
 let dialogOpen = false;
 
@@ -33,13 +25,13 @@ let postData: Downloadlinks = {
 	owner: $userStore!,
 };
 
+// TODO: Implement
 async function deleteLink(id: RecordId) {
 	// let db = await getDb();
 	// await db?.delete(id);
 }
 
-let user_id = $userStore?.id;
-
+// TODO: Implement
 async function postLinks() {
 	// let db = await getDb();
 	// await db
@@ -57,6 +49,7 @@ async function postLinks() {
 	// 	});
 }
 
+// TODO: Implement
 onMount(async () => {
 	// let db = await getDb();
 	// if (db && db.ready) {
@@ -126,7 +119,7 @@ onMount(async () => {
 </div>
 
 <div>
-    {#each downloadlinks as link}
+    {#each data.data as link}
         <div class="flex flex-wrap w-full justify-between my-2">
             <Button
                 class="gap-3"

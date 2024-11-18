@@ -1,13 +1,11 @@
 import { getDb } from '@/server/db';
 import type { Post, Topic } from '@/types';
-import { json } from '@sveltejs/kit';
+import { json, type RequestHandler } from '@sveltejs/kit';
 import { RecordId } from 'surrealdb';
 
-export async function GET({ request }: { request: Request }) {
-	let tokenRaw = request.headers.get('Authorization');
-	if (!tokenRaw) return json({}, { status: 500 });
-
-	let token = tokenRaw.replace('Bearer ', '');
+export const GET: RequestHandler = async ({ locals }) => {
+	let token = locals.jwt;
+	if (!token) return json({ status: 500 });
 	let db = await getDb();
 	db?.authenticate(token);
 
@@ -15,17 +13,15 @@ export async function GET({ request }: { request: Request }) {
 	let posts_raw = await db?.query<Array<Array<Post>>>(query);
 	let raw_data = await db?.query<Topic[][]>('select * from topics');
 
-	if (!posts_raw || !raw_data) return;
+	if (!posts_raw || !raw_data) return json({ status: 500 });
 
-	return json({ posts: posts_raw[0], topics: raw_data[0] });
-}
+	return json({ posts: posts_raw[0], topics: raw_data[0] }, { status: 200 });
+};
 
-export async function PATCH({ request }: { request: Request }) {
-	let tokenRaw = request.headers.get('Authorization');
-	if (!tokenRaw) return json({}, { status: 500 });
-
-	let token = tokenRaw.replace('Bearer ', '');
+export const PATCH: RequestHandler = async ({ request, locals }) => {
+	let token = locals.jwt;
 	let db = await getDb();
+	if (!token) return json({ status: 500 });
 	db?.authenticate(token);
 
 	let { id, state }: { id: RecordId | string; state: boolean } =
@@ -42,14 +38,17 @@ export async function PATCH({ request }: { request: Request }) {
 		console.error(e);
 		return json({ title: 'Post wurde nicht geupdatet' }, { status: 500 });
 	}
-}
+};
 
-export async function POST({ request }: { request: Request }) {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	let token = locals.jwt;
 	let db = await getDb();
+	if (!token) return json({ status: 500 });
+	db?.authenticate(token);
 
 	let { postData } = await request.json();
 	try {
-		if (!postData) return;
+		if (!postData) return json({ status: 500 });
 		await db?.query(
 			`CREATE posts 
         SET 
@@ -78,4 +77,4 @@ export async function POST({ request }: { request: Request }) {
 			{ status: 500 },
 		);
 	}
-}
+};

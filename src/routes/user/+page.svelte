@@ -8,7 +8,6 @@ import { fileUploadHandler } from '@/helpers/minio';
 import { toast } from 'svelte-sonner';
 import { Icon } from 'svelte-icons-pack';
 import {
-	FaSolidArrowRightFromBracket,
 	FaSolidEnvelope,
 	FaSolidFireFlameCurved,
 	FaSolidKey,
@@ -23,7 +22,7 @@ import {
 } from './functions';
 import type { User } from '@/types';
 import { goto, invalidateAll } from '$app/navigation';
-import { changeAdminMode, userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 import { adminOnly } from '@/helpers/admin';
 import type { ChannelSubsCheckable } from './+page.server';
 import { onMount } from 'svelte';
@@ -145,12 +144,13 @@ async function handleUpdateUser() {
 }
 </script>
 
+<!-- TODO: Implement -->
 <div class="flex flex-col my-5">
-    {#if $userStore && $userStore.role >= 10}
-        <Button variant="outline" onclick={changeAdminMode}
-            >Adminmode: {adminOnly() ? "Activated" : "Disabled"}</Button
-        >
-    {/if}
+    <!-- {#if $userStore && $userStore.role >= 10} -->
+    <!--     <Button variant="outline" onclick={changeAdminMode} -->
+    <!--         >Adminmode: {adminOnly() ? "Activated" : "Disabled"}</Button -->
+    <!--     > -->
+    <!-- {/if} -->
 </div>
 
 <form onsubmit={handleUpdateUser}>

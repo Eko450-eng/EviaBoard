@@ -2,10 +2,11 @@ import { getDb } from '@/server/db';
 import type { User } from '@/types';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ cookies }) => {
-	let token = cookies.get('jwt');
+export const GET: RequestHandler = async ({ locals }) => {
+	let token = locals.jwt;
 	if (token) {
 		let db = await getDb();
+		db?.authenticate(token);
 
 		let isValid = await db?.authenticate(token);
 		let userRaw = await db?.query<Array<Array<User>>>(

@@ -12,8 +12,7 @@ import {
 } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
 import { page } from '$app/stores';
-import { isLoggedIn } from '@/stores/user.store';
-import { onMount } from 'svelte';
+import { isLoggedIn } from '@/stores/userstore';
 
 let authenticatedLinks = [
 	{
@@ -70,6 +69,7 @@ $effect(() => {
 </script>
 
 <Sidebar.Root collapsible="icon" variant="floating">
+    {$isLoggedIn}
     <Sidebar.Header>
     <Sidebar.Menu>
     <div class="logo"></div>

@@ -1,7 +1,7 @@
 import { DB_NS } from '$env/static/private';
 import { PUBLIC_DB_DB } from '$env/static/public';
 import { getDb } from '@/server/db';
-import { checkUser } from '@/stores/user.store';
+import { checkUser } from '@/server/user.store';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
@@ -54,7 +54,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			},
 		});
 		if (token) {
-			cookies.set('jwt', token, { path: '/' });
+			cookies.set('jwt', token, { path: '/', sameSite: 'lax' });
 			await checkUser(token);
 			return json(
 				{

@@ -5,7 +5,7 @@ import { Button } from '../lib/components/ui/button/index.js';
 import { Label } from '../lib/components/ui/label/index.js';
 import { Input } from '../lib/components/ui/input/index.js';
 import type { News, Newspost } from '@/types.js';
-import { userStore } from '@/stores/user.store.js';
+import { userStore } from '@/stores/userstore';
 import { getToken } from '@/helpers/gettoken.js';
 import { invalidateAll } from '$app/navigation';
 

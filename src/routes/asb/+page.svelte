@@ -1,48 +1,41 @@
 <script lang="ts">
-import { onMount } from 'svelte';
 import { Button } from '$lib/components/ui/button';
-import { writable } from 'svelte/store';
-import { userStore } from '@/stores/user.store';
+import { invalidateAll } from '$app/navigation';
+import type { ASBCheck } from '@/types';
+import { userStore } from '@/stores/userstore';
 
-type ASBCheck = {
-	id: string;
-	name: string;
-};
+let { data }: { data: { asbcheck: ASBCheck[] } } = $props();
 
 let userNames = $state<ASBCheck[]>([]);
+$effect(() => {
+	userNames = data.asbcheck;
+});
 
-async function queryPosts() {
-	await fetch('/api/downloadlinks', {
+async function meldenHandler() {
+	let user = $userStore;
+	await fetch('/api/asbcheck', {
+		method: 'POST',
+		body: JSON.stringify({ user }),
 		headers: {
 			'Content-Type': 'application/json',
 		},
+		credentials: 'include',
+	}).then(async (res) => {
+		if (res.status === 200) invalidateAll();
 	});
 }
-
-async function meldenHandler() {
-	// let db = await getDb();
-	// db?.create('ASBCheck', {
-	// 	name: $userStore?.email,
-	// }).then(async () => {
-	// 	await queryPosts();
-	// });
-}
 async function abmeldenHandler() {
-	// let db = await getDb();
-	// try {
-	// 	await db
-	// 		?.query(`DELETE ASBCheck WHERE name = '${$userStore?.email}'`)
-	// 		.then(async () => {
-	// 			await queryPosts();
-	// 		});
-	// } catch (e) {
-	// 	console.error(e);
-	// }
+	let user = $userStore;
+	await fetch('/api/asbcheck', {
+		method: 'POST',
+		body: JSON.stringify({ user }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		if (res.status === 200) invalidateAll();
+	});
 }
-
-onMount(async () => {
-	await queryPosts();
-});
 </script>
 
 <div>

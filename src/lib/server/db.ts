@@ -1,9 +1,8 @@
 import { goto } from '$app/navigation';
 import { Surreal } from 'surrealdb';
-import type { NotificationResult, User } from '../types';
-import { checkUser, isLoggedIn, userStore } from '../stores/user.store';
 import { DB_DB, DB_NS, DB_ROOT_PW } from '$env/static/private';
 import { PUBLIC_DB_HOST } from '$env/static/public';
+import { isLoggedIn, userStore } from '@/stores/userstore';
 
 let HOST = PUBLIC_DB_HOST;
 let NS = DB_NS;

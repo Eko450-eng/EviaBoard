@@ -9,7 +9,7 @@ import { Icon } from 'svelte-icons-pack';
 import { FaCalendarDays } from 'svelte-icons-pack/fa';
 import Addnews from './addnews.svelte';
 import Addnewspost from './addnewspost.svelte';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 
 let { data } = $props();
 

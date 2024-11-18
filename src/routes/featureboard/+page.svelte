@@ -10,7 +10,7 @@ import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 import type { Report } from '@/types';
 import { sendPush } from '@/helpers/push';
 import { RecordId } from 'surrealdb';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 import { columns } from './columns';
 import DataTable from './bug-table.svelte';
 import { invalidateAll } from '$app/navigation';
