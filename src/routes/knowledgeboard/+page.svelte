@@ -45,7 +45,6 @@ async function upvote(recordId: RecordId) {
 	}).then(async (res) => {
 		let response = await res.json();
 		if (res.status === 200) {
-			console.log(response);
 			toast.success(response.title, {
 				description: response.description,
 			});

@@ -1,4 +1,3 @@
-import { generateAvatar } from '@/helpers/minio';
 import type { User } from '@/types';
 
 export function requestNotificationPermission() {
@@ -89,16 +88,15 @@ export async function subscribeUser(
 }
 
 export async function unsubscribe(isSubscribed: boolean, userData: User) {
-	// TODO: Fixup
-	// if ('serviceWorker' in navigator) {
-	// 	let db = await getDb();
-	// 	const registration = await navigator.serviceWorker.ready;
-	// 	const subscription = await registration.pushManager.getSubscription();
-	// 	if (subscription) {
-	// 		await subscription.unsubscribe();
-	// 		const query = `DELETE FROM pushkey WHERE user = ${userData.id} AND data.endpoint = '${subscription.endpoint}'`;
-	// 		await db?.query(query);
-	// 		isSubscribed = false;
-	// 	}
-	// }
+	if ('serviceWorker' in navigator) {
+		const registration = await navigator.serviceWorker.ready;
+		const subscription = await registration.pushManager.getSubscription();
+		// TODO: Fixup
+		// if (subscription) {
+		// 	await subscription.unsubscribe();
+		// 	const query = `DELETE FROM pushkey WHERE user = ${userData.id} AND data.endpoint = '${subscription.endpoint}'`;
+		// 	await db?.query(query);
+		// 	isSubscribed = false;
+		// }
+	}
 }

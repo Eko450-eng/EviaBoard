@@ -35,6 +35,8 @@ export type Pushkey_Channel = {
 	id?: RecordId;
 	in: Pushkey;
 	out: Channel;
+	active: boolean;
+	user: User;
 };
 
 export type Post_Vote = {

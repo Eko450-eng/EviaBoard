@@ -26,13 +26,23 @@ import { adminOnly } from '@/helpers/admin';
 import { onMount } from 'svelte';
 import { sendPush } from '@/helpers/push';
 import { channelHandler } from './notifyFunctions';
-import * as cookies from 'js-cookie';
-import { PUBLIC_HOST } from '$env/static/public';
+import type { RecordId } from 'surrealdb';
 
-let { data } = $props();
+type ChanTest = {
+	channel: {
+		channelname: string;
+		id: RecordId;
+		subbed: [
+			{
+				count: number;
+			},
+		];
+	};
+};
 
 let nottifPermGranted: boolean = $state(false);
 let isSubscribed = $state(false);
+let channels = $state<ChanTest[]>([]);
 
 let user: User = $state({
 	id: $userStore?.id,
@@ -67,23 +77,21 @@ onMount(async () => {
 	if (nottifPermGranted && $userStore) {
 		isSubscribed = await checkSubscriptionStatus($userStore, isSubscribed);
 
-		// TODO: Get all this fixed up finally....
 		if ('serviceWorker' in navigator) {
 			const registration = await navigator.serviceWorker.ready;
 			const subscription = await registration.pushManager.getSubscription();
+			const endpoint = subscription?.endpoint;
 
-			// let token = cookies.default.get('jwt');
-			// let res = await fetch(`${PUBLIC_HOST}/api/user`, {
-			// 	method: 'POST',
-			// 	body: JSON.stringify({
-			// 		endpoint: subscription?.endpoint,
-			// 		user: $userStore,
-			// 	}),
-			// 	headers: {
-			// 		Authorization: `Bearer ${token}`,
-			// 		'Content-Type': 'application/json',
-			// 	},
-			// });
+			await fetch(`/api/user`, {
+				method: 'POST',
+				body: JSON.stringify({ endpoint, user }),
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			}).then(async (res) => {
+				channels = await res.json();
+			});
 		} else {
 			goto('/', { replaceState: true });
 		}
@@ -137,7 +145,6 @@ async function handleChannelSub(channel: any, state: boolean) {
 }
 </script>
 
-<!-- TODO: Implement -->
 <div class="flex flex-col my-5"> 
     {#if $userStore && $userStore.role >= 10}  
         <Button variant="outline" onclick={()=>adminModeVal.set(!adminModeVal)} > 
@@ -235,7 +242,7 @@ async function handleChannelSub(channel: any, state: boolean) {
     </Card.Root>
 </form>
 
-{#if data.channel}
+{#if channels.channel}
     <h1 class="text-2xl mt-5">Notification Settings</h1>
     <Card.Root>
         <Card.Content>
@@ -265,7 +272,7 @@ async function handleChannelSub(channel: any, state: boolean) {
                     {#if isSubscribed && $userStore}
                         <div class="flex flex-col mb-10">
                             <h2>Benachrichtigungen zu folgendem erhalten?</h2>
-                            {#each data.channel as channel}
+                            {#each channels.channel as channel}
                                 <div class="items-top flex space-x-2 my-1">
                                     <Switch
                                         id={channel.channelname}

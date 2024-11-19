@@ -1,9 +1,4 @@
-import type { Channel } from '@/types';
 import type { PageServerLoad } from './$types';
-
-export interface ChannelSubsCheckable extends Channel {
-	subbed: number[];
-}
 
 export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();

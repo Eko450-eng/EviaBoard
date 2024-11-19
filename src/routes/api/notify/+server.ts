@@ -40,7 +40,7 @@ export const POST = async ({ request }: { request: Request }) => {
 	let channels: Channel[][] =
 		await db?.query<Array<Array<Channel>>>(queryChannels);
 
-	let usersListQuery = `SELECT in.data as subscriptions from pushkey_channel WHERE out = ${channels[0][0].id}`;
+	let usersListQuery = `SELECT in.data as subscriptions from pushkey_channel WHERE out = ${channels[0][0].id} AND active`;
 	let usersList = await db.query(usersListQuery);
 	// eslint-disable-next-line
 	let users: Array<{ subscriptions: webPush.PushSubscription }> =

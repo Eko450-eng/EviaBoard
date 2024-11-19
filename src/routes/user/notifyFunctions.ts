@@ -8,7 +8,6 @@ export async function channelHandler(
 ) {
 	if (!userId) return null;
 	if (!channel.id) return null;
-	console.log('1');
 	if (!isSubbed) {
 		return await unSubFromChannel(channel.id, userId);
 	} else {
@@ -20,10 +19,11 @@ export async function unSubFromChannel(channel: RecordId, userId: RecordId) {
 	if ('serviceWorker' in navigator) {
 		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.getSubscription();
+		const state = false;
 
 		let r = await fetch(`/api/user/channels`, {
-			method: 'PATCH',
-			body: JSON.stringify({ subscription, userId, channel }),
+			method: 'POST',
+			body: JSON.stringify({ subscription, userId, channel, state }),
 			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
@@ -40,11 +40,11 @@ export async function subToChannel(channel: RecordId, userId: RecordId) {
 	if ('serviceWorker' in navigator) {
 		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.getSubscription();
-		console.log('3');
+		const state = true;
 
 		let r = await fetch(`/api/user/channels`, {
 			method: 'POST',
-			body: JSON.stringify({ subscription, userId, channel }),
+			body: JSON.stringify({ subscription, userId, channel, state }),
 			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',

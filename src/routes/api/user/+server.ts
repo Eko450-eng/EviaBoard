@@ -1,6 +1,15 @@
 import { getDb } from '@/server/db';
-import type { Channel } from '@/types';
 import { json, type RequestHandler } from '@sveltejs/kit';
+import type { RecordId } from 'surrealdb';
+type ChanTest = {
+	channelname: string;
+	id: RecordId;
+	subbed: [
+		{
+			count: number;
+		},
+	];
+};
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	let token = locals.jwt;
@@ -11,10 +20,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		let query = `SELECT * FROM channels`;
 		if (endpoint && user) {
-			query = `SELECT *, (SELECT COUNT() FROM pushkey_channel WHERE in.user = ${user.id} AND out = $parent.id AND in.data.endpoint = "${endpoint}") as subbed FROM channels`;
+			query = `SELECT *, (SELECT COUNT() FROM pushkey_channel WHERE in.user = ${user.id} AND out = $parent.id AND in.data.endpoint = "${endpoint}" AND active) as subbed FROM channels`;
 		}
 
-		let channelsQuery = await db?.query<Array<Array<Channel>>>(query);
+		let channelsQuery = await db?.query<Array<Array<ChanTest>>>(query);
 		if (!channelsQuery) return json({ status: 404 });
 
 		return json({ channel: channelsQuery[0] }, { status: 200 });
