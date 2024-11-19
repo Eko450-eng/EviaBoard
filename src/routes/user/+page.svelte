@@ -4,7 +4,7 @@ import { Label } from '$ui/label';
 import * as Card from '$ui/card';
 import { Button } from '$ui/button';
 import { Input } from '$ui/input';
-import { fileUploadHandler } from '@/helpers/minio';
+import { fileUploadHandler, generateAvatar } from '@/helpers/minio';
 import { toast } from 'svelte-sonner';
 import { Icon } from 'svelte-icons-pack';
 import {
@@ -18,10 +18,9 @@ import {
 	requestNotificationPermission,
 	subscribeUser,
 	unsubscribe,
-	updateUser,
 } from './functions';
 import type { User } from '@/types';
-import { goto, invalidateAll } from '$app/navigation';
+import { goto } from '$app/navigation';
 import { adminModeVal, userStore } from '@/stores/userstore';
 import { adminOnly } from '@/helpers/admin';
 import { onMount } from 'svelte';
@@ -31,10 +30,20 @@ import * as cookies from 'js-cookie';
 import { PUBLIC_HOST } from '$env/static/public';
 
 let { data } = $props();
-let channels = $state(data.channel);
 
 let nottifPermGranted: boolean = $state(false);
 let isSubscribed = $state(false);
+
+let user: User = $state({
+	id: $userStore?.id,
+	password: '',
+	role: $userStore?.role ?? 0,
+	email: $userStore?.email ?? '',
+	name: $userStore?.name ?? '',
+	image: $userStore?.image ?? '',
+});
+
+let confirmPassword = $state('');
 
 async function subscribeHandler() {
 	isSubscribed = await checkSubscriptionStatus($userStore!, isSubscribed);
@@ -63,33 +72,22 @@ onMount(async () => {
 			const registration = await navigator.serviceWorker.ready;
 			const subscription = await registration.pushManager.getSubscription();
 
-			let token = cookies.default.get('jwt');
-			let res = await fetch(`${PUBLIC_HOST}/api/user`, {
-				method: 'POST',
-				body: JSON.stringify({
-					endpoint: subscription?.endpoint,
-					user: $userStore,
-				}),
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json',
-				},
-			});
-
-			channels = await res.json();
+			// let token = cookies.default.get('jwt');
+			// let res = await fetch(`${PUBLIC_HOST}/api/user`, {
+			// 	method: 'POST',
+			// 	body: JSON.stringify({
+			// 		endpoint: subscription?.endpoint,
+			// 		user: $userStore,
+			// 	}),
+			// 	headers: {
+			// 		Authorization: `Bearer ${token}`,
+			// 		'Content-Type': 'application/json',
+			// 	},
+			// });
 		} else {
 			goto('/', { replaceState: true });
 		}
 	}
-});
-
-async function getSubState() {
-	invalidateAll;
-	isSubscribed = await checkSubscriptionStatus($userStore!, isSubscribed);
-}
-
-$effect(() => {
-	if (nottifPermGranted && $userStore) getSubState();
 });
 
 async function sendPushHandler() {
@@ -100,35 +98,41 @@ async function sendPushHandler() {
 	}
 }
 
-let user: User = $state({
-	id: $userStore?.id,
-	password: '',
-	role: $userStore?.role ?? 0,
-	email: $userStore?.email ?? '',
-	name: $userStore?.name ?? '',
-	image: $userStore?.image ?? '',
-});
-
-let confirmPassword = $state('');
-
 async function handleUpdateUser() {
-	if (confirmPassword != user.password) {
-		toast.error('Woops', {
-			description: 'Die Passwörter stimmen nicht überein',
+	if (!$userStore) {
+		toast.error('Du bist nicht angemeldet', {
+			description: 'bitte einmal auf die Home Page und zurück gehen',
 		});
 		return;
 	}
-	if (user.email.length < 3 || user.name.length < 3) {
-		toast.error('Woops', {
-			description:
-				'Überprüfe bitte deine E-Mail und deinen Usernamen, dein Username muss mindestens 3 Zeichen lang sein',
-		});
-		return;
-	}
-	await updateUser($userStore as User, user).then(() => {
-		toast.success('Yey', {
-			description: 'Profil geupdated',
-		});
+	let id = $userStore.id;
+	await generateAvatar($userStore);
+	await fetch(`/api/user/update`, {
+		method: 'POST',
+		body: JSON.stringify({ user, id, confirmPassword }),
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, { description: response.description });
+		} else {
+			toast.error(response.title, { description: response.description });
+		}
+	});
+}
+
+async function handleChannelSub(channel: any, state: boolean) {
+	await channelHandler(channel, state, $userStore?.id).then(async (res) => {
+		if (!res) return;
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, { description: response.description });
+		} else {
+			toast.error(response.title, { description: response.description });
+		}
 	});
 }
 </script>
@@ -231,7 +235,7 @@ async function handleUpdateUser() {
     </Card.Root>
 </form>
 
-{#if channels}
+{#if data.channel}
     <h1 class="text-2xl mt-5">Notification Settings</h1>
     <Card.Root>
         <Card.Content>
@@ -261,11 +265,11 @@ async function handleUpdateUser() {
                     {#if isSubscribed && $userStore}
                         <div class="flex flex-col mb-10">
                             <h2>Benachrichtigungen zu folgendem erhalten?</h2>
-                            {#each channels as channel}
+                            {#each data.channel as channel}
                                 <div class="items-top flex space-x-2 my-1">
                                     <Switch
                                         id={channel.channelname}
-                                        onCheckedChange={(v) => channelHandler(channel, v as boolean, $userStore?.id)}
+                                        onCheckedChange={(v)=>handleChannelSub(channel, v as boolean)}
                                         checked={channel.subbed ? channel.subbed.length > 0 ? true : false : false}
                                     />
                                     <div class="grid gap-1.5 leading-none">

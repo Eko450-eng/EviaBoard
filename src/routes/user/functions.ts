@@ -1,35 +1,6 @@
 import { generateAvatar } from '@/helpers/minio';
 import type { User } from '@/types';
 
-export async function updateUser(oldUser: User, user: User) {
-	await generateAvatar(oldUser);
-	// TODO: Fixup
-	//
-	// await db?.patch(oldUser.id!, [
-	// 	{
-	// 		op: 'replace',
-	// 		path: '/email',
-	// 		value: user.email,
-	// 	},
-	// 	{
-	// 		op: 'replace',
-	// 		path: '/name',
-	// 		value: user.name,
-	// 	},
-	// 	{
-	// 		op: 'replace',
-	// 		path: '/image',
-	// 		value: `https://minio.eko450eng.org/eviaboard/${oldUser.id}.png`,
-	// 	},
-	// ]);
-	//
-	// if (user.password.length >= 8) {
-	// 	db?.query(
-	// 		`UPDATE user SET password = crypto::argon2::generate('${user.password}') WHERE id = ${oldUser.id}`,
-	// 	);
-	// }
-}
-
 export function requestNotificationPermission() {
 	Notification.requestPermission().then((permission) => {
 		if (permission === 'granted') {
