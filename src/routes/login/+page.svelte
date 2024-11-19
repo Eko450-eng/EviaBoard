@@ -7,6 +7,7 @@ import Label from '@/components/ui/label/label.svelte';
 import { goto } from '$app/navigation';
 import { toast } from 'svelte-sonner';
 import type { User } from '@/types';
+import { isLoggedIn, userStore } from '@/stores/userstore';
 
 let data: User = $state<User>({
 	name: '',
@@ -26,9 +27,11 @@ async function signInHandler() {
 			'Content-Type': 'application/json',
 		},
 	}).then(async (res) => {
-		let { title, desc } = await res.json();
+		let { title, desc, userData } = await res.json();
 		if (res.status === 200) {
 			goto('/', { replaceState: true });
+			userStore.set(userData.userObject);
+			isLoggedIn.set(userData.isValid);
 			toast.success(title, {
 				description: desc,
 			});

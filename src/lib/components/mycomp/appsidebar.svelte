@@ -69,7 +69,6 @@ $effect(() => {
 </script>
 
 <Sidebar.Root collapsible="icon" variant="floating">
-    {$isLoggedIn}
     <Sidebar.Header>
     <Sidebar.Menu>
     <div class="logo"></div>

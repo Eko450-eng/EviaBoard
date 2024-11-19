@@ -1,17 +1,14 @@
-import { PUBLIC_HOST } from '$env/static/public';
 import type { PageServerLoad } from './$types';
 
 export let ssr = false;
 export let csr = true;
 
-// eslint-disable-next-line
-export const load: PageServerLoad = async ({ parent, cookies }) => {
+export const load: PageServerLoad = async ({ fetch, parent }) => {
 	await parent();
-	const token = cookies.get('jwt');
 
-	let resPosts = await fetch(`${PUBLIC_HOST}/api/knowledgebase`, {
+	let resPosts = await fetch(`/api/knowledgebase`, {
+		credentials: 'include',
 		headers: {
-			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
 		},
 	});

@@ -22,14 +22,16 @@ import {
 } from './functions';
 import type { User } from '@/types';
 import { goto, invalidateAll } from '$app/navigation';
-import { userStore } from '@/stores/userstore';
+import { adminModeVal, userStore } from '@/stores/userstore';
 import { adminOnly } from '@/helpers/admin';
-import type { ChannelSubsCheckable } from './+page.server';
 import { onMount } from 'svelte';
 import { sendPush } from '@/helpers/push';
 import { channelHandler } from './notifyFunctions';
 import * as cookies from 'js-cookie';
 import { PUBLIC_HOST } from '$env/static/public';
+
+let { data } = $props();
+let channels = $state(data.channel);
 
 let nottifPermGranted: boolean = $state(false);
 let isSubscribed = $state(false);
@@ -57,7 +59,6 @@ onMount(async () => {
 		isSubscribed = await checkSubscriptionStatus($userStore, isSubscribed);
 
 		// TODO: Get all this fixed up finally....
-
 		if ('serviceWorker' in navigator) {
 			const registration = await navigator.serviceWorker.ready;
 			const subscription = await registration.pushManager.getSubscription();
@@ -110,18 +111,6 @@ let user: User = $state({
 
 let confirmPassword = $state('');
 
-let { data }: { data: { channel: ChannelSubsCheckable[] } } = $props();
-let channels = $state(data.channel);
-
-$effect(() => {
-	channels = data.channel;
-});
-
-$effect(() => {
-	$userStore;
-	invalidateAll();
-});
-
 async function handleUpdateUser() {
 	if (confirmPassword != user.password) {
 		toast.error('Woops', {
@@ -145,13 +134,13 @@ async function handleUpdateUser() {
 </script>
 
 <!-- TODO: Implement -->
-<div class="flex flex-col my-5">
-    <!-- {#if $userStore && $userStore.role >= 10} -->
-    <!--     <Button variant="outline" onclick={changeAdminMode} -->
-    <!--         >Adminmode: {adminOnly() ? "Activated" : "Disabled"}</Button -->
-    <!--     > -->
-    <!-- {/if} -->
-</div>
+<div class="flex flex-col my-5"> 
+    {#if $userStore && $userStore.role >= 10}  
+        <Button variant="outline" onclick={()=>adminModeVal.set(!adminModeVal)} > 
+            Adminmode: {adminModeVal ? "Activated" : "Disabled"} 
+        </Button>  
+    {/if}  
+</div> 
 
 <form onsubmit={handleUpdateUser}>
     <Card.Root>

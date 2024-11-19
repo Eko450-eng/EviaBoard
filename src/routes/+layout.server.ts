@@ -1,6 +1,6 @@
-import type { PageServerLoad } from './featureboard/$types';
+import type { LayoutServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch, cookies }) => {
+export const load: LayoutServerLoad = async ({ fetch, cookies }) => {
 	let resPosts = await fetch(`/api/news`, {
 		headers: {
 			'Content-Type': 'application/json',

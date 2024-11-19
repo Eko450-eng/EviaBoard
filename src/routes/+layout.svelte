@@ -1,6 +1,5 @@
 <script lang="ts">
 import * as Sidebar from '@/components/ui/sidebar';
-import { ModeWatcher, setMode } from 'mode-watcher';
 import '../app.css';
 import { afterNavigate, goto } from '$app/navigation';
 import { Toaster } from '$lib/components/ui/sonner';
@@ -9,22 +8,28 @@ import { Icon } from 'svelte-icons-pack';
 import { FaSolidArrowLeft } from 'svelte-icons-pack/fa';
 import Appsidebar from '@/components/mycomp/appsidebar.svelte';
 import { onMount } from 'svelte';
+import { isLoggedIn, userStore } from '@/stores/userstore';
+import type { LayoutServerData } from './$types';
 
 let previousPage = $state('/');
+
+let { children, data }: LayoutServerData = $props();
+
+$effect(() => {
+	if (data.resUserData) {
+		userStore.set(data.resUserData.userObject);
+		isLoggedIn.set(data.resUserData.isValid);
+	}
+});
 
 afterNavigate(({ from }) => {
 	if (!from?.url) return;
 	previousPage = from.url.pathname || previousPage;
 });
 
-onMount(async () => {
-	setMode('dark');
-});
-
-let { children } = $props();
+onMount(async () => {});
 </script>
 
-<!-- <ModeWatcher /> -->
 <Toaster />
 
 <main class="m-4">

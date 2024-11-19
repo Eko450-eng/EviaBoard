@@ -2,8 +2,10 @@ import type { User } from '@/types';
 import { adminModeVal, isLoggedIn, userStore } from '@/stores/userstore';
 import { getDb } from './db';
 
-export async function checkUser(token: string | undefined | null) {
-	if (!token) return false;
+export async function checkUser(
+	token: string | undefined | null,
+): Promise<{ userObject: User; isValid: boolean } | null> {
+	if (!token) return null;
 	let db = await getDb();
 	db?.authenticate(token);
 
@@ -12,14 +14,10 @@ export async function checkUser(token: string | undefined | null) {
 		'SELECT * FROM user WHERE id = $auth.id',
 	);
 
-	if (!userRaw || !isValid) return false;
-	let user = userRaw[0][0];
+	if (!userRaw || !isValid) return null;
+	let userObject = userRaw[0][0];
 
-	userStore.set(user);
-	isLoggedIn.set(isValid);
-	console.log('Ran');
-
-	return true;
+	return { userObject, isValid };
 }
 
 export function setUserData(user: User) {

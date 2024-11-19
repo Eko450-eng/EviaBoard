@@ -10,8 +10,9 @@ import { FaCalendarDays } from 'svelte-icons-pack/fa';
 import Addnews from './addnews.svelte';
 import Addnewspost from './addnewspost.svelte';
 import { userStore } from '@/stores/userstore';
+import type { PageServerData } from './$types';
 
-let { data } = $props();
+let { data }: PageServerData = $props();
 
 let addPostOpen = $state(false);
 let addNewsPostOpen = $state(false);

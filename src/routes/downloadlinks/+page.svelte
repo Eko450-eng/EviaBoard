@@ -13,7 +13,7 @@ import type { Downloadlinks, User } from '@/types.js';
 import { checkOwner, editorOnly } from '@/helpers/admin.js';
 import { userStore } from '@/stores/userstore.js';
 
-let { data }: { data: { data: Downloadlinks[] } } = $props();
+let { data } = $props();
 
 let dialogOpen = false;
 

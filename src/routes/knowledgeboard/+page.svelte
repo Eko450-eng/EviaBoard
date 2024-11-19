@@ -7,7 +7,7 @@ import { goto, invalidateAll } from '$app/navigation';
 import DeleteDialog from './delete-dialog.svelte';
 import RecoverDialog from './recover-dialog.svelte';
 import AvatarBar from '$lib/components/mycomp/avatar.svelte';
-import type { Post, PostVotes, Topic, User } from '@/types.js';
+import type { Post, Topic, User } from '@/types.js';
 import Plus from 'svelte-radix/Plus.svelte';
 import Cartarender from '@/components/mycomp/cartarender.svelte';
 import { FaCalendarDays, FaSolidHeart } from 'svelte-icons-pack/fa';
@@ -15,6 +15,7 @@ import { Icon } from 'svelte-icons-pack';
 import { formatDate } from '@/helpers/formating.js';
 import { userStore } from '@/stores/userstore';
 import { RecordId } from 'surrealdb';
+import { toast } from 'svelte-sonner';
 
 let { data } = $props();
 
@@ -25,7 +26,6 @@ let recoverDialog = $state(false);
 let postToRecover: Post | undefined = $state(undefined);
 
 let showDeleted: boolean = $state(false);
-// let open = false;
 let selectedValue = $state('Kategorie');
 
 const triggerContent = $derived(
@@ -34,33 +34,28 @@ const triggerContent = $derived(
 );
 
 async function upvote(recordId: RecordId) {
-	// let db = await getDb();
-	// let userId = $userStore?.id ?? new RecordId('', '');
-	// let post = await db?.select<Post>(recordId);
-	//
-	// let query = `SELECT * FROM postVote WHERE voter = ${'user:' + userId.id} AND post = ${recordId}`;
-	// let votes = await db?.query<Array<Array<PostVotes>>>(query);
-	//
-	// if (!post || !votes) return;
-	// let newUpvotes = post?.upvoteCount ?? 0;
-	//
-	// if (votes[0]?.length >= 1) {
-	// 	let v = votes[0][0];
-	// 	await db?.delete(v.id!);
-	// 	newUpvotes -= 1;
-	// } else {
-	// 	newUpvotes += 1;
-	// 	await db
-	// 		?.create('postVote', {
-	// 			post: recordId,
-	// 			voter: userId,
-	// 		})
-	// 		.then(async (vote) => {
-	// 			let q = `RELATE ${recordId} -> post_vote -> ${vote![0].id}`;
-	// 			await db?.query(q);
-	// 		});
-	// }
-	// invalidateAll();
+	let userId = $userStore?.id;
+	await fetch(`/api/knowledgebase/upvote`, {
+		method: 'POST',
+		credentials: 'include',
+		body: JSON.stringify({ userId, recordId }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			console.log(response);
+			toast.success(response.title, {
+				description: response.description,
+			});
+			invalidateAll();
+		} else {
+			toast.error(response.title, {
+				description: response.description,
+			});
+		}
+	});
 }
 </script>
 

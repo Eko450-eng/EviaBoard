@@ -1,20 +1,10 @@
-import { getDb } from '@/server/db';
-import type { Topic } from '@/types';
-
-async function queryTopics() {
-	let db = await getDb();
-	let raw_data = await db?.select<Topic>('topics');
-	return raw_data;
-}
-
-export let ssr = false;
+import type { PageServerLoad } from './$types';
 
 // eslint-disable-next-line
-export async function load({ params, parent }: any) {
+export const load: PageServerLoad = async ({ fetch, params, parent }) => {
 	await parent();
-	let topics = await queryTopics();
-	return {
-		topics,
-		params,
-	};
-}
+	let resPosts = await fetch(`/api/knowledgebase/edit?id=${params.slug}`);
+	let res = await resPosts.json();
+
+	return res;
+};

@@ -11,7 +11,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	// Attach the token to the request headers, if needed
 	if (token) {
-		if (!isLoggedIn) checkUser(token);
+		if (!isLoggedIn) await checkUser(token);
 
 		event.cookies.set('jwt', token, {
 			path: '/',
