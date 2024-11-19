@@ -8,13 +8,13 @@ import { goto } from '$app/navigation';
 import { toast } from 'svelte-sonner';
 import type { User } from '@/types';
 
-let data: User = {
+let data: User = $state<User>({
 	name: '',
 	email: '',
 	password: '',
 	role: 0,
 	created_at: new Date(),
-};
+});
 
 let confirmPass = $state('');
 

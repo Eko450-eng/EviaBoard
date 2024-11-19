@@ -24,7 +24,7 @@ onMount(async () => {
 let { children } = $props();
 </script>
 
-<ModeWatcher />
+<!-- <ModeWatcher /> -->
 <Toaster />
 
 <main class="m-4">
