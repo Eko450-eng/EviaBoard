@@ -39,25 +39,6 @@ async function addPost() {
 			});
 		}
 	});
-	// let db = await getDb();
-	// postData.owner = $userStore?.id!;
-	//
-	// try {
-	// 	if (!postData) return;
-	// 	await db?.create('newspost', postData).then(async (data) => {
-	// 		let newPost = data;
-	// 		await db?.insert_relation('news_post', {
-	// 			in: post?.id,
-	// 			out: newPost[0].id,
-	// 		});
-	// 		addPostOpen = false;
-	// 	});
-	// } catch (e) {
-	// 	console.error(e);
-	// 	toast.error('Fehler', {
-	// 		description: `This failed due to: ${e}, probably not my fault`,
-	// 	});
-	// }
 }
 </script>
 

@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch, locals }) => {
+export const load: PageServerLoad = async ({ fetch }) => {
 	let res = await fetch(`/api/asbcheck`, {
 		method: 'GET',
 		credentials: 'include',

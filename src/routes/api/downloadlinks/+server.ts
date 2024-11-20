@@ -16,6 +16,44 @@ export const GET: RequestHandler = async ({ locals }) => {
 	return json({ status: 500 });
 };
 
-export async function PATCH({ request }: { request: Request }) {}
+export const PATCH: RequestHandler = async ({ locals }) => {
+	let token = locals.jwt;
+	let db = await getDb();
+	if (token) {
+		db?.authenticate(token);
+		let downloadlinks = await db?.select<Downloadlinks>('downloadlinks');
+		if (!downloadlinks) {
+			return json({ status: 200 });
+		}
+		return json({ downloadlinks }, { status: 200 });
+	}
+	return json({ status: 500 });
+};
 
-export async function POST({ request }: { request: Request }) {}
+export const POST: RequestHandler = async ({ locals }) => {
+	let token = locals.jwt;
+	let db = await getDb();
+	if (token) {
+		db?.authenticate(token);
+		let downloadlinks = await db?.select<Downloadlinks>('downloadlinks');
+		if (!downloadlinks) {
+			return json({ status: 200 });
+		}
+		return json({ downloadlinks }, { status: 200 });
+	}
+	return json({ status: 500 });
+};
+
+export const DELETE: RequestHandler = async ({ locals }) => {
+	let token = locals.jwt;
+	let db = await getDb();
+	if (token) {
+		db?.authenticate(token);
+		let downloadlinks = await db?.select<Downloadlinks>('downloadlinks');
+		if (!downloadlinks) {
+			return json({ status: 200 });
+		}
+		return json({ downloadlinks }, { status: 200 });
+	}
+	return json({ status: 500 });
+};

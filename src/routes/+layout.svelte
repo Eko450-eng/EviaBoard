@@ -13,7 +13,7 @@ import type { LayoutServerData } from './$types';
 
 let previousPage = $state('/');
 
-let { children, data }: LayoutServerData = $props();
+let { children, data }: any = $props();
 
 $effect(() => {
 	if (data.resUserData) {
@@ -54,24 +54,7 @@ onMount(async () => {});
         margin: 0;
         padding: 0;
     }
-    /* .offline { */
-    /*     width: 0.5em; */
-    /*     height: 0.5em; */
-    /*     border-radius: 100%; */
-    /*     background: red; */
-    /*     position: fixed; */
-    /*     top: 1em; */
-    /*     right: 1em; */
-    /* } */
-    /* .online { */
-    /*     width: 0.5em; */
-    /*     height: 0.5em; */
-    /*     border-radius: 100%; */
-    /*     background: green; */
-    /*     position: fixed; */
-    /*     top: 1em; */
-    /*     right: 1em; */
-    /* } */
+
     :global(textarea.carta-font-code, div.carta-font-code){
         line-height: 1.2rem;
         font-size: 0.9rem;
