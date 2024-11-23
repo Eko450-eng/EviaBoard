@@ -1,3 +1,4 @@
+import { jres } from '@/helpers/responsesWithToast';
 import { getDb } from '@/server/db';
 import type { Downloadlinks } from '@/types';
 import { json, type RequestHandler } from '@sveltejs/kit';
@@ -9,11 +10,11 @@ export const GET: RequestHandler = async ({ locals }) => {
 		db?.authenticate(token);
 		let downloadlinks = await db?.select<Downloadlinks>('downloadlinks');
 		if (!downloadlinks) {
-			return json({ status: 200 });
+			return jres(200);
 		}
 		return json({ downloadlinks }, { status: 200 });
 	}
-	return json({ status: 500 });
+	return json(401);
 };
 
 export const PATCH: RequestHandler = async ({ locals }) => {
@@ -23,11 +24,11 @@ export const PATCH: RequestHandler = async ({ locals }) => {
 		db?.authenticate(token);
 		let downloadlinks = await db?.select<Downloadlinks>('downloadlinks');
 		if (!downloadlinks) {
-			return json({ status: 200 });
+			return jres(200);
 		}
 		return json({ downloadlinks }, { status: 200 });
 	}
-	return json({ status: 500 });
+	return jres(401);
 };
 
 export const POST: RequestHandler = async ({ locals }) => {
@@ -41,7 +42,7 @@ export const POST: RequestHandler = async ({ locals }) => {
 		}
 		return json({ downloadlinks }, { status: 200 });
 	}
-	return json({ status: 500 });
+	return jres(401);
 };
 
 export const DELETE: RequestHandler = async ({ locals }) => {
@@ -51,9 +52,9 @@ export const DELETE: RequestHandler = async ({ locals }) => {
 		db?.authenticate(token);
 		let downloadlinks = await db?.select<Downloadlinks>('downloadlinks');
 		if (!downloadlinks) {
-			return json({ status: 200 });
+			return jres(200);
 		}
 		return json({ downloadlinks }, { status: 200 });
 	}
-	return json({ status: 500 });
+	return jres(401);
 };

@@ -1,5 +1,6 @@
 import { DB_NS } from '$env/static/private';
 import { PUBLIC_DB_DB } from '$env/static/public';
+import { jres } from '@/helpers/responsesWithToast';
 import { getDb } from '@/server/db';
 import { checkUser } from '@/server/user.store';
 import type { User } from '@/types';
@@ -11,13 +12,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	let { data } = await request.json();
 
 	if (!db)
-		return json(
-			{
-				title: 'Dang',
-				desc: 'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
-				error: true,
-			},
-			{ status: 404 },
+		return jres(
+			400,
+			'Dang',
+			'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
 		);
 	try {
 		const token = await db.signin({
@@ -30,8 +28,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			},
 		});
 		if (token) {
-			let q = `SELECT name FROM user WHERE email = '${data.email}'`;
-			let [user] = await db.query<Array<Array<User>>>(q);
+			let q = `SELECT name FROM user WHERE email = $dataMail`;
+			let [user] = await db.query<Array<Array<User>>>(q, {
+				dataMail: data.email,
+			});
 
 			cookies.set('jwt', token, {
 				path: '/',
@@ -50,13 +50,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 	} catch (e) {
 		console.error(e);
-		return json(
-			{
-				title: 'Oops',
-				desc: 'Sicher dass alle deine Daten korrekt eingetragen sind?',
-				error: true,
-			},
-			{ status: 500 },
+		return jres(
+			400,
+			'Oops',
+			'Sicher dass alle deine Daten korrekt eingetragen sind?',
 		);
 	}
 

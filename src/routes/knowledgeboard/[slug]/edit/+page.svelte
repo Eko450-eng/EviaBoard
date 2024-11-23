@@ -56,6 +56,7 @@ onDestroy(() => {
 });
 
 async function editPost() {
+	console.log(postData);
 	await fetch(`/api/knowledgebase/edit?id=${postData.id}`, {
 		method: 'PATCH',
 		credentials: 'include',

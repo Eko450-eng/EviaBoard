@@ -40,65 +40,37 @@ let postData: Report = $state({
 });
 
 async function addPost() {
-	// let db = await getDb();
-	// let user = $userStore;
-	// if (!user) return;
-	// let category = 0;
-	// switch (selectedTopic) {
-	// 	case 'Bug':
-	// 		category = 0;
-	// 		break;
-	// 	case 'Feature':
-	// 		category = 1;
-	// 		break;
-	// 	case 'Question':
-	// 		category = 2;
-	// 		break;
-	// 	default:
-	// 		category = 0;
-	// 		break;
-	// }
-	// try {
-	// 	let data: Report = {
-	// 		...postData,
-	// 		category: category,
-	// 		owner: user.id!,
-	// 		priority: parseInt(selectedPriority),
-	// 	};
-	// 	await db?.create('bugreports', data).then(() => {
-	// 		addPostOpen = false;
-	// 		const message = () => {
-	// 			switch (data.category) {
-	// 				case 0:
-	// 					return `Jemand bemängelt ${data.title}`;
-	// 				case 1:
-	// 					return `Jemand will ${data.title}`;
-	// 				case 2:
-	// 					return `Jemand fragte ${data.title}`;
-	// 				default:
-	// 					return `Jemand bemängelt ${data.title}`;
-	// 			}
-	// 		};
-	// 		sendPush('New Featureboard entries', message());
-	// 		toast.success('Yey', {
-	// 			description: 'Danke für dein Feedback!',
-	// 		});
-	// 		postData = {
-	// 			title: '',
-	// 			body: '',
-	// 			status: 0,
-	// 			category: 0,
-	// 			upvotes: 0,
-	// 			owner: $userStore?.id!,
-	// 			priority: 0,
-	// 		};
-	// 		invalidateAll();
-	// 	});
-	// } catch (e) {
-	// 	toast.error('Fehler', {
-	// 		description: `This failed due to: ${e}, probably not my fault`,
-	// 	});
-	// }
+	await fetch('/api/featureboard', {
+		method: 'POST',
+		credentials: 'include',
+		body: JSON.stringify({ postData, selectedTopic, selectedPriority }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, {
+				description: response.description,
+			});
+			sendPush('Neuer Eintrag im Featureboard', response.pushMsg);
+			addPostOpen = false;
+			postData = {
+				title: '',
+				body: '',
+				status: 0,
+				category: 0,
+				upvotes: 0,
+				owner: $userStore?.id!,
+				priority: 0,
+			};
+			invalidateAll();
+		} else {
+			toast.error(response.title, {
+				description: response.description,
+			});
+		}
+	});
 }
 </script>
 

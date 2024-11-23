@@ -19,30 +19,20 @@ import {
 	subscribeUser,
 	unsubscribe,
 } from './functions';
-import type { User } from '@/types';
+import type { ChannelsWithSub, User } from '@/types';
 import { goto } from '$app/navigation';
 import { adminModeVal, userStore } from '@/stores/userstore';
 import { adminOnly } from '@/helpers/admin';
 import { onMount } from 'svelte';
 import { sendPush } from '@/helpers/push';
 import { channelHandler } from './notifyFunctions';
-import type { RecordId } from 'surrealdb';
-
-type ChanTest = {
-	channel: {
-		channelname: string;
-		id: RecordId;
-		subbed: [
-			{
-				count: number;
-			},
-		];
-	};
-};
 
 let nottifPermGranted: boolean = $state(false);
 let isSubscribed = $state(false);
-let channels = $state<ChanTest[]>([]);
+let channelsList = $state<ChannelsWithSub[]>([]);
+$effect(() => {
+	console.log(channelsList);
+});
 
 let user: User = $state({
 	id: $userStore?.id,
@@ -90,7 +80,8 @@ onMount(async () => {
 					'Content-Type': 'application/json',
 				},
 			}).then(async (res) => {
-				channels = await res.json();
+				let { channel } = await res.json();
+				channelsList = channel;
 			});
 		} else {
 			goto('/', { replaceState: true });
@@ -187,6 +178,7 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidEnvelope} />
                         <Input
+                            disabled
                             type="text"
                             name="email"
                             placeholder={$userStore?.email}
@@ -199,6 +191,7 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidUser} />
                         <Input
+                            disabled
                             type="text"
                             name="name"
                             placeholder={$userStore?.name}
@@ -211,7 +204,9 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidFireFlameCurved}  />
                         <div class="flex gap-2 w-full">
-                            <Input type="file" onchange={fileUploadHandler} />
+                            <Input
+                                disabled
+                                type="file" onchange={fileUploadHandler} />
                         </div>
                     </div>
                 </div>
@@ -220,6 +215,7 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidKey} />
                         <Input
+                            disabled
                             type="password"
                             name="name"
                             placeholder="Neues Passwort"
@@ -229,6 +225,7 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidKey} />
                         <Input
+                            disabled
                             type="password"
                             name="name"
                             placeholder="Passwort bestätigen"
@@ -242,7 +239,7 @@ async function handleChannelSub(channel: any, state: boolean) {
     </Card.Root>
 </form>
 
-{#if channels.channel}
+{#if channelsList}
     <h1 class="text-2xl mt-5">Notification Settings</h1>
     <Card.Root>
         <Card.Content>
@@ -272,7 +269,7 @@ async function handleChannelSub(channel: any, state: boolean) {
                     {#if isSubscribed && $userStore}
                         <div class="flex flex-col mb-10">
                             <h2>Benachrichtigungen zu folgendem erhalten?</h2>
-                            {#each channels.channel as channel}
+                            {#each channelsList as channel}
                                 <div class="items-top flex space-x-2 my-1">
                                     <Switch
                                         id={channel.channelname}

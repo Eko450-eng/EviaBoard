@@ -1,3 +1,4 @@
+import { jres } from '@/helpers/responsesWithToast';
 import { getDb } from '@/server/db';
 import { checkUser } from '@/server/user.store';
 import type { User } from '@/types';
@@ -9,13 +10,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	let { token } = await request.json();
 
 	if (!db)
-		return json(
-			{
-				title: 'Dang',
-				desc: 'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
-				error: true,
-			},
-			{ status: 404 },
+		return jres(
+			400,
+			'Dang',
+			'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
 		);
 	try {
 		if (token) {
@@ -32,7 +30,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				{
 					title: 'Willkommen zurück',
 					desc: `Wo warst du so lange ${user ? user.name : ''}`,
-					error: false,
 					userData,
 				},
 				{ status: 200 },
@@ -40,13 +37,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 	} catch (e) {
 		console.error(e);
-		return json(
-			{
-				title: 'Oops',
-				desc: 'Sicher dass alle deine Daten korrekt eingetragen sind?',
-				error: true,
-			},
-			{ status: 500 },
+		return jres(
+			400,
+			'Oops',
+			'Sicher dass alle deine Daten korrekt eingetragen sind?',
 		);
 	}
 

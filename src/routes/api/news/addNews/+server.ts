@@ -1,8 +1,8 @@
 import { getDb } from '@/server/db';
 import { sendPush } from '@/helpers/push';
 import type { News } from '@/types';
-import { json } from '@sveltejs/kit';
 import { RecordId } from 'surrealdb';
+import { jres } from '@/helpers/responsesWithToast';
 
 export async function POST({ request }: any) {
 	let { postData, token }: { postData: News; token: string } =
@@ -10,7 +10,7 @@ export async function POST({ request }: any) {
 	let db = await getDb();
 	db?.authenticate(token);
 	try {
-		if (!postData) return;
+		if (!postData) return jres(400);
 		await db
 			?.create<News>('news', {
 				title: postData.title,
@@ -20,31 +20,13 @@ export async function POST({ request }: any) {
 				try {
 					sendPush('New News', `Brand neu! - ${postData.title}`);
 				} catch (e) {
-					return json(
-						{
-							title: 'Fehler',
-							description: `This failed due to: ${e}, probably not my fault`,
-						},
-						{ status: 500 },
-					);
+					return jres(400);
 				}
 			});
 	} catch (e) {
 		console.error(e);
-		return json(
-			{
-				title: 'Fehler',
-				description: `This failed due to: ${e}, probably not my fault`,
-			},
-			{ status: 500 },
-		);
+		return jres(400);
 	}
 
-	return json(
-		{
-			title: 'Posted',
-			description: `Dieser Beitrag wurde gepostet WOHOO`,
-		},
-		{ status: 200 },
-	);
+	return jres(200, 'Posted', `Dieser Beitrag wurde gepostet WOHOO`);
 }

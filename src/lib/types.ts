@@ -156,3 +156,13 @@ export type Downloadlinks = {
 	link: string;
 	owner: User | RecordId;
 };
+
+export type ChannelsWithSub = {
+	channelname: string;
+	id: RecordId;
+	subbed: [
+		{
+			count: number;
+		},
+	];
+};

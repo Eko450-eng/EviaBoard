@@ -1,5 +1,6 @@
 import { DB_NS } from '$env/static/private';
 import { PUBLIC_DB_DB } from '$env/static/public';
+import { jres } from '@/helpers/responsesWithToast';
 import { getDb } from '@/server/db';
 import { checkUser } from '@/server/user.store';
 import { json, type RequestHandler } from '@sveltejs/kit';
@@ -10,35 +11,18 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	let { data, confirmPass } = await request.json();
 
 	if (data.password !== confirmPass) {
-		return json(
-			{
-				title: 'Oops',
-				desc: 'Versuch mal in beiden Feldern dasselbe Passwort',
-				error: true,
-			},
-			{ status: 500 },
-		);
+		return jres(400, 'Oops', 'Versuch mal in beiden Feldern dasselbe Passwort');
 	}
 
 	if (data.password.length < 8) {
-		return json(
-			{
-				title: 'Oops',
-				desc: 'Passwort zu kurz',
-				error: true,
-			},
-			{ status: 500 },
-		);
+		return jres(400, 'Oops', 'Passwort zu kurz');
 	}
 
 	if (!db)
-		return json(
-			{
-				title: 'Dang',
-				desc: 'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
-				error: true,
-			},
-			{ status: 404 },
+		return jres(
+			400,
+			'Dang',
+			'Uhhh... dieser Fehler ist unerwartet, bitte mal an Eko wenden',
 		);
 	try {
 		const token = await db?.signup({
@@ -56,24 +40,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		if (token) {
 			cookies.set('jwt', token, { path: '/', sameSite: 'lax' });
 			await checkUser(token);
-			return json(
-				{
-					title: 'Nice',
-					desc: 'Willkommen an Board',
-					error: false,
-				},
-				{ status: 200 },
-			);
+			return jres(200, 'Nice', 'Willkommen an Board');
 		}
 	} catch (e) {
 		console.error(e);
-		return json(
-			{
-				title: 'Oops',
-				desc: 'Sicher dass alle deine Daten korrekt eingetragen sind?',
-				error: true,
-			},
-			{ status: 500 },
+		return jres(
+			400,
+			'Oops',
+			'Sicher dass alle deine Daten korrekt eingetragen sind?',
 		);
 	}
 	return json({

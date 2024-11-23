@@ -1,3 +1,4 @@
+import { jres } from '@/helpers/responsesWithToast';
 import { getDb } from '@/server/db';
 import type { Pushkey } from '@/types';
 import { json, type RequestHandler } from '@sveltejs/kit';
@@ -15,7 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			>(
 				`SELECT * FROM pushkey WHERE user = ${userId} AND data.endpoint = "${subscription?.endpoint}"`,
 			);
-			if (!pushKey) return json({ status: 400 });
+			if (!pushKey) return jres(400);
 
 			let queryOpum = `
       let $endpoint = "${subscription.endpoint.replace(/(\r\n|\n|\r)/gm, '')}";
@@ -44,11 +45,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			await db?.query(`RELATE  ${userId} -> user_channels -> ${channel}`);
 			await db?.query(queryOpum);
 
-			return json({ status: 200 });
+			return jres(200);
 		} catch (e) {
-			return json({ status: 500 });
+			return jres(400);
 		}
 	} else {
-		return json({ status: 404 });
+		return jres(400);
 	}
 };

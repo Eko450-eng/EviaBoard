@@ -34,6 +34,9 @@ const cartaBody = new Carta({
 });
 
 const { data } = $props();
+$effect(() => {
+	console.log(data);
+});
 
 const cartaSolution = new Carta({
 	sanitizer: DOMPurify.sanitize,

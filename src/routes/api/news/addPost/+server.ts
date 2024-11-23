@@ -1,6 +1,6 @@
+import { jres } from '@/helpers/responsesWithToast';
 import { getDb } from '@/server/db';
 import type { News, Newspost } from '@/types';
-import { json } from '@sveltejs/kit';
 
 export async function POST({ request }: any) {
 	let {
@@ -11,7 +11,7 @@ export async function POST({ request }: any) {
 	let db = await getDb();
 	db?.authenticate(token);
 	try {
-		if (!postData) return;
+		if (!postData) return jres(400);
 		await db?.create('newspost', postData).then(async (data) => {
 			let newPost = data;
 			await db?.insert_relation('news_post', {
@@ -21,20 +21,8 @@ export async function POST({ request }: any) {
 		});
 	} catch (e) {
 		console.error(e);
-		return json(
-			{
-				title: 'Fehler',
-				description: `This failed due to: ${e}, probably not my fault`,
-			},
-			{ status: 500 },
-		);
+		return jres(400);
 	}
 
-	return json(
-		{
-			title: 'Posted',
-			description: `Dieser Beitrag wurde gepostet WOHOO`,
-		},
-		{ status: 200 },
-	);
+	return jres(200, 'Posted', `Dieser Beitrag wurde gepostet WOHOO`);
 }

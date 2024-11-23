@@ -1,19 +1,16 @@
-import { getDb } from '@/server/db';
-import type { Topic } from '@/types';
+import type { PageServerLoad } from '../$types';
 
-async function queryTopics() {
-	let db = await getDb();
-	let raw_data = await db?.select<Topic>('topics');
-	return raw_data;
-}
-
-export let ssr = false;
-
-// eslint-disable-next-line
-export async function load({ parent }: any) {
+export const load: PageServerLoad = async ({ parent, fetch }) => {
 	await parent();
-	let topics = await queryTopics();
-	return {
-		topics,
-	};
-}
+	let resPosts = await fetch(`/api/knowledgebase`, {
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
+
+	let { topics } = await resPosts.json();
+	console.log(topics);
+
+	return { topics };
+};
