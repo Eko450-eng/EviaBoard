@@ -59,6 +59,7 @@ let selectedPost: News | undefined = $state(undefined);
         </div>
     {/each}
 {:else}
+    <p class="mb-2 mt-2">Wenn die Seite nicht lädt, kann es sein dass du dich neu anmelden musst!</p>
     <div class="flex items-center space-x-4">
         <div class="space-y-2 w-full">
             <Skeleton class="h-4 w-4/5 rounded-full" />
