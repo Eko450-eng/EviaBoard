@@ -20,9 +20,6 @@ let { data }: PageServerData = $props();
 let addPostOpen = $state(false);
 let addNewsPostOpen = $state(false);
 let selectedPost: News | undefined = $state(undefined);
-$effect(() => {
-	console.log(data);
-});
 
 async function upvote(recordId: RecordId) {
 	let userId = $userStore?.id;

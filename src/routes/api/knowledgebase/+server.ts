@@ -10,7 +10,15 @@ export const GET: RequestHandler = async ({ locals }) => {
 	let db = await getDb();
 	db?.authenticate(token);
 
-	let query = `select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted, created_at, count(->post_vote) AS upvoteCount, (SELECT out.voter.name as name FROM post_vote WHERE in.id == $parent.id) as voter from posts WHERE  !deleted OR deleted AND owner = $auth.id ORDER created_at DESC`;
+	let query = `select id, body, title, topic.name as topic, owner.id, owner.name, owner.image, deleted, created_at, count(->post_vote) AS upvoteCount, (SELECT out.voter.name as name FROM post_vote WHERE in.id == $parent.id) as voter,
+
+         ->kb_comment.out[*].{
+             comment,
+             created_at,
+             id,
+             owner: owner.*
+         } AS comments
+from posts WHERE !deleted OR deleted AND owner = $auth.id ORDER created_at DESC`;
 	let posts_raw = await db?.query<Array<Array<Post>>>(query);
 	let raw_data = await db?.query<Topic[][]>('select * from topics');
 

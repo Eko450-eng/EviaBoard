@@ -140,6 +140,7 @@ export type Post = {
 	deleted: boolean;
 	created_at?: Date;
 	upvoteCount?: number;
+	comments?: Comment[];
 	voter?: [
 		{
 			name: string;

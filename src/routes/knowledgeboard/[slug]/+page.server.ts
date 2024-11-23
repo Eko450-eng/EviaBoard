@@ -4,7 +4,18 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ fetch, params, parent }) => {
 	await parent();
 	let resPosts = await fetch(`/api/knowledgebase/post?id=${params.slug}`);
-	let res = await resPosts.json();
+	let resComments = await fetch(
+		`/api/knowledgebase/comments?id=${params.slug}`,
+	);
+	let data = await resPosts.json();
+	let { comments } = await resComments.json();
 
-	return res;
+	let result = {
+		data,
+		comments,
+	};
+
+	console.log(result.comments);
+
+	return result;
 };

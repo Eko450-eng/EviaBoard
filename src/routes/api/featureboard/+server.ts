@@ -32,9 +32,7 @@ async function setTyperStatus(id: string, state: string): Promise<Response> {
 	const ejAPI = 'https://ejberichtsheft.de/';
 
 	await fetch(`${ejAPI}?${ejParams}`, {}).then(async (response) => {
-		console.log(response.status);
 		let respon = await response.json();
-		console.log('Typer-Res,', respon);
 	});
 	return jres(200);
 }
@@ -187,7 +185,6 @@ export const PATCH: RequestHandler = async ({ locals, request }) => {
 	let { id, change, value, app } = await request.json();
 	if (app === 'Typer') {
 		if (change === 'status') {
-			console.log(id, value);
 			await setTyperStatus(id, value);
 			return jres(200, 'Yey', 'Status geändert');
 		} else {

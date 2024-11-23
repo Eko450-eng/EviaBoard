@@ -24,7 +24,6 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 	let { userId, recordId } = await request.json();
 
 	try {
-		console.log(userId, recordId);
 		let post = await db?.select<News>(recordId);
 		let query =
 			'SELECT * FROM newsVote WHERE voter = type::record($userId) AND post = type::record($postId)';

@@ -18,8 +18,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 const { data }: PageServerData = $props();
 </script>
 
-{#if data.posts}
-    {#each data.posts as post}
+{#if data.data.posts}
+    {#each data.data.posts as post}
         <div class="flex flex-col w-full">
             <h1
                 class="mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0"
@@ -73,7 +73,7 @@ const { data }: PageServerData = $props();
                 {/if}
             </div>
         </div>
-        <Comments />
+        <Comments id={post.id} bind:comments={data.comments} />
     {/each}
     {:else}
     <div class="flex items-center space-x-4">
