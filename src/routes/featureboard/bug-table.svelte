@@ -24,7 +24,6 @@ import { isLoggedIn } from '@/stores/userstore';
 import { toast } from 'svelte-sonner';
 import { categoryToText, statusToText } from './helpers';
 import { invalidateAll } from '$app/navigation';
-import { onMount } from 'svelte';
 
 let selectedCell: any = $state(undefined);
 let sheetOpen = $state(false);
@@ -44,11 +43,12 @@ async function changeThis(
 	change: string,
 	id: RecordId,
 	value: string | number,
+	app: string,
 ) {
 	await fetch('/api/featureboard', {
 		method: 'PATCH',
 		credentials: 'include',
-		body: JSON.stringify({ id, change, value }),
+		body: JSON.stringify({ id, change, value, app }),
 		headers: {
 			'Content-Type': 'application/json',
 		},
@@ -135,7 +135,6 @@ let categoryFilter = $state(['0', '1', '2']);
 function setLocalFilters() {
 	localStorage.setItem('FB_StatusFilter', statusFilter.join(','));
 	localStorage.setItem('FB_CategoryFilter', categoryFilter.join(','));
-	console.log('Changed', statusFilter);
 }
 
 $effect(() => {
@@ -254,7 +253,8 @@ const categorys = [
                                                                     .row.getValue(
                                                                         "id",
                                                                     ),
-                                                                0
+                                                                0,
+                                                                cell.getContext().row.getValue("source")
                                                             )}>Upvote</Button
                                                     >
                                                 {/if}
@@ -275,6 +275,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         0,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Open</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -290,6 +291,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         1,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>WIP</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -305,6 +307,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         2,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Accepted</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -320,6 +323,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         3,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Denied</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -335,6 +339,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         4,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Closed</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -350,6 +355,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         10,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Archived</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -368,6 +374,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         0,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Leicht</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -383,6 +390,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         1,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Mittel</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -398,6 +406,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         2,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Schwer</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -413,6 +422,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         3,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>INSTANTTLYFIX</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -431,6 +441,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         0,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Bug</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -446,6 +457,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         1,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Feature</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -461,6 +473,7 @@ const categorys = [
                                                                                 "id",
                                                                             ),
                                                                         2,
+                                                                        cell.getContext().row.getValue("source")
                                                                     )}>Question</Button
                                                             >
                                                         </ContextMenu.Item>
@@ -550,7 +563,8 @@ const categorys = [
                                             .row.getValue(
                                                 "id",
                                             ),
-                                        0
+                                        0,
+                                        "eviaboard"
                                     )}>Upvote</Button
                             >
                             <Button

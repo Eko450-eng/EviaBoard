@@ -30,9 +30,6 @@ import { channelHandler } from './notifyFunctions';
 let nottifPermGranted: boolean = $state(false);
 let isSubscribed = $state(false);
 let channelsList = $state<ChannelsWithSub[]>([]);
-$effect(() => {
-	console.log(channelsList);
-});
 
 let user: User = $state({
 	id: $userStore?.id,

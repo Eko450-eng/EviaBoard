@@ -10,7 +10,6 @@ export const load: PageServerLoad = async ({ parent, fetch }) => {
 	});
 
 	let { topics } = await resPosts.json();
-	console.log(topics);
 
 	return { topics };
 };

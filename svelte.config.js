@@ -6,6 +6,11 @@ const config = {
 	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
 	// for more information about preprocessors
 	preprocess: vitePreprocess(),
+	compilerOptions: {
+		compatibility: {
+			componentApi: 4,
+		},
+	},
 	kit: {
 		csrf: {
 			checkOrigin: false,
