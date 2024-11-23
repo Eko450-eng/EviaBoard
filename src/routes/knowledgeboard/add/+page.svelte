@@ -8,8 +8,7 @@ import type { Post, Topic } from '@/types.js';
 import { sendPush } from '@/helpers/push.js';
 import { RecordId } from 'surrealdb';
 import { MarkdownEditor } from 'carta-md';
-import { getDb } from '@/db.js';
-import { userStore } from '@/stores/user.store.js';
+import { userStore } from '@/stores/userstore.js';
 import { Carta } from 'carta-md';
 import { code } from '@cartamd/plugin-code';
 import { attachment } from '@cartamd/plugin-attachment';
@@ -18,8 +17,7 @@ import { imsize } from 'carta-plugin-imsize';
 import DOMPurify from 'isomorphic-dompurify';
 import { uploadFileGeneric } from '@/helpers/minio.js';
 import '$lib/themes/github.scss';
-import { goto, replaceState } from '$app/navigation';
-import { Toaster } from '@/components/ui/sonner/index.js';
+import { goto } from '$app/navigation';
 
 const cartaBody = new Carta({
 	sanitizer: DOMPurify.sanitize,
@@ -33,6 +31,11 @@ const cartaBody = new Carta({
 			},
 		}),
 	],
+});
+
+const { data } = $props();
+$effect(() => {
+	console.log(data);
 });
 
 const cartaSolution = new Carta({
@@ -49,7 +52,7 @@ const cartaSolution = new Carta({
 	],
 });
 
-let { data } = $props();
+// let { data } = $props();
 // eslint-disable-next-line
 let value: any = $state();
 let topics: Topic[] = $state([]);
@@ -61,7 +64,6 @@ let postData: Post = $state({
 	solution: '',
 	owner: new RecordId('', ''),
 	topic: new RecordId('', ''),
-	created_at: new Date(),
 });
 
 $effect(() => {
@@ -69,7 +71,6 @@ $effect(() => {
 });
 
 async function addPost() {
-	let db = await getDb();
 	let topic = new RecordId('topics', value);
 	postData.topic = topic;
 	postData.owner = $userStore?.id!;
@@ -80,30 +81,34 @@ async function addPost() {
 		});
 		return;
 	}
-	try {
-		if (!postData) return;
-		console.log('Creating');
-		await db?.create<Post>('posts', postData).then(async () => {
-			console.log('created');
+	if (!postData) return;
 
-			toast.success('Posted', {
-				description: 'Dein Beitrag wurde gepostet',
+	await fetch('/api/knowledgebase', {
+		method: 'POST',
+		body: JSON.stringify({ postData }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+
+		if (res.status === 200) {
+			toast.success(response.title, {
+				description: response.description,
 			});
 			sendPush(
 				'New Posts',
 				`Es gab einen neuen Post von ${$userStore?.name} - ${postData.title}`,
-			).then(async () => {
-				let r = await goto('/knowledgeboard', { replaceState: true });
-				console.log(r);
+			);
+			await goto('/knowledgeboard', { replaceState: true });
+		} else {
+			toast.error(response.title, {
+				description: response.description,
 			});
-		});
-	} catch (e) {
-		console.error(e);
-		toast.error('Fehler', {
-			description: `This failed due to: ${e}, probably not my fault`,
-		});
-	}
+		}
+	});
 }
+
 const triggerContent = $derived(
 	data.topics!.find((f: Topic) => f.name === value)?.name ?? 'Kategorie',
 );

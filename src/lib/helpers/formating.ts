@@ -1,4 +1,5 @@
-export function formatDate(date: Date) {
+export function formatDate(rawDate: Date) {
+	const date = new Date(rawDate);
 	const formattedDate = new Intl.DateTimeFormat('de-DE', {
 		year: 'numeric',
 		month: 'long',

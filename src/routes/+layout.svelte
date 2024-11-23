@@ -1,6 +1,5 @@
 <script lang="ts">
 import * as Sidebar from '@/components/ui/sidebar';
-import { ModeWatcher } from 'mode-watcher';
 import '../app.css';
 import { afterNavigate, goto } from '$app/navigation';
 import { Toaster } from '$lib/components/ui/sonner';
@@ -9,24 +8,28 @@ import { Icon } from 'svelte-icons-pack';
 import { FaSolidArrowLeft } from 'svelte-icons-pack/fa';
 import Appsidebar from '@/components/mycomp/appsidebar.svelte';
 import { onMount } from 'svelte';
-import { checkUser } from '@/stores/user.store';
+import { isLoggedIn, userStore } from '@/stores/userstore';
+import type { LayoutServerData } from './$types';
 
 let previousPage = $state('/');
+
+let { children, data }: any = $props();
+
+$effect(() => {
+	if (data.resUserData) {
+		userStore.set(data.resUserData.userObject);
+		isLoggedIn.set(data.resUserData.isValid);
+	}
+});
 
 afterNavigate(({ from }) => {
 	if (!from?.url) return;
 	previousPage = from.url.pathname || previousPage;
 });
 
-onMount(async () => {
-	let token = localStorage.getItem('user_token');
-	if (!token) return;
-	await checkUser(token);
-});
-let { children } = $props();
+onMount(async () => {});
 </script>
 
-<ModeWatcher />
 <Toaster />
 
 <main class="m-4">
@@ -51,24 +54,7 @@ let { children } = $props();
         margin: 0;
         padding: 0;
     }
-    /* .offline { */
-    /*     width: 0.5em; */
-    /*     height: 0.5em; */
-    /*     border-radius: 100%; */
-    /*     background: red; */
-    /*     position: fixed; */
-    /*     top: 1em; */
-    /*     right: 1em; */
-    /* } */
-    /* .online { */
-    /*     width: 0.5em; */
-    /*     height: 0.5em; */
-    /*     border-radius: 100%; */
-    /*     background: green; */
-    /*     position: fixed; */
-    /*     top: 1em; */
-    /*     right: 1em; */
-    /* } */
+
     :global(textarea.carta-font-code, div.carta-font-code){
         line-height: 1.2rem;
         font-size: 0.9rem;

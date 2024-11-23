@@ -6,7 +6,6 @@ import { FaSolidNoteSticky } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
 
 let { data }: { data: { data: Notes[] } } = $props();
-$inspect(data).with(console.log);
 </script>
 <div class="flex mt-4">
     <div class="flex flex-col gap-2">

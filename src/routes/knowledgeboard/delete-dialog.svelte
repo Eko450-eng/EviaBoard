@@ -2,19 +2,23 @@
 import * as Dialog from '$lib/components/ui/dialog/index.js';
 import { Button } from '$lib/components/ui/button/index.js';
 import type { Post } from '@/types';
-import { getDb } from '@/db';
+import * as cookies from 'js-cookie';
+import { invalidateAll } from '$app/navigation';
+import { PUBLIC_HOST } from '$env/static/public';
 
 async function deletePost(data: Post) {
-	let db = await getDb();
-	let newData = data;
-	newData.deleted = true;
-	await db?.patch(data.id!, [
-		{
-			op: 'replace',
-			path: '/deleted',
-			value: true,
+	const token = cookies.default.get('jwt');
+
+	await fetch(`${PUBLIC_HOST}/api/knowledgebase`, {
+		method: 'PATCH',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
 		},
-	]);
+		body: JSON.stringify({ id: data.id, state: true }),
+	}).then(() => {
+		invalidateAll();
+	});
 }
 
 export let deleteDialog: boolean;

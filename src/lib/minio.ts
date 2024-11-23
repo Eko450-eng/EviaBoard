@@ -1,12 +1,12 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_MINIO_AK, PUBLIC_MINIO_SK } from '$env/static/public';
 import {
 	S3Client,
 	PutObjectCommand,
 	GetObjectCommand,
 } from '@aws-sdk/client-s3';
 
-const SK = env.PUBLIC_MINIO_SK || '';
-const AK = env.PUBLIC_MINIO_AK || '';
+const SK = PUBLIC_MINIO_SK || '';
+const AK = PUBLIC_MINIO_AK || '';
 
 export const minioClient = new S3Client({
 	region: 'us-east-1',

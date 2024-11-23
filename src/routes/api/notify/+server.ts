@@ -1,4 +1,9 @@
-import { env } from '$env/dynamic/public';
+import { DB_DB, DB_NS, DB_ROOT_PW } from '$env/static/private';
+import {
+	PUBLIC_DB_HOST,
+	PUBLIC_VAPID_PRIVATE,
+	PUBLIC_VAPID_PUBLIC,
+} from '$env/static/public';
 import type { Channel } from '@/types';
 import { json } from '@sveltejs/kit';
 import Surreal from 'surrealdb';
@@ -6,14 +11,14 @@ import webPush from 'web-push';
 
 webPush.setVapidDetails(
 	'mailto:ekrem@wipdesign.de',
-	env.PUBLIC_VAPID_PUBLIC,
-	env.PUBLIC_VAPID_PRIVATE,
+	PUBLIC_VAPID_PUBLIC,
+	PUBLIC_VAPID_PRIVATE,
 );
 
-let HOST = env.PUBLIC_DB_HOST;
-let NS = env.PUBLIC_DB_NS;
-let DB_KEY = env.PUBLIC_DB_DB;
-let ADMINPW = env.PUBLIC_DB_ROOT_PW;
+let HOST = PUBLIC_DB_HOST;
+let NS = DB_NS;
+let DB_KEY = DB_DB;
+let ADMINPW = DB_ROOT_PW;
 let ADMINUSER = 'admin';
 
 export const POST = async ({ request }: { request: Request }) => {
@@ -35,7 +40,7 @@ export const POST = async ({ request }: { request: Request }) => {
 	let channels: Channel[][] =
 		await db?.query<Array<Array<Channel>>>(queryChannels);
 
-	let usersListQuery = `SELECT in.data as subscriptions from pushkey_channel WHERE out = ${channels[0][0].id}`;
+	let usersListQuery = `SELECT in.data as subscriptions from pushkey_channel WHERE out = ${channels[0][0].id} AND active`;
 	let usersList = await db.query(usersListQuery);
 	// eslint-disable-next-line
 	let users: Array<{ subscriptions: webPush.PushSubscription }> =

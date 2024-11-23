@@ -19,10 +19,8 @@ import * as Select from '$lib/components/ui/select/index';
 import * as Sheet from '$lib/components/ui/sheet/index';
 import * as ContextMenu from '$ui/context-menu';
 import { adminOnly } from '@/helpers/admin';
-import { getDb } from '@/db';
 import { RecordId } from 'surrealdb';
-import { isLoggedIn, userStore } from '@/stores/user.store';
-import type { Report, Votes } from '@/types';
+import { isLoggedIn } from '@/stores/userstore';
 import { toast } from 'svelte-sonner';
 import { categoryToText, statusToText } from './helpers';
 import { invalidateAll } from '$app/navigation';
@@ -41,95 +39,33 @@ let { data, columns }: DateTableProps<TData, TValue> = $props();
 // Sorting and filtering
 let sorting = $state<SortingState>([]);
 
-async function upvote(id: string) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	let userId = $userStore?.id ?? new RecordId('', '');
-	let report = await db?.select<Report>(recordId);
-
-	let votes = await db?.query<Array<Array<Votes>>>(`SELECT * FROM votes WHERE
-                  voter = ${'user:' + userId.id}
-                  AND
-                  bugreport = ${id}
-                  `);
-
-	if (!report || !votes) return;
-	let newUpvotes = report?.upvotes;
-
-	if (votes[0]?.length >= 1) {
-		let v = votes[0][0];
-		await db?.delete(v.id!);
-		newUpvotes -= 1;
-	} else {
-		newUpvotes += 1;
-		await db
-			?.create('votes', {
-				bugreport: recordId,
-				voter: userId,
-			})
-			.then(async (vote) => {
-				let q = `RELATE ${recordId} -> bug_vote -> ${vote![0].id}`;
-				await db?.query(q);
+async function changeThis(
+	change: string,
+	id: RecordId,
+	value: string | number,
+) {
+	await fetch('/api/featureboard', {
+		method: 'PATCH',
+		credentials: 'include',
+		body: JSON.stringify({ id, change, value }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, {
+				description: response.description,
 			});
-	}
-	invalidateAll();
-}
-
-async function setStatus(id: string, status: number) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	await db
-		?.patch(recordId, [
-			{
-				op: 'replace',
-				path: '/status',
-				value: status,
-			},
-		])
-		.then(() => {
-			toast.success('Yey', {
-				description: 'Status gändert',
+			invalidateAll();
+		} else if (res.status === 201) {
+			invalidateAll();
+		} else {
+			toast.error(response.title, {
+				description: response.description,
 			});
-		});
-	invalidateAll();
-}
-
-async function setCategory(id: string, category: number) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	await db
-		?.patch(recordId, [
-			{
-				op: 'replace',
-				path: '/category',
-				value: category,
-			},
-		])
-		.then(() => {
-			toast.success('Yey', {
-				description: 'Kategorie gändert',
-			});
-		});
-	invalidateAll();
-}
-
-async function setPrio(id: string, prio: number) {
-	let db = await getDb();
-	let recordId = new RecordId('bugreports', id.replace('bugreports:', ''));
-	await db
-		?.patch(recordId, [
-			{
-				op: 'replace',
-				path: '/priority',
-				value: prio,
-			},
-		])
-		.then(() => {
-			toast.success('Yey', {
-				description: 'Priorität gändert',
-			});
-		});
-	invalidateAll();
+		}
+	});
 }
 
 let globalFilter = $state('');
@@ -292,12 +228,14 @@ const categorys = [
                                                     <Button
                                                         variant="link"
                                                         onclick={() =>
-                                                            upvote(
+                                                            changeThis(
+                                                                "upvote",
                                                                 cell
                                                                     .getContext()
                                                                     .row.getValue(
                                                                         "id",
                                                                     ),
+                                                                0
                                                             )}>Upvote</Button
                                                     >
                                                 {/if}
@@ -310,7 +248,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setStatus(
+                                                                    changeThis(
+                                                                        "status",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -324,7 +263,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setStatus(
+                                                                    changeThis(
+                                                                        "status",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -338,7 +278,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setStatus(
+                                                                    changeThis(
+                                                                        "status",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -352,7 +293,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setStatus(
+                                                                    changeThis(
+                                                                        "status",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -366,7 +308,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setStatus(
+                                                                    changeThis(
+                                                                        "status",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -380,7 +323,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setStatus(
+                                                                    changeThis(
+                                                                        "status",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -397,7 +341,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setPrio(
+                                                                    changeThis(
+                                                                        "prio",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -411,7 +356,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setPrio(
+                                                                    changeThis(
+                                                                        "prio",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -425,7 +371,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setPrio(
+                                                                    changeThis(
+                                                                        "prio",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -439,7 +386,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setPrio(
+                                                                    changeThis(
+                                                                        "prio",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -456,7 +404,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setCategory(
+                                                                    changeThis(
+                                                                        "category",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -470,7 +419,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setCategory(
+                                                                    changeThis(
+                                                                        "category",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -484,7 +434,8 @@ const categorys = [
                                                             <Button
                                                                 variant="link"
                                                                 onclick={() =>
-                                                                    setCategory(
+                                                                    changeThis(
+                                                                        "category",
                                                                         cell
                                                                             .getContext()
                                                                             .row.getValue(
@@ -573,12 +524,14 @@ const categorys = [
                                 class="mt-5"
                                 variant="outline"
                                 onclick={() =>
-                                    upvote(
+                                    changeThis(
+                                        "upvote",
                                         selectedCell
                                             .getContext()
                                             .row.getValue(
                                                 "id",
                                             ),
+                                        0
                                     )}>Upvote</Button
                             >
                             <Button

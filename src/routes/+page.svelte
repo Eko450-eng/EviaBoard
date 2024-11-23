@@ -5,37 +5,14 @@ import { Skeleton } from '$ui/skeleton';
 import { adminOnly } from '@/helpers/admin';
 import { formatDate } from '@/helpers/formating';
 import type { News, User } from '@/types';
-import type { Uuid } from 'surrealdb';
-import { onMount } from 'svelte';
 import { Icon } from 'svelte-icons-pack';
 import { FaCalendarDays } from 'svelte-icons-pack/fa';
 import Addnews from './addnews.svelte';
 import Addnewspost from './addnewspost.svelte';
-import { invalidateAll } from '$app/navigation';
-import { getDb } from '@/db';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
+import type { PageServerData } from './$types';
 
-let { data } = $props();
-
-async function subscribeNews(queryUuid: Uuid | undefined) {
-	let db = await getDb();
-	if (!queryUuid) return;
-	// eslint-disable-next-line
-	await db?.subscribeLive(queryUuid!, async (action: any, _result: any) => {
-		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
-			await invalidateAll();
-		}
-	});
-}
-
-onMount(async () => {
-	let db = await getDb();
-	// eslint-disable-next-line
-	const queryUuidNews = await db?.live('news', (action, _result) => {
-		if (action === 'CLOSE') return;
-	});
-	subscribeNews(queryUuidNews);
-});
+let { data }: PageServerData = $props();
 
 let addPostOpen = $state(false);
 let addNewsPostOpen = $state(false);

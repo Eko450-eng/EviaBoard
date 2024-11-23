@@ -3,7 +3,6 @@ import {
 	Button,
 	buttonVariants,
 } from '../../lib/components/ui/button/index.js';
-import { getDb } from '$lib/db';
 import { onMount } from 'svelte';
 import * as Dialog from '$lib/components/ui/dialog/index.js';
 import Plus from 'svelte-radix/Plus.svelte';
@@ -12,17 +11,9 @@ import Input from '@/components/ui/input/input.svelte';
 import { RecordId } from 'surrealdb';
 import type { Downloadlinks, User } from '@/types.js';
 import { checkOwner, editorOnly } from '@/helpers/admin.js';
-import { userStore } from '@/stores/user.store.js';
+import { userStore } from '@/stores/userstore.js';
 
-let downloadlinks: Array<Downloadlinks> = [];
-
-async function getLinks() {
-	let db = await getDb();
-	let dl = await db?.select<Downloadlinks>('downloadlinks');
-	if (dl) {
-		downloadlinks = dl;
-	}
-}
+let { data } = $props();
 
 let dialogOpen = false;
 
@@ -34,48 +25,49 @@ let postData: Downloadlinks = {
 	owner: $userStore!,
 };
 
+// TODO: Implement
 async function deleteLink(id: RecordId) {
-	let db = await getDb();
-	await db?.delete(id);
+	// let db = await getDb();
+	// await db?.delete(id);
 }
 
-let user_id = $userStore?.id;
-
+// TODO: Implement
 async function postLinks() {
-	let db = await getDb();
-	await db
-		?.query(
-			` CREATE downloadlinks CONTENT{
-            name:  "${postData.name}",
-            description:  "${postData.description}",
-            link:  "${postData.link}",
-            owner: ${user_id},
-            created_at: d"${new Date().toISOString()}", 
-        }`,
-		)
-		.then(() => {
-			dialogOpen = false;
-		});
+	// let db = await getDb();
+	// await db
+	// 	?.query(
+	// 		` CREATE downloadlinks CONTENT{
+	//            name:  "${postData.name}",
+	//            description:  "${postData.description}",
+	//            link:  "${postData.link}",
+	//            owner: ${user_id},
+	//            created_at: d"${new Date().toISOString()}",
+	//        }`,
+	// 	)
+	// 	.then(() => {
+	// 		dialogOpen = false;
+	// 	});
 }
 
+// TODO: Implement
 onMount(async () => {
-	let db = await getDb();
-	if (db && db.ready) {
-		getLinks();
-		const queryUuid = await db?.live(
-			'downloadlinks',
-			// eslint-disable-next-line
-			(action, _result) => {
-				if (action === 'CLOSE') return;
-			},
-		);
-		// eslint-disable-next-line
-		await db?.subscribeLive(queryUuid!, async (action, _result) => {
-			if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
-				getLinks();
-			}
-		});
-	}
+	// let db = await getDb();
+	// if (db && db.ready) {
+	// 	getLinks();
+	// 	const queryUuid = await db?.live(
+	// 		'downloadlinks',
+	// 		// eslint-disable-next-line
+	// 		(action, _result) => {
+	// 			if (action === 'CLOSE') return;
+	// 		},
+	// 	);
+	// 	// eslint-disable-next-line
+	// 	await db?.subscribeLive(queryUuid!, async (action, _result) => {
+	// 		if (action === 'CREATE' || action === 'UPDATE' || action === 'DELETE') {
+	// 			getLinks();
+	// 		}
+	// 	});
+	// }
 });
 </script>
 
@@ -127,7 +119,7 @@ onMount(async () => {
 </div>
 
 <div>
-    {#each downloadlinks as link}
+    {#each data.data as link}
         <div class="flex flex-wrap w-full justify-between my-2">
             <Button
                 class="gap-3"

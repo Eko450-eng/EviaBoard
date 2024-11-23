@@ -35,6 +35,8 @@ export type Pushkey_Channel = {
 	id?: RecordId;
 	in: Pushkey;
 	out: Channel;
+	active: boolean;
+	user: User;
 };
 
 export type Post_Vote = {
@@ -78,7 +80,7 @@ export type News_newspost = {
 	id?: RecordId;
 	owner: User | RecordId;
 	title: string;
-	date: Date;
+	date?: Date;
 	newspost: Newspost[];
 };
 
@@ -92,7 +94,7 @@ export type News = {
 	id?: RecordId;
 	owner: User | RecordId;
 	title: string;
-	date: Date;
+	date?: Date | string;
 };
 
 export type Newspost = {
@@ -153,4 +155,14 @@ export type Downloadlinks = {
 	description: string;
 	link: string;
 	owner: User | RecordId;
+};
+
+export type ChannelsWithSub = {
+	channelname: string;
+	id: RecordId;
+	subbed: [
+		{
+			count: number;
+		},
+	];
 };

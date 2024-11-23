@@ -8,12 +8,11 @@ import {
 	FaSolidGlobe,
 	FaSolidHouse,
 	FaSolidPlateWheat,
-	FaSolidTrain,
 	FaSolidUser,
 } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
 import { page } from '$app/stores';
-import { isLoggedIn } from '@/stores/user.store';
+import { isLoggedIn } from '@/stores/userstore';
 
 let authenticatedLinks = [
 	{
@@ -36,11 +35,6 @@ let authenticatedLinks = [
 		name: 'Bestellnotifier',
 		value: '/essensbestellungen',
 	},
-	// {
-	// 	icon: FaSolidTrain,
-	// 	name: 'Bestellnotifier',
-	// 	value: '/dbjournal',
-	// },
 	{
 		icon: FaSolidUser,
 		name: 'Profile',

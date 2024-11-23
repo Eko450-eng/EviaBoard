@@ -4,12 +4,10 @@ import { Label } from '$ui/label';
 import * as Card from '$ui/card';
 import { Button } from '$ui/button';
 import { Input } from '$ui/input';
-import { fileUploadHandler } from '@/helpers/minio';
-import { signOut } from '@/db';
+import { fileUploadHandler, generateAvatar } from '@/helpers/minio';
 import { toast } from 'svelte-sonner';
 import { Icon } from 'svelte-icons-pack';
 import {
-	FaSolidArrowRightFromBracket,
 	FaSolidEnvelope,
 	FaSolidFireFlameCurved,
 	FaSolidKey,
@@ -20,19 +18,32 @@ import {
 	requestNotificationPermission,
 	subscribeUser,
 	unsubscribe,
-	updateUser,
 } from './functions';
-import type { User } from '@/types';
-import { goto, invalidateAll } from '$app/navigation';
-import { changeAdminMode, userStore } from '@/stores/user.store';
+import type { ChannelsWithSub, User } from '@/types';
+import { goto } from '$app/navigation';
+import { adminModeVal, userStore } from '@/stores/userstore';
 import { adminOnly } from '@/helpers/admin';
-import type { ChannelSubsCheckable } from './+page';
 import { onMount } from 'svelte';
 import { sendPush } from '@/helpers/push';
 import { channelHandler } from './notifyFunctions';
 
 let nottifPermGranted: boolean = $state(false);
 let isSubscribed = $state(false);
+let channelsList = $state<ChannelsWithSub[]>([]);
+$effect(() => {
+	console.log(channelsList);
+});
+
+let user: User = $state({
+	id: $userStore?.id,
+	password: '',
+	role: $userStore?.role ?? 0,
+	email: $userStore?.email ?? '',
+	name: $userStore?.name ?? '',
+	image: $userStore?.image ?? '',
+});
+
+let confirmPassword = $state('');
 
 async function subscribeHandler() {
 	isSubscribed = await checkSubscriptionStatus($userStore!, isSubscribed);
@@ -55,16 +66,27 @@ onMount(async () => {
 	nottifPermGranted = Notification.permission === 'granted';
 	if (nottifPermGranted && $userStore) {
 		isSubscribed = await checkSubscriptionStatus($userStore, isSubscribed);
+
+		if ('serviceWorker' in navigator) {
+			const registration = await navigator.serviceWorker.ready;
+			const subscription = await registration.pushManager.getSubscription();
+			const endpoint = subscription?.endpoint;
+
+			await fetch(`/api/user`, {
+				method: 'POST',
+				body: JSON.stringify({ endpoint, user }),
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			}).then(async (res) => {
+				let { channel } = await res.json();
+				channelsList = channel;
+			});
+		} else {
+			goto('/', { replaceState: true });
+		}
 	}
-});
-
-async function getSubState() {
-	invalidateAll;
-	isSubscribed = await checkSubscriptionStatus($userStore!, isSubscribed);
-}
-
-$effect(() => {
-	if (nottifPermGranted && $userStore) getSubState();
 });
 
 async function sendPushHandler() {
@@ -75,58 +97,52 @@ async function sendPushHandler() {
 	}
 }
 
-let user: User = $state({
-	id: $userStore?.id,
-	password: '',
-	role: $userStore?.role ?? 0,
-	email: $userStore?.email ?? '',
-	name: $userStore?.name ?? '',
-	image: $userStore?.image ?? '',
-});
-
-let confirmPassword = $state('');
-
-let { data }: { data: { channel: ChannelSubsCheckable[] } } = $props();
-let channels = $state(data.channel);
-
-$effect(() => {
-	channels = data.channel;
-});
-
-$effect(() => {
-	$userStore;
-	invalidateAll();
-});
-
 async function handleUpdateUser() {
-	if (confirmPassword != user.password) {
-		toast.error('Woops', {
-			description: 'Die Passwörter stimmen nicht überein',
+	if (!$userStore) {
+		toast.error('Du bist nicht angemeldet', {
+			description: 'bitte einmal auf die Home Page und zurück gehen',
 		});
 		return;
 	}
-	if (user.email.length < 3 || user.name.length < 3) {
-		toast.error('Woops', {
-			description:
-				'Überprüfe bitte deine E-Mail und deinen Usernamen, dein Username muss mindestens 3 Zeichen lang sein',
-		});
-		return;
-	}
-	await updateUser($userStore as User, user).then(() => {
-		toast.success('Yey', {
-			description: 'Profil geupdated',
-		});
+	let id = $userStore.id;
+	await generateAvatar($userStore);
+	await fetch(`/api/user/update`, {
+		method: 'POST',
+		body: JSON.stringify({ user, id, confirmPassword }),
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, { description: response.description });
+		} else {
+			toast.error(response.title, { description: response.description });
+		}
+	});
+}
+
+async function handleChannelSub(channel: any, state: boolean) {
+	await channelHandler(channel, state, $userStore?.id).then(async (res) => {
+		if (!res) return;
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, { description: response.description });
+		} else {
+			toast.error(response.title, { description: response.description });
+		}
 	});
 }
 </script>
 
-<div class="flex flex-col my-5">
-    {#if $userStore && $userStore.role >= 10}
-        <Button variant="outline" onclick={changeAdminMode}
-            >Adminmode: {adminOnly() ? "Activated" : "Disabled"}</Button
-        >
-    {/if}
-</div>
+<div class="flex flex-col my-5"> 
+    {#if $userStore && $userStore.role >= 10}  
+        <Button variant="outline" onclick={()=>adminModeVal.set(!adminModeVal)} > 
+            Adminmode: {adminModeVal ? "Activated" : "Disabled"} 
+        </Button>  
+    {/if}  
+</div> 
 
 <form onsubmit={handleUpdateUser}>
     <Card.Root>
@@ -135,7 +151,7 @@ async function handleUpdateUser() {
                 <h1>Profil Einstellungen</h1>
                 <div class="flex justify-between">
                     <h1 class="text-2xl">{$userStore?.name}</h1>
-                    <Button
+                    <!--<Button
                         class="mx-4"
                         onclick={async () => {
                             signOut().then((res) => {
@@ -155,13 +171,14 @@ async function handleUpdateUser() {
                         size="icon"
                     >
                         <Icon src={FaSolidArrowRightFromBracket} size={24} />
-                    </Button>
+</Button>-->
                 </div>
                 <div class="flex flex-col gap-2">
                     <Label for="email" class="mb-1">E-Mail</Label>
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidEnvelope} />
                         <Input
+                            disabled
                             type="text"
                             name="email"
                             placeholder={$userStore?.email}
@@ -174,6 +191,7 @@ async function handleUpdateUser() {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidUser} />
                         <Input
+                            disabled
                             type="text"
                             name="name"
                             placeholder={$userStore?.name}
@@ -186,7 +204,9 @@ async function handleUpdateUser() {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidFireFlameCurved}  />
                         <div class="flex gap-2 w-full">
-                            <Input type="file" onchange={fileUploadHandler} />
+                            <Input
+                                disabled
+                                type="file" onchange={fileUploadHandler} />
                         </div>
                     </div>
                 </div>
@@ -195,6 +215,7 @@ async function handleUpdateUser() {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidKey} />
                         <Input
+                            disabled
                             type="password"
                             name="name"
                             placeholder="Neues Passwort"
@@ -204,6 +225,7 @@ async function handleUpdateUser() {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidKey} />
                         <Input
+                            disabled
                             type="password"
                             name="name"
                             placeholder="Passwort bestätigen"
@@ -217,7 +239,7 @@ async function handleUpdateUser() {
     </Card.Root>
 </form>
 
-{#if channels}
+{#if channelsList}
     <h1 class="text-2xl mt-5">Notification Settings</h1>
     <Card.Root>
         <Card.Content>
@@ -247,11 +269,11 @@ async function handleUpdateUser() {
                     {#if isSubscribed && $userStore}
                         <div class="flex flex-col mb-10">
                             <h2>Benachrichtigungen zu folgendem erhalten?</h2>
-                            {#each channels as channel}
+                            {#each channelsList as channel}
                                 <div class="items-top flex space-x-2 my-1">
                                     <Switch
                                         id={channel.channelname}
-                                        onCheckedChange={(v) => channelHandler(channel, v as boolean, $userStore?.id)}
+                                        onCheckedChange={(v)=>handleChannelSub(channel, v as boolean)}
                                         checked={channel.subbed ? channel.subbed.length > 0 ? true : false : false}
                                     />
                                     <div class="grid gap-1.5 leading-none">

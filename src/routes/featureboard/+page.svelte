@@ -10,8 +10,7 @@ import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 import type { Report } from '@/types';
 import { sendPush } from '@/helpers/push';
 import { RecordId } from 'surrealdb';
-import { getDb } from '@/db';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 import { columns } from './columns';
 import DataTable from './bug-table.svelte';
 import { invalidateAll } from '$app/navigation';
@@ -41,49 +40,21 @@ let postData: Report = $state({
 });
 
 async function addPost() {
-	let db = await getDb();
-	let user = $userStore;
-	if (!user) return;
-	let category = 0;
-	switch (selectedTopic) {
-		case 'Bug':
-			category = 0;
-			break;
-		case 'Feature':
-			category = 1;
-			break;
-		case 'Question':
-			category = 2;
-			break;
-		default:
-			category = 0;
-			break;
-	}
-	try {
-		let data: Report = {
-			...postData,
-			category: category,
-			owner: user.id!,
-			priority: parseInt(selectedPriority),
-		};
-		await db?.create('bugreports', data).then(() => {
-			addPostOpen = false;
-			const message = () => {
-				switch (data.category) {
-					case 0:
-						return `Jemand bemängelt ${data.title}`;
-					case 1:
-						return `Jemand will ${data.title}`;
-					case 2:
-						return `Jemand fragte ${data.title}`;
-					default:
-						return `Jemand bemängelt ${data.title}`;
-				}
-			};
-			sendPush('New Featureboard entries', message());
-			toast.success('Yey', {
-				description: 'Danke für dein Feedback!',
+	await fetch('/api/featureboard', {
+		method: 'POST',
+		credentials: 'include',
+		body: JSON.stringify({ postData, selectedTopic, selectedPriority }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, {
+				description: response.description,
 			});
+			sendPush('Neuer Eintrag im Featureboard', response.pushMsg);
+			addPostOpen = false;
 			postData = {
 				title: '',
 				body: '',
@@ -94,12 +65,12 @@ async function addPost() {
 				priority: 0,
 			};
 			invalidateAll();
-		});
-	} catch (e) {
-		toast.error('Fehler', {
-			description: `This failed due to: ${e}, probably not my fault`,
-		});
-	}
+		} else {
+			toast.error(response.title, {
+				description: response.description,
+			});
+		}
+	});
 }
 </script>
 

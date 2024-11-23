@@ -5,11 +5,9 @@ import { Button } from '$lib/components/ui/button/index.js';
 import { Label } from '$lib/components/ui/label/index.js';
 import { Input } from '$lib/components/ui/input/index.js';
 import '$lib/themes/github.scss';
-import type { Post, Topic } from '@/types.js';
+import type { Post } from '@/types.js';
 import { goto } from '$app/navigation';
-import { RecordId } from 'surrealdb';
 import { Carta, MarkdownEditor } from 'carta-md';
-import { getDb } from '@/db.js';
 import { code } from '@cartamd/plugin-code';
 import { attachment } from '@cartamd/plugin-attachment';
 import { anchor } from '@cartamd/plugin-anchor';
@@ -17,11 +15,11 @@ import { imsize } from 'carta-plugin-imsize';
 import DOMPurify from 'isomorphic-dompurify';
 import { uploadFileGeneric } from '@/helpers/minio.js';
 import '$lib/themes/github.scss';
+import type { PageServerData } from './$types';
+import { onDestroy } from 'svelte';
 
-let { data } = $props();
-// eslint-disable-next-line
+let { data }: PageServerData = $props();
 let selectedTopic = $state<string>('');
-let topics: Topic[] = $state([]);
 
 const cartaBody = new Carta({
 	sanitizer: DOMPurify.sanitize,
@@ -51,69 +49,38 @@ const cartaSolution = new Carta({
 	],
 });
 
-async function getPost() {
-	let db = await getDb();
-	if (data.params.slug) {
-		let query = `select id, body, title, solution, topic.name as topic, owner.id, owner.name, owner.image, deleted from posts WHERE id=${data.params.slug}`;
-		let posts_raw = await db?.query<Array<Array<Post>>>(query);
-		if (!posts_raw) return;
-		postData = posts_raw[0][0];
-		selectedTopic = postData.topic as string;
-	}
-}
+let postData: Post = $state(data.posts[0]);
 
-$effect(() => {
-	getPost();
-});
-
-let postData: Post = $state({
-	deleted: false,
-	title: '',
-	body: '',
-	solution: '',
-	owner: new RecordId('', ''),
-	topic: '',
-});
-
-$effect(() => {
-	topics = data.topics as Topic[];
+onDestroy(() => {
+	cartaBody.dispatcher;
 });
 
 async function editPost() {
-	let db = await getDb();
-	try {
-		if (!postData.id) return;
-		await db
-			?.patch(postData.id, [
-				{
-					op: 'replace',
-					path: '/deleted',
-					value: postData.deleted,
-				},
-				{ op: 'replace', path: '/title', value: postData.title },
-				{ op: 'replace', path: '/body', value: postData.body },
-				{
-					op: 'replace',
-					path: '/solution',
-					value: postData.solution,
-				},
-			])
-			.then(() => {
-				toast.success('Geupdated', {
-					description: `Update hochgeladen`,
-				});
-				goto(`/knowledgeboard`);
+	console.log(postData);
+	await fetch(`/api/knowledgebase/edit?id=${postData.id}`, {
+		method: 'PATCH',
+		credentials: 'include',
+		body: JSON.stringify({ postData }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			goto(`/knowledgeboard/${postData.id}`, { replaceState: true });
+			toast.success(response.title, {
+				description: response.description,
 			});
-	} catch (e) {
-		console.error(e);
-		toast.error('Fehler', {
-			description: `This failed due to: ${e}, probably not my fault`,
-		});
-	}
+		} else {
+			toast.error(response.title, {
+				description: response.description,
+			});
+		}
+	});
 }
 </script>
 
-<h1>Post beitragen</h1>
+<h1>Post Anpassen</h1>
 <p>Trage zur Knowledgebase bei!</p>
 <div class="grid gap-4 py-4">
     <div>
@@ -147,8 +114,8 @@ async function editPost() {
         <Select.Content>
             <Select.Group>
                 <Select.GroupHeading>Themen</Select.GroupHeading>
-                {#if topics}
-                    {#each topics as topic}
+                {#if data.topics}
+                    {#each data.topics as topic}
                         <Select.Item value={topic.name} label={topic.name}
                             >{topic.name}</Select.Item
                         >

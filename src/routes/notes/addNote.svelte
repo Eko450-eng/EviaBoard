@@ -3,10 +3,9 @@ import { Input } from '$ui/input';
 import { Button } from '$ui/button';
 import { MarkdownEditor } from 'carta-md';
 import type { Notes } from '@/types';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 import carta from '$lib/helpers/carta.js';
 import '$lib/themes/github.scss';
-import { getDb } from '@/db';
 import { RecordId } from 'surrealdb';
 
 let note = $state<Notes>({
@@ -22,8 +21,8 @@ $effect(() => {
 });
 
 async function handlePost() {
-	let db = await getDb();
-	db?.create('notes', note);
+	// let db = await getDb();
+	// db?.create('notes', note);
 }
 </script>
 

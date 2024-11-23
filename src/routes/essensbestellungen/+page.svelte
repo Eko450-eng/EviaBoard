@@ -2,7 +2,7 @@
 import { Button } from '$ui/button';
 import { Input } from '$ui/input';
 import { sendPush } from '@/helpers/push';
-import { userStore } from '@/stores/user.store';
+import { userStore } from '@/stores/userstore';
 
 let food = $state('Pizza');
 let user = $state($userStore?.name);
