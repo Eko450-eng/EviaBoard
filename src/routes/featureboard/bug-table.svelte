@@ -24,6 +24,7 @@ import { isLoggedIn } from '@/stores/userstore';
 import { toast } from 'svelte-sonner';
 import { categoryToText, statusToText } from './helpers';
 import { invalidateAll } from '$app/navigation';
+import { onMount } from 'svelte';
 
 let selectedCell: any = $state(undefined);
 let sheetOpen = $state(false);
@@ -131,6 +132,24 @@ const statuses = [
 let statusFilter = $state(['0', '1', '2']);
 let categoryFilter = $state(['0', '1', '2']);
 
+function setLocalFilters() {
+	localStorage.setItem('FB_StatusFilter', statusFilter.join(','));
+	localStorage.setItem('FB_CategoryFilter', categoryFilter.join(','));
+	console.log('Changed', statusFilter);
+}
+
+$effect(() => {
+	let sf = localStorage.getItem('FB_StatusFilter')?.split(',');
+	let cf = localStorage.getItem('FB_CategoryFilter')?.split(',');
+
+	if (sf) {
+		statusFilter = sf;
+	}
+	if (cf) {
+		categoryFilter = cf;
+	}
+});
+
 const statusFilterTrigger = $derived('Gefilterte Statuse');
 const categoryFilterTrigger = $derived('Gefilterte Kategorien');
 
@@ -143,7 +162,7 @@ const categorys = [
 
 <main class="w-full">
     <div class="flex justify-evenly mb-3">
-        <Select.Root type="multiple" name="statuses" bind:value={statusFilter}>
+        <Select.Root type="multiple" name="statuses" bind:value={statusFilter} onValueChange={setLocalFilters}>
           <Select.Trigger class="w-[180px]">
             {statusFilterTrigger}
           </Select.Trigger>
@@ -157,7 +176,7 @@ const categorys = [
           </Select.Content>
         </Select.Root>
 
-        <Select.Root type="multiple" name="categories" bind:value={categoryFilter}>
+        <Select.Root type="multiple" name="categories" bind:value={categoryFilter} onValueChange={setLocalFilters}>
           <Select.Trigger class="w-[180px]">
             {categoryFilterTrigger}
           </Select.Trigger>
