@@ -45,8 +45,20 @@ export type Post_Vote = {
 	out: User;
 };
 
+export type News_Vote = {
+	id?: RecordId;
+	in: News;
+	out: User;
+};
+
 export type Votes = {
 	id?: RecordId;
+	voter: User;
+};
+
+export type NewsVotes = {
+	id?: RecordId;
+	news: News;
 	voter: User;
 };
 
@@ -95,6 +107,7 @@ export type News = {
 	owner: User | RecordId;
 	title: string;
 	date?: Date | string;
+	upvoteCount?: number;
 };
 
 export type Newspost = {

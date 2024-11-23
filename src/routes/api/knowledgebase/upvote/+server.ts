@@ -1,7 +1,7 @@
 import { jres } from '@/helpers/responsesWithToast';
 import { getDb } from '@/server/db';
 import type { Post, PostVotes } from '@/types';
-import { json, type RequestHandler } from '@sveltejs/kit';
+import { type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	let token = locals.jwt;

@@ -9,7 +9,6 @@ import { FaSolidArrowLeft } from 'svelte-icons-pack/fa';
 import Appsidebar from '@/components/mycomp/appsidebar.svelte';
 import { onMount } from 'svelte';
 import { isLoggedIn, userStore } from '@/stores/userstore';
-import type { LayoutServerData } from './$types';
 
 let previousPage = $state('/');
 

@@ -6,17 +6,47 @@ import { adminOnly } from '@/helpers/admin';
 import { formatDate } from '@/helpers/formating';
 import type { News, User } from '@/types';
 import { Icon } from 'svelte-icons-pack';
-import { FaCalendarDays } from 'svelte-icons-pack/fa';
+import { FaCalendarDays, FaSolidHeart } from 'svelte-icons-pack/fa';
 import Addnews from './addnews.svelte';
 import Addnewspost from './addnewspost.svelte';
 import { userStore } from '@/stores/userstore';
 import type { PageServerData } from './$types';
+import type { RecordId } from 'surrealdb';
+import { toast } from 'svelte-sonner';
+import { invalidateAll } from '$app/navigation';
 
 let { data }: PageServerData = $props();
 
 let addPostOpen = $state(false);
 let addNewsPostOpen = $state(false);
 let selectedPost: News | undefined = $state(undefined);
+$effect(() => {
+	console.log(data);
+});
+
+async function upvote(recordId: RecordId) {
+	let userId = $userStore?.id;
+	await fetch(`/api/news`, {
+		method: 'PATCH',
+		credentials: 'include',
+		body: JSON.stringify({ userId, recordId }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, {
+				description: response.description,
+			});
+			invalidateAll();
+		} else {
+			toast.error(response.title, {
+				description: response.description,
+			});
+		}
+	});
+}
 </script>
 
 {#if $userStore && adminOnly()}
@@ -55,7 +85,20 @@ let selectedPost: News | undefined = $state(undefined);
                     {/each}
                 </ul>
             </div>
-            <AvatarBar user={post.owner as User} />
+            <div class="flex justify-between mx-2">
+                <AvatarBar user={post.owner as User} />
+
+                <Button variant="link" class="flex items-center gap-2 opacity-80"
+                    onclick={()=>upvote(post.id!)}
+                >
+                    <Icon
+                        src={FaSolidHeart}
+                        size={15}
+                        color={post.voter?.some((obj: any)=>obj.name == $userStore?.name) ? "red" : "white"}
+                    />
+                    {post.upvoteCount}
+                </Button>
+            </div>
         </div>
     {/each}
 {:else}
