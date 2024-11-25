@@ -1,5 +1,4 @@
 <script lang="ts">
-import type { PageServerData } from '../$types';
 import { Input } from '$ui/input';
 import { Button } from '$ui/button';
 import { Label } from '@/components/ui/label';

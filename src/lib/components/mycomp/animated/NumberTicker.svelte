@@ -1,13 +1,7 @@
 <script lang="ts">
 import { cubicOut } from 'svelte/easing';
-import { onMount } from 'svelte';
 import { tweened } from 'svelte/motion';
 import { cn } from '$lib/utils';
-// let value = 100;
-// let initial = 0;
-// let duration = 6000;
-// { className as class };
-
 let {
 	value = $bindable(100),
 	initial = 0,
