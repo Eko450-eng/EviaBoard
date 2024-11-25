@@ -168,14 +168,13 @@ async function handleChannelSub(channel: any, state: boolean) {
                         size="icon"
                     >
                         <Icon src={FaSolidArrowRightFromBracket} size={24} />
-</Button>-->
+                    </Button>-->
                 </div>
                 <div class="flex flex-col gap-2">
                     <Label for="email" class="mb-1">E-Mail</Label>
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidEnvelope} />
                         <Input
-                            disabled
                             type="text"
                             name="email"
                             placeholder={$userStore?.email}
@@ -188,7 +187,6 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidUser} />
                         <Input
-                            disabled
                             type="text"
                             name="name"
                             placeholder={$userStore?.name}
@@ -202,7 +200,6 @@ async function handleChannelSub(channel: any, state: boolean) {
                         <Icon src={FaSolidFireFlameCurved}  />
                         <div class="flex gap-2 w-full">
                             <Input
-                                disabled
                                 type="file" onchange={fileUploadHandler} />
                         </div>
                     </div>
@@ -212,7 +209,6 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidKey} />
                         <Input
-                            disabled
                             type="password"
                             name="name"
                             placeholder="Neues Passwort"
@@ -222,7 +218,6 @@ async function handleChannelSub(channel: any, state: boolean) {
                     <div class="flex items-center mb-5 gap-2">
                         <Icon src={FaSolidKey} />
                         <Input
-                            disabled
                             type="password"
                             name="name"
                             placeholder="Passwort bestätigen"

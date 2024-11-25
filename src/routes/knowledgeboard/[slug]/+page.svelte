@@ -67,7 +67,7 @@ const { data }: PageServerData = $props();
                 class="flex flex-col justify-between my-5 border-t text-sm opacity-80"
             >
                 <p>Kategorie: {post.topic}</p>
-                <AvatarBar user={post.owner as User} />
+                <AvatarBar user={post.owner as User} size={6}/>
                 {#if post.id}
                     <Idview id={post.id} />
                 {/if}

@@ -9,10 +9,18 @@ import {
 	FaSolidHouse,
 	FaSolidPlateWheat,
 	FaSolidUser,
+	FaSolidWandMagic,
 } from 'svelte-icons-pack/fa';
 import { Icon } from 'svelte-icons-pack';
 import { page } from '$app/stores';
-import { isLoggedIn } from '@/stores/userstore';
+import { isLoggedIn, userStore } from '@/stores/userstore';
+import { adminOnly } from '@/helpers/admin';
+
+let adminDashboard = {
+	icon: FaSolidWandMagic,
+	name: 'Admin Dashboard',
+	value: '/admindash',
+};
 
 let authenticatedLinks = [
 	{
@@ -116,6 +124,18 @@ $effect(() => {
                             </Sidebar.MenuButton>
                         </Sidebar.MenuItem>
                     {/each}
+                {/if}
+                {#if $userStore && $userStore.role > 10}
+                    <Sidebar.MenuItem class="mx-auto" >
+                        <Sidebar.MenuButton isActive={pathname === adminDashboard.value}>
+                            {#snippet child({props})}
+                                <a href={adminDashboard.value} {...props}>
+                                    <Icon src={adminDashboard.icon} size={24} />
+                                    <span class="linkButton-active text-muted-foreground">{adminDashboard.name}</span>
+                              </a>
+                            {/snippet}
+                        </Sidebar.MenuButton>
+                    </Sidebar.MenuItem>
                 {/if}
             </Sidebar.Menu>
         </Sidebar.SidebarGroupContent>

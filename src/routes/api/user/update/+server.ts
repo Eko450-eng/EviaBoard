@@ -30,8 +30,46 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             name = "${user.name}",
             image = "${image}",
             password = crypto::argon2::generate("${user.password}")
-          WHERE id = $token.ID
+          WHERE id = type::record($id) 
         `,
+				{ id: user.id },
+			)
+			.then(() => {
+				return jres(200, 'Yey', 'Profil geupdated');
+			});
+		return jres(200, 'Yey', 'Profil geupdated');
+	} else {
+		return jres(401);
+	}
+};
+
+export const PATCH: RequestHandler = async ({ request, locals }) => {
+	let token = locals.jwt;
+	if (token) {
+		let db = await getDb();
+		db?.authenticate(token);
+		let { user } = await request.json();
+
+		if (user.email.length < 3 || user.name.length < 3) {
+			return jres(
+				400,
+				'Woops',
+				'Überprüfe bitte deine E-Mail und deinen Usernamen, dein Username muss mindestens 3 Zeichen lang sein',
+			);
+		}
+
+		let image = `https://minio.eko450eng.org/eviaboard/${user.id}.png`;
+
+		await db
+			?.query(
+				`
+          UPDATE user SET
+            email = "${user.email}",
+            name = "${user.name}",
+            image = "${image}",
+          WHERE id = type::record($id) 
+        `,
+				{ id: user.id },
 			)
 			.then(() => {
 				return jres(200, 'Yey', 'Profil geupdated');

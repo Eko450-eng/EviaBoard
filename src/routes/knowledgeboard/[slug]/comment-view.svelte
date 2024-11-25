@@ -12,10 +12,6 @@ let { id, comments = $bindable() }: { id: any; comments: Comments[] } =
 	$props();
 let message: string = $state('');
 
-$effect(() => {
-	console.log(comments);
-});
-
 async function sendPost() {
 	await fetch('/api/knowledgebase/comments', {
 		method: 'POST',
@@ -35,7 +31,7 @@ async function sendPost() {
     <Card.Root class="my-1 w-full">
         <Card.Header>
             <Card.Title>
-                <AvatarBar user={comment.owner as User} />
+                <AvatarBar user={comment.owner as User} size={6}/>
             </Card.Title>
         </Card.Header>
         <Card.Content>
@@ -51,7 +47,7 @@ async function sendPost() {
     </Card.Root>
 {/each}
 
-<form on:submit={sendPost}>
+<form onsubmit={sendPost}>
     <Label for="title" class="text-right">Nachricht</Label>
     <div class="flex gap-2">
         <Input id="title" bind:value={message} class="col-span-3" />

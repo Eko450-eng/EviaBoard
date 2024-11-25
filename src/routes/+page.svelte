@@ -6,7 +6,11 @@ import { adminOnly } from '@/helpers/admin';
 import { formatDate } from '@/helpers/formating';
 import type { News, User } from '@/types';
 import { Icon } from 'svelte-icons-pack';
-import { FaCalendarDays, FaSolidHeart } from 'svelte-icons-pack/fa';
+import {
+	FaCalendarDays,
+	FaSolidHeart,
+	FaSolidTrashCan,
+} from 'svelte-icons-pack/fa';
 import Addnews from './addnews.svelte';
 import Addnewspost from './addnewspost.svelte';
 import { userStore } from '@/stores/userstore';
@@ -14,12 +18,36 @@ import type { PageServerData } from './$types';
 import type { RecordId } from 'surrealdb';
 import { toast } from 'svelte-sonner';
 import { invalidateAll } from '$app/navigation';
+import NumberTicker from '@/components/mycomp/animated/NumberTicker.svelte';
 
 let { data }: PageServerData = $props();
 
 let addPostOpen = $state(false);
 let addNewsPostOpen = $state(false);
 let selectedPost: News | undefined = $state(undefined);
+
+async function deletePost(recordId: RecordId) {
+	await fetch(`/api/news/addPost`, {
+		method: 'DELETE',
+		credentials: 'include',
+		body: JSON.stringify({ recordId }),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	}).then(async (res) => {
+		let response = await res.json();
+		if (res.status === 200) {
+			toast.success(response.title, {
+				description: response.description,
+			});
+			invalidateAll();
+		} else {
+			toast.error(response.title, {
+				description: response.description,
+			});
+		}
+	});
+}
 
 async function upvote(recordId: RecordId) {
 	let userId = $userStore?.id;
@@ -48,8 +76,8 @@ async function upvote(recordId: RecordId) {
 
 {#if $userStore && adminOnly()}
     <Addnews bind:addPostOpen />
+    <Addnewspost bind:addPostOpen={addNewsPostOpen} post={selectedPost} />
 {/if}
-<Addnewspost bind:addPostOpen={addNewsPostOpen} post={selectedPost} />
 
 {#if data.data}
     {#each data.data as post}
@@ -76,14 +104,24 @@ async function upvote(recordId: RecordId) {
                 </p>
                 <ul class="feature-description-list-item list-disc">
                     {#each post.newspost as entry}
-                        <li>
-                            {entry.name}
-                        </li>
+                        {#if entry }
+                            <li class="flex justify-between">
+                                {entry.name}
+                                {#if adminOnly()}
+                                    <Button
+                                        onclick={()=>deletePost(entry.id)}
+                                        size="sm"
+                                        variant="destructive"
+                                    ><Icon src={FaSolidTrashCan}/>
+                                    </Button>
+                                {/if}
+                            </li>
+                        {/if}
                     {/each}
                 </ul>
             </div>
             <div class="flex justify-between mx-2">
-                <AvatarBar user={post.owner as User} />
+                <AvatarBar user={post.owner as User} size={6} />
 
                 <Button variant="link" class="flex items-center gap-2 opacity-80"
                     onclick={()=>upvote(post.id!)}
@@ -93,7 +131,10 @@ async function upvote(recordId: RecordId) {
                         size={15}
                         color={post.voter?.some((obj: any)=>obj.name == $userStore?.name) ? "red" : "white"}
                     />
-                    {post.upvoteCount}
+
+                    <div class="flex justify-center items-center h-fit">
+                        <NumberTicker class="whitespace-pre-wrap font-medium tracking-tighter text-black dark:text-white" value={post.upvoteCount} />
+                    </div>
                 </Button>
             </div>
         </div>

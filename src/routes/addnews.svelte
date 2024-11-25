@@ -52,9 +52,6 @@ async function addPost() {
     <Dialog.Content class="sm:max-w-[425px]">
         <Dialog.Header>
             <Dialog.Title>Post beitragen</Dialog.Title>
-            <Dialog.Description>
-                Trage zur Knowledgebase bei!
-            </Dialog.Description>
         </Dialog.Header>
         <div class="grid gap-4 py-4">
             <div>

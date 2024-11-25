@@ -6,7 +6,6 @@ import { Label } from '../lib/components/ui/label/index.js';
 import { Input } from '../lib/components/ui/input/index.js';
 import type { News, Newspost } from '@/types.js';
 import { userStore } from '@/stores/userstore';
-import { getToken } from '@/helpers/gettoken.js';
 import { invalidateAll } from '$app/navigation';
 
 export let addPostOpen: boolean;
@@ -18,10 +17,10 @@ export let postData: Newspost = {
 
 async function addPost() {
 	if (!postData) return;
-	let token = getToken();
 	await fetch('/api/news/addPost', {
 		method: 'POST',
-		body: JSON.stringify({ postData, post, token }),
+		credentials: 'include',
+		body: JSON.stringify({ postData, post }),
 		headers: {
 			'Content-Type': 'application/json',
 		},
@@ -49,9 +48,6 @@ async function addPost() {
     <Dialog.Content class="sm:max-w-[425px]">
         <Dialog.Header>
             <Dialog.Title>Post beitragen</Dialog.Title>
-            <Dialog.Description>
-                Trage zur Knowledgebase bei!
-            </Dialog.Description>
         </Dialog.Header>
         <div class="grid gap-4 py-4">
             <form on:submit={addPost}>

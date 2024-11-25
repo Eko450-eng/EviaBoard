@@ -15,7 +15,5 @@ export const load: PageServerLoad = async ({ fetch, params, parent }) => {
 		comments,
 	};
 
-	console.log(result.comments);
-
 	return result;
 };

@@ -36,6 +36,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		?.query<Array<Array<CommentRelation>>>(query, { id: id })
 		.then((value: CommentRelation[][]) => {
 			return value[0][0].comments;
+			// TODO: Find a nicer solution for the long run - Hint down below
 			if (!value[0][0]) return jres(404);
 			let comments = value[0][0].comments;
 			comments.sort((a: Comments, b: Comments) => {

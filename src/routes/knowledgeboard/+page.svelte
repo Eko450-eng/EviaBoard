@@ -16,6 +16,7 @@ import { formatDate } from '@/helpers/formating.js';
 import { userStore } from '@/stores/userstore';
 import { RecordId } from 'surrealdb';
 import { toast } from 'svelte-sonner';
+import NumberTicker from '@/components/mycomp/animated/NumberTicker.svelte';
 
 let { data } = $props();
 
@@ -142,7 +143,7 @@ async function upvote(recordId: RecordId) {
                                     </div>
                                     <Card.Footer class="flex justify-between">
                                         <Card.Description>
-                                            <AvatarBar user={post.owner as User} />
+                                            <AvatarBar user={post.owner as User} size={6}/>
                                             <div class="flex justify-evenly gap-6 w-full">
                                                 <span class="flex items-center gap-2 opacity-80">
                                                     <Icon
@@ -159,7 +160,11 @@ async function upvote(recordId: RecordId) {
                                                         size={15}
                                                         color={post.voter?.some((obj: any)=>obj.name == $userStore.name) ? "red" : "white"}
                                                     />
-                                                    {post.upvoteCount}
+
+                                                    <div class="flex justify-center items-center h-fit">
+                                                        <NumberTicker class="whitespace-pre-wrap font-medium tracking-tighter text-black dark:text-white" value={post.upvoteCount} />
+                                                    </div>
+                                                    
                                                 </Button>
                                             </div>
                                         </Card.Description>
