@@ -30,7 +30,6 @@ async function setTyperStatus(id: string, state: string): Promise<Response> {
 		state: state,
 	}).toString();
 	const ejAPI = 'https://ejberichtsheft.de/';
-
 	await fetch(`${ejAPI}?${ejParams}`, {}).then(async (response) => {
 		let respon = await response.json();
 	});

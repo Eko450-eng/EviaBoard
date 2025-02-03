@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PageServerData } from './$types';
 import UserCard from './userCard.svelte';
+import Updates from './updates.svelte';
 import FeatureBoardEntries from './featureBoardEntries.svelte';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -24,7 +25,13 @@ let showUsers = $state(true);
         />
     </div>
     <Separator />
-    <FeatureBoardEntries data={data} />
+    <div class="flex gap-4 flex-wrap my-4 justify-center w-full">
+        <Updates /> 
+    </div>
+    <Separator />
+    <div class="flex gap-4 flex-wrap my-4 justify-center w-full">
+        <FeatureBoardEntries data={data} />
+    </div>
     <Separator />
     <div class="flex gap-4 flex-wrap my-4 justify-center w-full">
         {#if showUsers}
