@@ -12,12 +12,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Attach the token to the request headers, if needed
 	if (token) {
 		if (!isLoggedIn) await checkUser(token);
-
-		event.cookies.set('jwt', token, {
-			path: '/',
-			sameSite: 'lax',
-		});
-
+		//
+		// event.cookies.set('jwt', token, {
+		// 	path: '/',
+		// 	sameSite: 'lax',
+		// });
+		//
 		event.locals.jwt = token;
 	}
 
